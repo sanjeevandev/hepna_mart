@@ -8,17 +8,24 @@ const FeaturedProducts: React.FC = () => {
   const featured = products.filter(p => p.featured).slice(0, 8);
 
   return (
-    <section className="bg-white">
+    <section className="container-custom">
       <ProductGrid 
         products={featured} 
         title="Featured Products" 
         subtitle="Handpicked premium materials for your projects" 
         columns={4}
+        action={
+          <Link to="/shop">
+            <Button variant="outline" size="sm" className="hidden sm:inline-flex">
+              View All Products →
+            </Button>
+          </Link>
+        }
       />
       
-      <div className="text-center pb-16">
+      <div className="text-center pt-2 pb-6 sm:hidden">
         <Link to="/shop">
-          <Button variant="outline" size="lg" className="px-8">
+          <Button variant="outline" size="md" className="w-full">
             View All Products →
           </Button>
         </Link>

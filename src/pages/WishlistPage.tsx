@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useWishlistStore } from '@/store/wishlistStore';
 import { products } from '@/data/products';
-import ProductCard from '@/components/product/ProductCard';
+import ProductGrid from '@/components/product/ProductGrid';
 import { Heart } from 'lucide-react';
 
 const WishlistPage: React.FC = () => {
@@ -16,7 +16,7 @@ const WishlistPage: React.FC = () => {
 
   return (
     <div className="container-custom py-12">
-      <h1 className="text-3xl font-heading font-bold text-primary mb-8">
+      <h1 className="text-3xl font-heading font-bold text-primary mb-6">
         My Wishlist ({items.length} {items.length === 1 ? 'item' : 'items'})
       </h1>
 
@@ -39,11 +39,7 @@ const WishlistPage: React.FC = () => {
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {wishlistedProducts.map(product => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        <ProductGrid products={wishlistedProducts} columns={4} />
       )}
     </div>
   );
