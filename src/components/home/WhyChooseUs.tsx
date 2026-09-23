@@ -1,5 +1,6 @@
 import React from 'react';
 import { ShieldCheck, IndianRupee, Package, Truck, Lock, Headphones, Award, RotateCcw } from 'lucide-react';
+import ScrollReveal from '@/components/ui/ScrollReveal';
 
 const features = [
   { icon: ShieldCheck, title: 'Verified Products', desc: '100% genuine materials from top brands' },
@@ -14,21 +15,30 @@ const features = [
 
 const WhyChooseUs: React.FC = () => {
   return (
-    <section className="py-20 bg-white">
+    <section className="py-16 md:py-20 bg-white">
       <div className="container-custom">
-        <div className="text-center mb-16 max-w-3xl mx-auto">
-          <h2 className="section-title text-primary-dark">Why Choose HEPNA MART?</h2>
-          <p className="section-subtitle mt-4 text-lg">Your trusted partner for all construction material requirements</p>
+        <div className="text-center mb-12 md:mb-16 max-w-3xl mx-auto">
+          <ScrollReveal
+            baseOpacity={0.2}
+            baseRotation={2}
+            blurStrength={6}
+            as="h2"
+            containerClassName="mb-3"
+            textClassName="section-title text-primary-dark"
+          >
+            Why Choose HEPNA MART?
+          </ScrollReveal>
+          <p className="section-subtitle mt-2 text-base md:text-lg">Your trusted partner for all construction material requirements</p>
         </div>
         
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-10">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 md:gap-10">
           {features.map((feature, idx) => (
-            <div key={idx} className="flex flex-col items-center text-center p-6 rounded-2xl hover:bg-surface-dark transition-colors duration-300 group">
-              <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center mb-6 group-hover:bg-accent group-hover:shadow-lg group-hover:shadow-accent/30 transition-all duration-300">
-                <feature.icon className="w-8 h-8 text-accent group-hover:text-white transition-colors duration-300" />
+            <div key={idx} className="flex flex-col items-center text-center p-5 sm:p-6 rounded-2xl hover:bg-surface-dark transition-colors duration-300 group border border-transparent hover:border-gray-100">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-accent/10 flex items-center justify-center mb-5 group-hover:bg-accent group-hover:shadow-lg group-hover:shadow-accent/30 transition-all duration-300">
+                <feature.icon className="w-7 h-7 sm:w-8 sm:h-8 text-accent group-hover:text-white transition-colors duration-300" />
               </div>
-              <h3 className="font-heading font-semibold text-lg text-primary-dark mb-2">{feature.title}</h3>
-              <p className="text-sm text-gray-500 leading-relaxed">{feature.desc}</p>
+              <h3 className="font-heading font-semibold text-base sm:text-lg text-primary-dark mb-1.5">{feature.title}</h3>
+              <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">{feature.desc}</p>
             </div>
           ))}
         </div>

@@ -1,5 +1,6 @@
 import React, { ReactNode } from 'react';
 import BorderGlow from '@/components/ui/BorderGlow';
+import ScrollReveal from '@/components/ui/ScrollReveal';
 
 export interface ProductSectionProps {
   title?: string;
@@ -31,9 +32,16 @@ const ProductSection: React.FC<ProductSectionProps> = ({
         <div className="mb-6 flex flex-col md:flex-row md:items-end md:justify-between gap-3">
           <div>
             {title && (
-              <h2 className={`text-2xl sm:text-3xl font-bold font-heading ${dark ? 'text-white' : 'text-primary'}`}>
+              <ScrollReveal
+                baseOpacity={0.2}
+                baseRotation={2}
+                blurStrength={6}
+                as="h2"
+                containerClassName="mb-1"
+                textClassName={`text-2xl sm:text-3xl font-bold font-heading ${dark ? 'text-white' : 'text-primary'}`}
+              >
                 {title}
-              </h2>
+              </ScrollReveal>
             )}
             {subtitle && (
               <p className={`text-sm sm:text-base mt-1 ${dark ? 'text-gray-300' : 'text-gray-500'}`}>

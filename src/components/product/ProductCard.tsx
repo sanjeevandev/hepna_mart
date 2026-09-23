@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, ShoppingCart } from 'lucide-react';
 import { Product } from '@/types';
@@ -10,7 +10,6 @@ import PriceDisplay from '@/components/ui/PriceDisplay';
 import QuantitySelector from '@/components/ui/QuantitySelector';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
-import BorderGlow from '@/components/ui/BorderGlow';
 
 interface ProductCardProps {
   product: Product;
@@ -19,7 +18,7 @@ interface ProductCardProps {
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { addToCart } = useCartStore();
   const { toggleWishlist, isWishlisted } = useWishlistStore();
-  const [quantity, setQuantity] = React.useState(1);
+  const [quantity, setQuantity] = useState(1);
 
   const wishlisted = isWishlisted(product.id);
 
@@ -42,28 +41,16 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   };
 
   return (
-    <BorderGlow
-      edgeSensitivity={20}
-      glowColor="24 90 55"
-      backgroundColor="#FFFFFF"
-      borderRadius={16}
-      glowRadius={25}
-      glowIntensity={1.0}
-      coneSpread={30}
-      animated={false}
-      colors={['#E87A2D', '#F5A623', '#1B3A5C', '#2A5A8C']}
-      className="h-full group hover:-translate-y-1 transition-transform duration-300"
-      innerClassName="h-full"
-    >
+    <div className="card h-full flex flex-col group relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover border border-gray-100/80 bg-white">
       <Link 
         to={`/product/${product.slug}`} 
-        className="flex flex-col h-full relative overflow-hidden rounded-2xl bg-white select-none"
+        className="flex flex-col h-full relative"
       >
         <div className="relative aspect-square overflow-hidden bg-surface flex items-center justify-center">
           <img 
             src={product.images?.[0] || 'https://placehold.co/400?text=No+Image'} 
             alt={product.name} 
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500 ease-out"
           />
           
           {/* Badges */}
@@ -79,7 +66,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           {/* Wishlist Button */}
           <button 
             onClick={handleWishlist}
-            className="absolute top-2 right-2 p-2 rounded-full bg-white/90 backdrop-blur-sm shadow-md hover:bg-white transition-colors z-10"
+            className="absolute top-2 right-2 p-2 rounded-full bg-white/95 shadow-md hover:bg-white hover:text-accent transition-all z-10"
             aria-label="Toggle wishlist"
           >
             <Heart className={`w-4 h-4 sm:w-5 sm:h-5 ${wishlisted ? 'fill-accent text-accent' : 'text-gray-400'}`} />
@@ -116,7 +103,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </div>
         </div>
       </Link>
-    </BorderGlow>
+    </div>
   );
 };
 

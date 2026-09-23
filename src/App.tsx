@@ -1,5 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
+import Lenis from 'lenis';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 
@@ -21,13 +23,59 @@ import AboutPage from '@/pages/AboutPage';
 import ContactPage from '@/pages/ContactPage';
 import SearchResultsPage from '@/pages/SearchResultsPage';
 
-// Scroll to top on route change
-function ScrollToTop() {
+// Lenis smooth scroll and scroll restoration provider
+function SmoothScrollProvider({ children }: { children: React.ReactNode }) {
   const { pathname } = useLocation();
+  const lenisRef = useRef<Lenis | null>(null);
+
   useEffect(() => {
-    window.scrollTo(0, 0);
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) return;
+
+    const lenis = new Lenis({
+      duration: 1.0,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+      touchMultiplier: 1.5,
+      wheelMultiplier: 1.0,
+      infinite: false,
+    });
+
+    lenisRef.current = lenis;
+
+    // Synchronize Lenis scroll with GSAP ScrollTrigger
+    lenis.on('scroll', ScrollTrigger.update);
+
+    let rafId: number;
+    function raf(time: number) {
+      lenis.raf(time);
+      rafId = requestAnimationFrame(raf);
+    }
+    rafId = requestAnimationFrame(raf);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      lenis.destroy();
+      lenisRef.current = null;
+    };
+  }, []);
+
+  // Smooth scroll to top on route change
+  useEffect(() => {
+    if (lenisRef.current) {
+      lenisRef.current.scrollTo(0, { immediate: true });
+    } else {
+      window.scrollTo(0, 0);
+    }
+    // Refresh ScrollTrigger calculations
+    const timeout = setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 100);
+
+    return () => clearTimeout(timeout);
   }, [pathname]);
-  return null;
+
+  return <>{children}</>;
 }
 
 const NotFound: React.FC = () => (
@@ -45,34 +93,35 @@ const NotFound: React.FC = () => (
 
 function App() {
   return (
-    <div className="flex flex-col min-h-screen">
-      <ScrollToTop />
-      <Header />
+    <SmoothScrollProvider>
+      <div className="flex flex-col min-h-screen">
+        <Header />
 
-      <main className="flex-grow">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/shop" element={<ShopPage />} />
-          <Route path="/categories" element={<CategoriesPage />} />
-          <Route path="/category/:slug" element={<CategoryProductsPage />} />
-          <Route path="/product/:slug" element={<ProductDetailsPage />} />
-          <Route path="/cart" element={<CartPage />} />
-          <Route path="/checkout" element={<CheckoutPage />} />
-          <Route path="/wishlist" element={<WishlistPage />} />
-          <Route path="/orders" element={<OrdersPage />} />
-          <Route path="/account" element={<AccountPage />} />
-          <Route path="/wholesale" element={<WholesalePage />} />
-          <Route path="/tools" element={<ConstructionToolsPage />} />
-          <Route path="/offers" element={<OffersPage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/search" element={<SearchResultsPage />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </main>
+        <main className="flex-grow">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/shop" element={<ShopPage />} />
+            <Route path="/categories" element={<CategoriesPage />} />
+            <Route path="/category/:slug" element={<CategoryProductsPage />} />
+            <Route path="/product/:slug" element={<ProductDetailsPage />} />
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/wishlist" element={<WishlistPage />} />
+            <Route path="/orders" element={<OrdersPage />} />
+            <Route path="/account" element={<AccountPage />} />
+            <Route path="/wholesale" element={<WholesalePage />} />
+            <Route path="/tools" element={<ConstructionToolsPage />} />
+            <Route path="/offers" element={<OffersPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/search" element={<SearchResultsPage />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </main>
 
-      <Footer />
-    </div>
+        <Footer />
+      </div>
+    </SmoothScrollProvider>
   );
 }
 

@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { products } from '@/data/products';
 import ProductGrid from '@/components/product/ProductGrid';
+import ScrollReveal from '@/components/ui/ScrollReveal';
 import { Wrench, Hammer, HardHat, Zap, Ruler } from 'lucide-react';
 
 const ConstructionToolsPage: React.FC = () => {
@@ -26,9 +27,16 @@ const ConstructionToolsPage: React.FC = () => {
       <div className="bg-primary-dark text-white py-16">
         <div className="container-custom">
           <div className="max-w-2xl">
-            <h1 className="text-4xl md:text-5xl font-heading font-bold mb-4 text-accent-light">
+            <ScrollReveal
+              baseOpacity={0.2}
+              baseRotation={2}
+              blurStrength={6}
+              as="h1"
+              containerClassName="mb-4"
+              textClassName="text-4xl md:text-5xl font-heading font-bold text-accent-light"
+            >
               Professional Tools Marketplace
-            </h1>
+            </ScrollReveal>
             <p className="text-lg text-gray-300 mb-8">
               High-performance tools and safety equipment for serious contractors. Built tough for Indian construction sites.
             </p>
@@ -49,7 +57,16 @@ const ConstructionToolsPage: React.FC = () => {
 
       <div className="container-custom py-12">
         <div className="flex justify-between items-center mb-8">
-          <h2 className="text-2xl font-bold text-gray-900">Featured Tools & Equipment</h2>
+          <ScrollReveal
+            baseOpacity={0.2}
+            baseRotation={2}
+            blurStrength={6}
+            as="h2"
+            containerClassName="m-0"
+            textClassName="text-2xl font-bold text-gray-900"
+          >
+            Featured Tools & Equipment
+          </ScrollReveal>
           <span className="text-gray-600">{tools.length} Products</span>
         </div>
         

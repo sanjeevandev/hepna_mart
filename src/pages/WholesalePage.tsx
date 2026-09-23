@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Building, TrendingDown, Clock, ShieldCheck, Plus, Trash2 } from 'lucide-react';
 import Button from '@/components/ui/Button';
+import ScrollReveal from '@/components/ui/ScrollReveal';
 import toast from 'react-hot-toast';
 
 const WholesalePage: React.FC = () => {
@@ -33,7 +34,16 @@ const WholesalePage: React.FC = () => {
       <div className="bg-primary text-white py-16 md:py-24 relative overflow-hidden">
         <div className="absolute inset-0 opacity-20 bg-[url('https://images.unsplash.com/photo-1541888086225-ee5995818d1a?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80')] bg-cover bg-center"></div>
         <div className="container-custom relative z-10 text-center max-w-3xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-heading font-bold mb-6">Wholesale & Bulk Orders</h1>
+          <ScrollReveal
+            baseOpacity={0.2}
+            baseRotation={2}
+            blurStrength={6}
+            as="h1"
+            containerClassName="mb-6"
+            textClassName="text-4xl md:text-5xl font-heading font-bold text-white"
+          >
+            Wholesale & Bulk Orders
+          </ScrollReveal>
           <p className="text-lg md:text-xl text-gray-200 mb-8">
             Special pricing for contractors, builders, and large-scale construction projects. Get customized quotes within 24 hours.
           </p>
@@ -45,7 +55,16 @@ const WholesalePage: React.FC = () => {
           {/* Form Section */}
           <div className="w-full lg:w-3/5">
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Request a Bulk Quote</h2>
+              <ScrollReveal
+                baseOpacity={0.2}
+                baseRotation={2}
+                blurStrength={4}
+                as="h2"
+                containerClassName="mb-6"
+                textClassName="text-2xl font-bold text-gray-900"
+              >
+                Request a Bulk Quote
+              </ScrollReveal>
               <form onSubmit={handleSubmit} className="space-y-6">
                 
                 {/* Contact Info */}
@@ -134,7 +153,16 @@ const WholesalePage: React.FC = () => {
           {/* Info Section */}
           <div className="w-full lg:w-2/5 space-y-8">
             <div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">Benefits of Bulk Ordering</h3>
+              <ScrollReveal
+                baseOpacity={0.2}
+                baseRotation={2}
+                blurStrength={4}
+                as="h3"
+                containerClassName="mb-6"
+                textClassName="text-2xl font-bold text-gray-900"
+              >
+                Benefits of Bulk Ordering
+              </ScrollReveal>
               <div className="space-y-4">
                 <div className="bg-white p-5 rounded-xl border border-gray-100 flex gap-4 items-start">
                   <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary shrink-0">
