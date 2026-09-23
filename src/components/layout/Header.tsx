@@ -57,12 +57,12 @@ const Header: React.FC = () => {
       <header className="sticky top-0 z-40 w-full shadow-md bg-primary text-white">
         <div className="container-custom">
           {/* Main Top Bar */}
-          <div className="flex items-center justify-between h-16 gap-3 lg:gap-5">
+          <div className="flex items-center justify-between h-16 gap-2 sm:gap-4 lg:gap-6">
             
             {/* Mobile Menu & Logo */}
-            <div className="flex items-center gap-3 flex-shrink-0">
+            <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
               <button 
-                className="md:hidden p-1 mr-1 text-white hover:bg-primary-light rounded-md"
+                className="md:hidden p-1 text-white hover:bg-primary-light rounded-md"
                 onClick={() => setIsMobileMenuOpen(true)}
                 aria-label="Open mobile menu"
               >
@@ -70,14 +70,14 @@ const Header: React.FC = () => {
               </button>
               
               <Link to="/" className="flex items-center gap-2">
-                <span className="font-heading font-bold text-xl md:text-2xl tracking-tight text-white whitespace-nowrap">
+                <span className="font-heading font-bold text-xl sm:text-2xl tracking-tight text-white whitespace-nowrap">
                   HEPNA <span className="text-accent">MART</span>
                 </span>
               </Link>
             </div>
 
             {/* Desktop Gooey Navigation */}
-            <div className="hidden lg:flex items-center justify-center flex-shrink-0">
+            <div className="hidden md:flex items-center justify-center flex-shrink-0">
               <GooeyNav
                 items={navItems}
                 initialActiveIndex={getActiveNavIndex()}
@@ -91,19 +91,19 @@ const Header: React.FC = () => {
             </div>
 
             {/* Desktop Search */}
-            <div className="hidden md:flex flex-1 max-w-xs xl:max-w-sm 2xl:max-w-md px-1">
+            <div className="hidden lg:flex flex-1 max-w-xs xl:max-w-sm px-1">
               <SearchBar 
                 value={query}
                 onChange={setQuery}
                 onSearch={handleSearch}
-                className="w-full text-gray-900"
+                className="w-full text-gray-900 text-sm"
               />
             </div>
 
             {/* Icons */}
-            <div className="flex items-center space-x-2 md:space-x-3 xl:space-x-4 flex-shrink-0">
+            <div className="flex items-center space-x-1.5 sm:space-x-3 xl:space-x-4 flex-shrink-0">
               <button 
-                className="md:hidden p-2 text-white hover:bg-primary-light rounded-full"
+                className="lg:hidden p-2 text-white hover:bg-primary-light rounded-full"
                 onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
                 aria-label="Toggle search"
               >
@@ -145,7 +145,7 @@ const Header: React.FC = () => {
           
           {/* Mobile Search Bar (Expandable) */}
           {isMobileSearchOpen && (
-            <div className="md:hidden pb-4 px-2">
+            <div className="lg:hidden pb-4 px-2">
               <SearchBar 
                 value={query}
                 onChange={setQuery}
