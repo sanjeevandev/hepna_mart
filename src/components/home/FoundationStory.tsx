@@ -73,16 +73,16 @@ const FoundationStory: React.FC = () => {
             <div className="flex items-center gap-2 mb-4">
               <span className="w-2.5 h-2.5 rounded-full bg-accent animate-pulse" />
               <span className="text-xs sm:text-sm font-bold tracking-[0.2em] uppercase text-accent">
-                BUILDING DREAMS
+                WHY HEPNA MART
               </span>
             </div>
 
             {/* Main Story Headline */}
             <h2 className="foundation-headline text-3xl sm:text-4xl lg:text-5xl font-heading font-extrabold text-white leading-tight tracking-tight mb-4">
-              Great Buildings Begin With<br className="hidden sm:inline" />
-              {' '}Great Foundations —<br />
+              Everything You Need<br className="hidden sm:inline" />
+              {' '}to Build —<br />
               <span className="foundation-hepna-text text-accent">
-                HEPNA MART
+                From Foundation to Finish
               </span>
             </h2>
 

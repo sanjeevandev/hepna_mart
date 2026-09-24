@@ -1,65 +1,74 @@
-/* SectionMotion — Unified, Intentional Entrance Animations */
+/* SectionMotion — Premium Cinematic Entrance Animations */
 .section-motion {
   opacity: 0;
-  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.65s cubic-bezier(0.16, 1, 0.3, 1),
-              filter 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 1s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 1s cubic-bezier(0.22, 1, 0.36, 1),
+              filter 1s cubic-bezier(0.22, 1, 0.36, 1);
   will-change: opacity, transform, filter;
 }
 
-/* Variant Up (Default - 30px translateY, scale 0.985, blur 5px) */
+/* Variant Up — Dramatic vertical rise with scale + blur */
 .section-motion--up {
-  transform: translateY(30px) scale(0.985);
-  filter: blur(5px);
+  transform: translateY(60px) scale(0.97);
+  filter: blur(8px);
 }
 
-/* Variant Left */
+/* Variant Left — Slide from left */
 .section-motion--left {
-  transform: translateX(-35px);
-  filter: blur(5px);
+  transform: translateX(-70px) scale(0.98);
+  filter: blur(8px);
 }
 
-/* Variant Right */
+/* Variant Right — Slide from right */
 .section-motion--right {
-  transform: translateX(35px);
-  filter: blur(5px);
+  transform: translateX(70px) scale(0.98);
+  filter: blur(8px);
 }
 
-/* Variant Scale */
+/* Variant Scale — Grow from center */
 .section-motion--scale {
-  transform: scale(0.96);
-  filter: blur(5px);
+  transform: scale(0.92);
+  filter: blur(10px);
 }
 
-/* Variant Fade */
+/* Variant Fade — Gentle vertical float */
 .section-motion--fade {
-  transform: translateY(15px);
-  filter: blur(5px);
+  transform: translateY(30px);
+  filter: blur(6px);
 }
 
-/* Variant Product */
+/* Variant Product — Product card grid */
 .section-motion--product {
-  transform: translateY(20px) scale(0.99);
-  filter: blur(4px);
-  transition-duration: 0.55s;
+  transform: translateY(40px) scale(0.98);
+  filter: blur(6px);
+  transition-duration: 0.85s;
 }
 
-/* Variant Hero */
+/* Variant Hero — Section hero entrance */
 .section-motion--hero {
-  transform: translateY(16px);
+  transform: translateY(25px) scale(0.99);
   filter: blur(4px);
-  transition-duration: 0.65s;
+  transition-duration: 0.9s;
 }
 
-/* Triggered State: Natural, sharp, unblurred resting position */
+/* ─── Triggered State ─── */
 .section-motion.is-visible {
   opacity: 1;
   transform: translate(0, 0) scale(1);
-  filter: blur(0);
+  filter: blur(0px);
   will-change: auto;
 }
 
-/* Accessibility: Immediate display when prefers-reduced-motion is active */
+/* ─── Staggered Children ─── */
+/* When section-motion has data-stagger, animate direct children with stagger */
+.section-motion.is-visible > .stagger-child:nth-child(1) { transition-delay: 0ms; }
+.section-motion.is-visible > .stagger-child:nth-child(2) { transition-delay: 80ms; }
+.section-motion.is-visible > .stagger-child:nth-child(3) { transition-delay: 160ms; }
+.section-motion.is-visible > .stagger-child:nth-child(4) { transition-delay: 240ms; }
+.section-motion.is-visible > .stagger-child:nth-child(5) { transition-delay: 320ms; }
+.section-motion.is-visible > .stagger-child:nth-child(6) { transition-delay: 400ms; }
+
+/* ─── Accessibility ─── */
 @media (prefers-reduced-motion: reduce) {
   .section-motion,
   .section-motion--up,

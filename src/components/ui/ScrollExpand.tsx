@@ -1,4 +1,5 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useEffect, useLayoutEffect, useRef } from 'react';
+import defaultHeroImg from '@/assets/images/hepna-construction-hero.webp';
 import './ScrollExpand.css';
 
 export interface ScrollExpandProps {
@@ -6,21 +7,10 @@ export interface ScrollExpandProps {
   mediaType?: 'image' | 'video';
   poster?: string;
   alt?: string;
-  title?: string;
-  subtitle?: string;
+  eyebrow?: string;
+  title?: React.ReactNode;
+  subtitle?: React.ReactNode;
   scrollHint?: string;
-  startWidth?: number;
-  startHeight?: number;
-  startRadius?: number;
-  endRadius?: number;
-  mediaZoom?: number;
-  scrollDistance?: number;
-  holdDistance?: number;
-  smoothing?: number;
-  overlayScrim?: number;
-  useWindowScroll?: boolean;
-  stageHeight?: number | string;
-  enabled?: boolean;
   children?: React.ReactNode;
   className?: string;
   style?: React.CSSProperties;
@@ -34,249 +24,184 @@ const smoothstep = (edge0: number, edge1: number, x: number) => {
 };
 
 const ScrollExpand: React.FC<ScrollExpandProps> = ({
-  src = '',
+  src = defaultHeroImg,
   mediaType = 'image',
   poster = '',
-  alt = '',
-  title = '',
-  subtitle = '',
-  scrollHint = '',
-  startWidth = 60,
-  startHeight = 70,
-  startRadius = 24,
-  endRadius = 16,
-  mediaZoom = 1.15,
-  scrollDistance = 0.4,
-  holdDistance = 0.1,
-  smoothing = 0.1,
-  overlayScrim = 0.4,
-  useWindowScroll = true,
-  stageHeight,
-  enabled = true,
+  alt = 'HEPNA MART Construction Materials',
+  eyebrow = 'HEPNA MART',
+  title = 'Great Buildings Begin With Great Foundations',
+  subtitle,
+  scrollHint = 'Scroll to build',
   children,
   className = '',
   style,
-  ...rest
 }) => {
-  const rootRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
-  const stageRef = useRef<HTMLDivElement>(null);
+  const stickyRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<HTMLDivElement>(null);
-  const mediaRef = useRef<HTMLImageElement & HTMLVideoElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
+  const scrimRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
-  const scrimRef = useRef<HTMLDivElement>(null);
-  const hintRef = useRef<HTMLDivElement>(null);
 
-  const propsRef = useRef({
-    startWidth,
-    startHeight,
-    startRadius,
-    endRadius,
-    mediaZoom,
-    scrollDistance,
-    holdDistance,
-    smoothing,
-    overlayScrim,
-    useWindowScroll,
-    enabled,
-  });
-
-  propsRef.current = {
-    startWidth,
-    startHeight,
-    startRadius,
-    endRadius,
-    mediaZoom,
-    scrollDistance,
-    holdDistance,
-    smoothing,
-    overlayScrim,
-    useWindowScroll,
-    enabled,
-  };
-
-  const applyProgress = useCallback((p: number) => {
+  const applyProgress = (progress: number) => {
     const frame = frameRef.current;
-    const media = mediaRef.current;
-    if (!frame || !media) return;
-    const c = propsRef.current;
+    if (!frame) return;
 
-    const e = smoothstep(0, 1, p);
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+    const startW = isMobile ? 86 : 56;
+    const startH = isMobile ? 70 : 62;
+    const startR = isMobile ? 16 : 24;
 
-    const w = c.startWidth + (100 - c.startWidth) * e;
-    const h = c.startHeight + (100 - c.startHeight) * e;
-    const ix = Math.max(0, (100 - w) / 2);
-    const iy = Math.max(0, (100 - h) / 2);
-    const r = c.startRadius + (c.endRadius - c.startRadius) * e;
-    frame.style.clipPath = `inset(${iy}% ${ix}% ${iy}% ${ix}% round ${r}px)`;
+    const e = smoothstep(0, 1, progress);
 
-    media.style.transform = `scale(${c.mediaZoom + (1 - c.mediaZoom) * e})`;
+    const w = startW + (100 - startW) * e;
+    const h = startH + (100 - startH) * e;
+    const r = Math.max(0, startR * (1 - e));
 
-    if (scrimRef.current) scrimRef.current.style.opacity = `${c.overlayScrim * (0.6 + 0.4 * e)}`;
+    frame.style.width = `${w}%`;
+    frame.style.height = `${h}%`;
+    frame.style.borderRadius = `${r}px`;
 
-    if (titleRef.current) {
-      const out = smoothstep(0.65, 1, p);
-      titleRef.current.style.opacity = `${1 - 0.25 * out}`;
-      titleRef.current.style.transform = `translate3d(0, ${-12 * out}px, 0) scale(${1 + 0.03 * out})`;
+    if (imgRef.current) {
+      const scale = 1.05 - 0.05 * e;
+      imgRef.current.style.transform = `scale(${scale})`;
     }
 
-    if (hintRef.current) {
-      const gone = smoothstep(0, 0.2, p);
-      hintRef.current.style.opacity = `${1 - gone}`;
+    if (scrimRef.current) {
+      const scrimOp = 0.22 + 0.26 * e;
+      scrimRef.current.style.opacity = `${scrimOp}`;
+    }
+
+    if (titleRef.current) {
+      const titleFade = smoothstep(0.22, 0.65, progress);
+      titleRef.current.style.opacity = `${1 - titleFade}`;
+      titleRef.current.style.transform = `translate3d(0, ${-30 * titleFade}px, 0)`;
+      titleRef.current.style.pointerEvents = titleFade > 0.8 ? 'none' : 'auto';
     }
 
     if (overlayRef.current) {
-      const inn = smoothstep(0.5, 1, p);
-      overlayRef.current.style.opacity = `${inn}`;
+      const overlayIn = smoothstep(0.60, 0.95, progress);
+      overlayRef.current.style.opacity = `${overlayIn}`;
+      overlayRef.current.style.transform = `translate3d(0, ${20 * (1 - overlayIn)}px, 0)`;
+      overlayRef.current.style.pointerEvents = overlayIn > 0.6 ? 'auto' : 'none';
     }
+  };
+
+  useLayoutEffect(() => {
+    applyProgress(0);
   }, []);
 
   useEffect(() => {
-    const root = rootRef.current;
-    const track = trackRef.current;
-    const stage = stageRef.current;
-    if (!root || !track || !stage) return;
-
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion) {
+      applyProgress(1);
+      return;
+    }
 
-    let raf = 0;
-    let current = 0;
-    let target = 0;
-    let stageH = 0;
-    let running = false;
+    let ticking = false;
+    const handleScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        if (trackRef.current && stickyRef.current) {
+          const rect = trackRef.current.getBoundingClientRect();
+          const stageH = stickyRef.current.clientHeight || (window.innerWidth < 768 ? window.innerHeight * 0.72 : window.innerHeight * 0.82);
+          const totalTrackH = trackRef.current.clientHeight;
+          const scrollableDistance = Math.max(1, totalTrackH - stageH);
 
-    const measure = () => {
-      const c = propsRef.current;
-      if (stageHeight) {
-        stageH = typeof stageHeight === 'number' ? stageHeight : parseInt(stageHeight, 10) || 380;
-      } else {
-        stageH = Math.min(window.innerHeight * 0.55, 460);
-      }
-      if (stageH <= 0) return;
-      stage.style.height = `${stageH}px`;
-      track.style.height = `${stageH * (1 + Math.max(0, c.scrollDistance) + Math.max(0, c.holdDistance))}px`;
-
-      const w = root.clientWidth || stageH;
-      stage.style.setProperty('--se-title-size', `${clamp(w * 0.045, 20, 44)}px`);
+          // rect.top goes from 0 (track hits top of window) to -scrollableDistance
+          const progress = clamp(-rect.top / scrollableDistance, 0, 1);
+          applyProgress(progress);
+        }
+        ticking = false;
+      });
     };
 
-    const readProgress = () => {
-      const c = propsRef.current;
-      if (!c.enabled) return 1;
-      const span = stageH * Math.max(0.01, c.scrollDistance);
-      const top = track.getBoundingClientRect().top - (window.innerHeight - stageH) / 2;
-      return clamp(-top / span, 0, 1);
-    };
+    handleScroll();
 
-    const tick = () => {
-      const c = propsRef.current;
-      const k = c.smoothing <= 0 ? 1 : 1 - Math.exp(-1 / (60 * c.smoothing));
-      current += (target - current) * k;
-      if (Math.abs(target - current) < 0.0004) {
-        current = target;
-        running = false;
-      }
-      applyProgress(current);
-      raf = running ? requestAnimationFrame(tick) : 0;
-    };
-
-    const kick = () => {
-      if (running) return;
-      running = true;
-      if (!raf) raf = requestAnimationFrame(tick);
-    };
-
-    const onScroll = () => {
-      target = readProgress();
-      if (propsRef.current.smoothing <= 0 || reduceMotion) {
-        current = target;
-        applyProgress(current);
-        return;
-      }
-      kick();
-    };
-
-    const onResize = () => {
-      measure();
-      target = readProgress();
-      current = target;
-      applyProgress(current);
-    };
-
-    measure();
-    target = readProgress();
-    current = target;
-    applyProgress(current);
-
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onResize);
-    const ro = new ResizeObserver(onResize);
-    ro.observe(root);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleScroll);
 
     return () => {
-      if (raf) cancelAnimationFrame(raf);
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onResize);
-      ro.disconnect();
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
     };
-  }, [applyProgress, stageHeight]);
-
-  const media =
-    mediaType === 'video' ? (
-      <video
-        ref={mediaRef}
-        className="scroll-expand__media"
-        src={src}
-        poster={poster}
-        autoPlay
-        muted
-        loop
-        playsInline
-      />
-    ) : (
-      <img ref={mediaRef} className="scroll-expand__media" src={src} alt={alt} draggable={false} />
-    );
+  }, []);
 
   return (
-    <div
-      ref={rootRef}
-      className={`scroll-expand ${className}`.trim()}
-      style={style}
-      {...rest}
-    >
-      <div ref={trackRef} className="scroll-expand__track">
-        <div ref={stageRef} className="scroll-expand__stage rounded-3xl overflow-hidden">
-          <div ref={frameRef} className="scroll-expand__frame">
-            {media}
-            <div ref={scrimRef} className="scroll-expand__scrim" />
-            {children ? (
-              <div ref={overlayRef} className="scroll-expand__overlay">
-                {children}
-              </div>
-            ) : null}
-          </div>
-          {title ? (
-            <div ref={titleRef} className="scroll-expand__title flex-col gap-2">
-              <span className="text-accent text-xs sm:text-sm font-semibold tracking-widest uppercase">
-                HEPNA MART Advantage
-              </span>
-              <span className="text-white drop-shadow-md">{title}</span>
+    <section className={`scroll-expand-section ${className}`.trim()} style={style}>
+      <div ref={trackRef} className="scroll-expand-track">
+        <div ref={stickyRef} className="scroll-expand-sticky">
+          {/* Centered expanding media frame */}
+          <div
+            ref={frameRef}
+            className="scroll-expand-frame"
+            style={{
+              width: '56%',
+              height: '62%',
+              borderRadius: '24px',
+            }}
+          >
+            {mediaType === 'video' ? (
+              <video
+                className="scroll-expand-media"
+                src={src}
+                poster={poster}
+                autoPlay
+                muted
+                loop
+                playsInline
+              />
+            ) : (
+              <img
+                ref={imgRef}
+                className="scroll-expand-media"
+                src={src}
+                alt={alt}
+                loading="eager"
+                decoding="sync"
+                draggable={false}
+              />
+            )}
+
+            {/* Subtle atmospheric scrim */}
+            <div ref={scrimRef} className="scroll-expand-scrim" />
+
+            {/* Initial Headline Layer */}
+            <div ref={titleRef} className="scroll-expand-title-layer">
+              {eyebrow && (
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 mb-3 rounded-full bg-accent/20 border border-accent/40 text-accent-light text-xs sm:text-sm font-bold tracking-[0.2em] uppercase backdrop-blur-md shadow-lg">
+                  <span className="w-2 h-2 rounded-full bg-accent animate-ping" />
+                  <span>{eyebrow}</span>
+                </div>
+              )}
+              <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold font-heading text-white leading-[1.15] tracking-tight max-w-3xl drop-shadow-2xl">
+                {title}
+              </h2>
               {subtitle && (
-                <span className="text-xs sm:text-base text-gray-200 font-normal max-w-xl text-center">
+                <p className="mt-3 text-sm sm:text-base md:text-lg text-gray-200 font-normal max-w-xl drop-shadow-md">
                   {subtitle}
-                </span>
+                </p>
+              )}
+              {scrollHint && (
+                <div className="scroll-expand-hint mt-6">
+                  <span>{scrollHint}</span>
+                  <span className="animate-bounce text-accent text-base">↓</span>
+                </div>
               )}
             </div>
-          ) : null}
-          {scrollHint ? (
-            <div ref={hintRef} className="scroll-expand__hint">
-              {scrollHint}
-            </div>
-          ) : null}
+
+            {/* Revealed Overlay Layer at 100% Expansion */}
+            {children && (
+              <div ref={overlayRef} className="scroll-expand-overlay-layer">
+                {children}
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

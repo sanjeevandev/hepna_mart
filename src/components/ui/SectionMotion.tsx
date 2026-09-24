@@ -17,8 +17,8 @@ const SectionMotion: React.FC<SectionMotionProps> = ({
   children,
   className = '',
   variant = 'up',
-  threshold = 0.15,
-  rootMargin = '0px 0px -40px 0px',
+  threshold = 0.08,
+  rootMargin = '0px 0px -60px 0px',
   delay = 0,
   as: Component = 'div',
 }) => {

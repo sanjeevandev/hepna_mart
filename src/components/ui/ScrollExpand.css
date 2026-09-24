@@ -1,62 +1,87 @@
-.scroll-expand {
+/* ScrollExpand.css — Rock-Solid Direct-Width Scroll Expansion */
+
+.scroll-expand-section {
   position: relative;
   width: 100%;
-  height: 100%;
+  background: #071A2B;
+  z-index: 1;
 }
 
-.scroll-expand--scroller {
-  overflow-y: auto;
-  overflow-x: hidden;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  overscroll-behavior: contain;
-}
-
-.scroll-expand--scroller::-webkit-scrollbar {
-  display: none;
-}
-
-.scroll-expand__track {
+.scroll-expand-track {
   position: relative;
   width: 100%;
+  height: 155vh;
+  background: #071A2B;
 }
 
-.scroll-expand__stage {
+@media (max-width: 768px) {
+  .scroll-expand-track {
+    height: 135vh;
+  }
+}
+
+.scroll-expand-sticky {
   position: sticky;
   top: 0;
   width: 100%;
+  height: 82vh;
+  min-height: 520px;
+  max-height: 840px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
-  --se-title-size: 3.5rem;
+  background: #071A2B;
+  z-index: 2;
 }
 
-.scroll-expand__frame {
-  position: absolute;
-  inset: 0;
-  clip-path: inset(18% 22% 18% 22% round 24px);
-  will-change: clip-path;
+@media (max-width: 768px) {
+  .scroll-expand-sticky {
+    height: 72vh;
+    min-height: 440px;
+  }
 }
 
-.scroll-expand__media {
+.scroll-expand-frame {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0B2742;
+  box-shadow: 0 30px 80px -15px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.15);
+  will-change: width, height, border-radius;
+  z-index: 3;
+}
+
+.scroll-expand-media {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   will-change: transform;
-  transform-origin: center;
-  user-select: none;
-  -webkit-user-drag: none;
+  display: block;
+  opacity: 1 !important;
+  z-index: 0;
 }
 
-.scroll-expand__scrim {
+.scroll-expand-scrim {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(to top, rgba(15, 36, 64, 0.85), rgba(27, 58, 92, 0.35) 45%, rgba(15, 36, 64, 0.5));
-  opacity: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(7, 26, 43, 0.20) 0%,
+    rgba(7, 26, 43, 0.30) 45%,
+    rgba(7, 26, 43, 0.70) 100%
+  );
+  opacity: 0.25;
+  z-index: 1;
 }
 
-.scroll-expand__overlay {
+.scroll-expand-title-layer {
   position: absolute;
   inset: 0;
   display: flex;
@@ -64,42 +89,60 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 6%;
-  opacity: 0;
-  will-change: opacity, transform;
+  padding: 1.5rem;
+  pointer-events: none;
+  z-index: 2;
 }
 
-.scroll-expand__title {
+.scroll-expand-hint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  text-align: center;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+}
+
+.scroll-expand-overlay-layer {
   position: absolute;
   inset: 0;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin: 0;
-  padding: 0 6%;
   text-align: center;
-  font-size: var(--se-title-size);
-  font-weight: 800;
-  font-family: 'Poppins', sans-serif;
-  letter-spacing: -0.02em;
-  line-height: 1.15;
-  color: #fff;
-  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.6);
+  padding: 1.5rem;
+  opacity: 0;
   pointer-events: none;
-  will-change: opacity, transform;
+  z-index: 3;
 }
 
-.scroll-expand__hint {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 2rem;
-  text-align: center;
-  font-size: 0.875rem;
-  font-weight: 500;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.8);
-  pointer-events: none;
-  will-change: opacity, transform;
+/* Reduced Motion Override */
+@media (prefers-reduced-motion: reduce) {
+  .scroll-expand-frame {
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 0 !important;
+  }
+  .scroll-expand-media {
+    transform: none !important;
+  }
+  .scroll-expand-scrim {
+    opacity: 0.50 !important;
+  }
+  .scroll-expand-title-layer {
+    opacity: 0 !important;
+    display: none !important;
+  }
+  .scroll-expand-overlay-layer {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
 }

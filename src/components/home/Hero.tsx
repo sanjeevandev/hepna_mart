@@ -1,39 +1,97 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Button from '@/components/ui/Button';
 import { ArrowRight, ShieldCheck, Tag, Truck, Users } from 'lucide-react';
+import heroImage from '@/assets/images/hepna-construction-hero.webp';
 
 const Hero: React.FC = () => {
-  return (
-    <div className="relative min-h-[580px] lg:h-[88vh] max-h-[780px] flex items-center bg-cover bg-center overflow-hidden"
-      style={{
-        backgroundImage: 'url("https://images.unsplash.com/photo-1541888086225-ee5315b8823f?q=80&w=2070&auto=format&fit=crop")',
-      }}
-    >
-      {/* Deep Navy Atmospheric Overlay with Subtle Radial Vignette */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[#071A2B]/95 via-[#0B2742]/85 to-[#0F2440]/60" />
-      <div className="absolute inset-0 bg-radial-gradient from-transparent via-black/20 to-black/50 pointer-events-none" />
+  const heroRef = useRef<HTMLDivElement>(null);
+  const bgRef = useRef<HTMLImageElement>(null);
 
-      {/* Main Content */}
+  useEffect(() => {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) return;
+
+    let ticking = false;
+    const handleScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        if (bgRef.current && heroRef.current) {
+          const rect = heroRef.current.getBoundingClientRect();
+          const viewportHeight = window.innerHeight;
+          if (rect.bottom > 0 && rect.top < viewportHeight) {
+            const scrollProgress = -rect.top / viewportHeight;
+            const translateY = scrollProgress * 20;
+            const scale = 1.04 + scrollProgress * 0.04;
+            bgRef.current.style.transform = `scale(${scale}) translateY(${translateY}px)`;
+          }
+        }
+        ticking = false;
+      });
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  return (
+    <section
+      ref={heroRef}
+      className="relative min-h-[75vh] lg:min-h-[82vh] max-h-[880px] flex items-center overflow-hidden bg-[#071A2B]"
+    >
+      {/* ─── Layer 1: Background Construction Image (Directly visible) ─── */}
+      <img
+        ref={bgRef}
+        src={heroImage}
+        alt="HEPNA MART Construction Site"
+        loading="eager"
+        decoding="sync"
+        className="absolute inset-0 w-full h-full object-cover object-center will-change-transform opacity-100"
+        style={{
+          filter: 'blur(2px)',
+          transform: 'scale(1.04)',
+        }}
+      />
+
+      {/* ─── Layer 2: Directional Cinematic Overlay ─── */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            'linear-gradient(90deg, rgba(7,26,43,0.80) 0%, rgba(7,26,43,0.58) 50%, rgba(7,26,43,0.30) 100%)',
+        }}
+      />
+
+      {/* ─── Layer 3: Subtle Orange Ambient Glow ─── */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            'radial-gradient(circle at 80% 30%, rgba(232,122,45,0.12), transparent 45%)',
+        }}
+      />
+
+      {/* ─── Layer 4: Sharp Foreground Content (Always 100% visible) ─── */}
       <div className="container-custom relative z-10 text-white py-12 md:py-20 flex flex-col justify-center h-full">
         <div className="max-w-3xl">
           {/* Eyebrow Badge */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 mb-6 rounded-full bg-accent/20 border border-accent/40 text-accent-light text-xs sm:text-sm font-semibold tracking-wider uppercase backdrop-blur-md">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 mb-6 rounded-full bg-accent/20 border border-accent/40 text-accent-light text-xs sm:text-sm font-bold tracking-wider uppercase backdrop-blur-md">
             <span className="w-2 h-2 rounded-full bg-accent animate-ping" />
             <span>India's Trusted Construction Marketplace</span>
           </div>
 
           {/* Headline */}
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold font-heading mb-6 leading-[1.12] tracking-tight">
-            Build Better. <br />
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold font-heading mb-6 leading-[1.12] tracking-tight text-white">
+            Everything You Need <br />
             <span className="text-accent underline decoration-accent/40 decoration-4 underline-offset-8">
-              Buy Smarter.
+              to Build.
             </span>
           </h1>
 
           {/* Subtitle */}
           <p className="text-base sm:text-lg md:text-xl text-gray-200 mb-8 max-w-2xl leading-relaxed font-normal">
-            Certified building materials, heavy structural supplies, and professional tools delivered directly to your job site across India.
+            Quality materials for stronger structures and smarter construction. Certified building supplies, heavy structural materials, and professional tools delivered directly to your job site.
           </p>
 
           {/* Action CTAs */}
@@ -44,7 +102,7 @@ const Hero: React.FC = () => {
                 size="lg"
                 className="w-full sm:w-auto text-base sm:text-lg px-8 py-3.5 shadow-xl shadow-accent/30 flex items-center justify-center gap-2.5 hover-lift"
               >
-                <span>Shop Materials</span>
+                <span>Shop Building Materials</span>
                 <ArrowRight className="w-5 h-5" />
               </Button>
             </Link>
@@ -100,18 +158,11 @@ const Hero: React.FC = () => {
         </div>
       </div>
 
-      {/* Signature Curved Transition into Foundation Story */}
-      <div className="absolute bottom-0 left-0 right-0 h-8 pointer-events-none z-10 flex flex-col justify-end">
-        <svg
-          viewBox="0 0 1200 40"
-          className="w-full h-8 text-[#071A2B] fill-current preserve-3d"
-          preserveAspectRatio="none"
-        >
-          <path d="M0,40 L0,15 Q600,0 1200,15 L1200,40 Z" />
-        </svg>
-        <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-accent/40 to-transparent" />
+      {/* ─── Bottom Transition Line into ScrollExpand ─── */}
+      <div className="absolute bottom-0 left-0 right-0 h-4 pointer-events-none z-10 flex flex-col justify-end">
+        <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-accent/30 to-transparent" />
       </div>
-    </div>
+    </section>
   );
 };
 
