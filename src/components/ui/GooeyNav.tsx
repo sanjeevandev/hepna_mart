@@ -21,12 +21,12 @@ export interface GooeyNavProps {
 
 const GooeyNav: React.FC<GooeyNavProps> = ({
   items,
-  animationTime = 600,
-  particleCount = 15,
-  particleDistances = [90, 10],
-  particleR = 100,
-  timeVariance = 300,
-  colors = [1, 2, 3, 1, 2, 3, 1, 4],
+  animationTime = 500,
+  particleCount = 12,
+  particleDistances = [75, 10],
+  particleR = 90,
+  timeVariance = 250,
+  colors = [1, 2, 3, 1, 2, 4],
   initialActiveIndex = 0,
   onItemClick,
   className = '',
@@ -184,6 +184,26 @@ const GooeyNav: React.FC<GooeyNavProps> = ({
 
   return (
     <div className={`gooey-nav-container ${className}`} ref={containerRef}>
+      {/* SVG ColorMatrix Filter for clean Alpha-based Gooey effect (No black background, no black box) */}
+      <svg
+        className="gooey-nav-svg-filter"
+        aria-hidden="true"
+        style={{ position: 'absolute', width: 0, height: 0, pointerEvents: 'none', overflow: 'hidden' }}
+      >
+        <defs>
+          <filter id="gooey-nav-filter" x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
+            <feColorMatrix
+              in="blur"
+              type="matrix"
+              values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -8"
+              result="goo"
+            />
+            <feComposite in="SourceGraphic" in2="goo" operator="atop" />
+          </filter>
+        </defs>
+      </svg>
+
       <nav>
         <ul ref={navRef}>
           {items.map((item, index) => (

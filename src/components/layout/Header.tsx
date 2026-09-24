@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Search, MapPin, User, Heart, ShoppingCart, Menu, X } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
@@ -26,12 +26,17 @@ const Header: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const isScrolledRef = useRef(false);
   
   const { query, setQuery } = useSearchStore();
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      const scrolled = window.scrollY > 20;
+      if (scrolled !== isScrolledRef.current) {
+        isScrolledRef.current = scrolled;
+        setIsScrolled(scrolled);
+      }
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
@@ -63,10 +68,10 @@ const Header: React.FC = () => {
   return (
     <>
       <header
-        className={`sticky top-0 z-40 w-full transition-all duration-300 ${
+        className={`sticky top-0 z-50 w-full transition-[background-color,border-color,box-shadow,padding] duration-300 ease-out ${
           isScrolled
-            ? 'bg-[#071A2B]/95 backdrop-blur-md shadow-lg border-b border-white/10 py-0.5'
-            : 'bg-[#071A2B]/85 backdrop-blur-sm border-b border-white/5 py-1'
+            ? 'bg-[#071A2B]/95 backdrop-blur-[16px] shadow-md shadow-black/10 border-b border-white/[0.12] py-0.5'
+            : 'bg-[#071A2B]/85 backdrop-blur-[14px] border-b border-white/[0.08] py-1'
         } text-white`}
       >
         <div className="container-custom">
@@ -90,7 +95,7 @@ const Header: React.FC = () => {
               </Link>
             </div>
 
-            {/* Desktop Gooey Navigation */}
+            {/* Desktop Gooey Navigation (Clean SVG filter, no black box) */}
             <div className="hidden md:flex items-center justify-center flex-shrink-0">
               <GooeyNav
                 items={navItems}

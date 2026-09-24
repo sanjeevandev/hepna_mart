@@ -41,7 +41,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   };
 
   return (
-    <div className="card h-full flex flex-col group relative overflow-hidden bg-white rounded-2xl border border-gray-100 shadow-sm transition-all duration-300 ease-out hover:-translate-y-[5px] hover:shadow-card-hover">
+    <div className="card h-full flex flex-col group relative overflow-hidden bg-white rounded-2xl border border-gray-100 shadow-sm transition-all duration-300 ease-out hover:-translate-y-[3px] hover:shadow-card-hover">
       <Link 
         to={`/product/${product.slug}`} 
         className="flex flex-col h-full relative"
@@ -52,7 +52,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             src={product.images?.[0] || 'https://placehold.co/400?text=No+Image'} 
             alt={product.name} 
             loading="lazy"
-            className="w-full h-full object-cover rounded-xl transition-transform duration-300 ease-out group-hover:scale-[1.035]"
+            className="w-full h-full object-cover rounded-xl transition-transform duration-300 ease-out group-hover:scale-[1.02]"
           />
           
           {/* Status Badges */}

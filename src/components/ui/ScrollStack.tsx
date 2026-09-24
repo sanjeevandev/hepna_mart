@@ -1,5 +1,4 @@
 import React, { useLayoutEffect, useRef, useCallback, ReactNode } from 'react';
-import Lenis from 'lenis';
 import './ScrollStack.css';
 
 export interface ScrollStackItemProps {
@@ -211,40 +210,15 @@ const ScrollStack: React.FC<ScrollStackProps> = ({
     updateCardTransforms();
   }, [updateCardTransforms]);
 
-  const setupLenis = useCallback(() => {
+  const setupScrollListener = useCallback(() => {
     if (useWindowScroll) {
-      // In window scroll mode, window Lenis (if any) or scroll listener takes care of updates
       window.addEventListener('scroll', handleScroll, { passive: true });
-      return null;
+      return () => window.removeEventListener('scroll', handleScroll);
     } else {
       const scroller = scrollerRef.current;
       if (!scroller) return null;
-
-      const content = scroller.querySelector<HTMLElement>('.scroll-stack-inner');
-      if (!content) return null;
-
-      const lenis = new Lenis({
-        wrapper: scroller,
-        content: content,
-        duration: 1.2,
-        easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-        smoothWheel: true,
-        touchMultiplier: 2,
-        infinite: false,
-        wheelMultiplier: 1,
-        lerp: 0.1,
-      });
-
-      lenis.on('scroll', handleScroll);
-
-      const raf = (time: number) => {
-        lenis.raf(time);
-        animationFrameRef.current = requestAnimationFrame(raf);
-      };
-      animationFrameRef.current = requestAnimationFrame(raf);
-
-      lenisRef.current = lenis;
-      return lenis;
+      scroller.addEventListener('scroll', handleScroll, { passive: true });
+      return () => scroller.removeEventListener('scroll', handleScroll);
     }
   }, [handleScroll, useWindowScroll]);
 
@@ -274,18 +248,12 @@ const ScrollStack: React.FC<ScrollStackProps> = ({
       (card.style as any).webkitPerspective = '1000px';
     });
 
-    setupLenis();
+    const cleanupListener = setupScrollListener();
     updateCardTransforms();
 
     return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-      if (lenisRef.current) {
-        lenisRef.current.destroy();
-      }
-      if (useWindowScroll) {
-        window.removeEventListener('scroll', handleScroll);
+      if (cleanupListener) {
+        cleanupListener();
       }
       stackCompletedRef.current = false;
       cardsRef.current = [];
@@ -304,9 +272,8 @@ const ScrollStack: React.FC<ScrollStackProps> = ({
     blurAmount,
     useWindowScroll,
     onStackComplete,
-    setupLenis,
+    setupScrollListener,
     updateCardTransforms,
-    handleScroll,
   ]);
 
   return (
