@@ -5,6 +5,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import PageTransition from '@/components/ui/PageTransition';
+import ProductCompareBar from '@/components/product/ProductCompareBar';
 
 // Pages
 import HomePage from '@/pages/HomePage';
@@ -123,6 +124,7 @@ function App() {
         </main>
 
         <Footer />
+        <ProductCompareBar />
       </div>
     </SmoothScrollProvider>
   );

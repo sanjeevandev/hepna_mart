@@ -71,6 +71,10 @@ export interface DeliveryAddress {
   state: string;
   pincode: string;
   isConstructionSite: boolean;
+  siteName?: string;
+  siteType?: string;
+  deliveryPreference?: string;
+  requiredDeliveryDate?: string;
   siteContactPerson?: string;
   sitePhone?: string;
   deliveryInstructions?: string;
