@@ -7,6 +7,7 @@ export interface ScrollExpandProps {
   poster?: string;
   alt?: string;
   title?: string;
+  subtitle?: string;
   scrollHint?: string;
   startWidth?: number;
   startHeight?: number;
@@ -18,6 +19,7 @@ export interface ScrollExpandProps {
   smoothing?: number;
   overlayScrim?: number;
   useWindowScroll?: boolean;
+  stageHeight?: number | string;
   enabled?: boolean;
   children?: React.ReactNode;
   className?: string;
@@ -37,17 +39,19 @@ const ScrollExpand: React.FC<ScrollExpandProps> = ({
   poster = '',
   alt = '',
   title = '',
+  subtitle = '',
   scrollHint = '',
-  startWidth = 46,
-  startHeight = 60,
+  startWidth = 60,
+  startHeight = 70,
   startRadius = 24,
-  endRadius = 0,
-  mediaZoom = 1.3,
-  scrollDistance = 1.2,
-  holdDistance = 0.3,
+  endRadius = 16,
+  mediaZoom = 1.15,
+  scrollDistance = 0.4,
+  holdDistance = 0.1,
   smoothing = 0.1,
-  overlayScrim = 0.5,
+  overlayScrim = 0.4,
   useWindowScroll = true,
+  stageHeight,
   enabled = true,
   children,
   className = '',
@@ -109,24 +113,22 @@ const ScrollExpand: React.FC<ScrollExpandProps> = ({
 
     media.style.transform = `scale(${c.mediaZoom + (1 - c.mediaZoom) * e})`;
 
-    if (scrimRef.current) scrimRef.current.style.opacity = `${c.overlayScrim * e}`;
+    if (scrimRef.current) scrimRef.current.style.opacity = `${c.overlayScrim * (0.6 + 0.4 * e)}`;
 
     if (titleRef.current) {
-      const out = smoothstep(0.4, 0.88, p);
-      titleRef.current.style.opacity = `${1 - out}`;
-      titleRef.current.style.transform = `translate3d(0, ${-28 * out}px, 0) scale(${1 + 0.06 * out})`;
+      const out = smoothstep(0.65, 1, p);
+      titleRef.current.style.opacity = `${1 - 0.25 * out}`;
+      titleRef.current.style.transform = `translate3d(0, ${-12 * out}px, 0) scale(${1 + 0.03 * out})`;
     }
 
     if (hintRef.current) {
-      const gone = smoothstep(0, 0.12, p);
+      const gone = smoothstep(0, 0.2, p);
       hintRef.current.style.opacity = `${1 - gone}`;
-      hintRef.current.style.transform = `translate3d(0, ${8 * gone}px, 0)`;
     }
 
     if (overlayRef.current) {
-      const inn = smoothstep(0.68, 1, p);
+      const inn = smoothstep(0.5, 1, p);
       overlayRef.current.style.opacity = `${inn}`;
-      overlayRef.current.style.transform = `translate3d(0, ${18 * (1 - inn)}px, 0)`;
     }
   }, []);
 
@@ -146,24 +148,25 @@ const ScrollExpand: React.FC<ScrollExpandProps> = ({
 
     const measure = () => {
       const c = propsRef.current;
-      stageH = c.useWindowScroll ? window.innerHeight : root.clientHeight;
+      if (stageHeight) {
+        stageH = typeof stageHeight === 'number' ? stageHeight : parseInt(stageHeight, 10) || 380;
+      } else {
+        stageH = Math.min(window.innerHeight * 0.55, 460);
+      }
       if (stageH <= 0) return;
       stage.style.height = `${stageH}px`;
       track.style.height = `${stageH * (1 + Math.max(0, c.scrollDistance) + Math.max(0, c.holdDistance))}px`;
 
       const w = root.clientWidth || stageH;
-      stage.style.setProperty('--se-title-size', `${clamp(w * 0.065, 24, 72)}px`);
+      stage.style.setProperty('--se-title-size', `${clamp(w * 0.045, 20, 44)}px`);
     };
 
     const readProgress = () => {
       const c = propsRef.current;
       if (!c.enabled) return 1;
       const span = stageH * Math.max(0.01, c.scrollDistance);
-      if (c.useWindowScroll) {
-        const top = track.getBoundingClientRect().top;
-        return clamp(-top / span, 0, 1);
-      }
-      return clamp(root.scrollTop / span, 0, 1);
+      const top = track.getBoundingClientRect().top - (window.innerHeight - stageH) / 2;
+      return clamp(-top / span, 0, 1);
     };
 
     const tick = () => {
@@ -206,19 +209,18 @@ const ScrollExpand: React.FC<ScrollExpandProps> = ({
     current = target;
     applyProgress(current);
 
-    const scroller = useWindowScroll ? window : root;
-    scroller.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onResize);
     const ro = new ResizeObserver(onResize);
     ro.observe(root);
 
     return () => {
       if (raf) cancelAnimationFrame(raf);
-      scroller.removeEventListener('scroll', onScroll);
+      window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onResize);
       ro.disconnect();
     };
-  }, [applyProgress, useWindowScroll]);
+  }, [applyProgress, stageHeight]);
 
   const media =
     mediaType === 'video' ? (
@@ -239,12 +241,12 @@ const ScrollExpand: React.FC<ScrollExpandProps> = ({
   return (
     <div
       ref={rootRef}
-      className={`scroll-expand ${useWindowScroll ? '' : 'scroll-expand--scroller'} ${className}`.trim()}
+      className={`scroll-expand ${className}`.trim()}
       style={style}
       {...rest}
     >
       <div ref={trackRef} className="scroll-expand__track">
-        <div ref={stageRef} className="scroll-expand__stage">
+        <div ref={stageRef} className="scroll-expand__stage rounded-3xl overflow-hidden">
           <div ref={frameRef} className="scroll-expand__frame">
             {media}
             <div ref={scrimRef} className="scroll-expand__scrim" />
@@ -255,8 +257,16 @@ const ScrollExpand: React.FC<ScrollExpandProps> = ({
             ) : null}
           </div>
           {title ? (
-            <div ref={titleRef} className="scroll-expand__title">
-              {title}
+            <div ref={titleRef} className="scroll-expand__title flex-col gap-2">
+              <span className="text-accent text-xs sm:text-sm font-semibold tracking-widest uppercase">
+                HEPNA MART Advantage
+              </span>
+              <span className="text-white drop-shadow-md">{title}</span>
+              {subtitle && (
+                <span className="text-xs sm:text-base text-gray-200 font-normal max-w-xl text-center">
+                  {subtitle}
+                </span>
+              )}
             </div>
           ) : null}
           {scrollHint ? (

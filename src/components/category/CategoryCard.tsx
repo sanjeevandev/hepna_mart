@@ -15,13 +15,22 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category }) => {
   const Icon = iconMap[category.icon] || Package;
 
   return (
-    <Link to={`/category/${category.slug}`} className="card card-hover flex flex-col items-center p-6 text-center group transition-all duration-300">
-      <div className="w-16 h-16 rounded-full bg-surface-dark flex items-center justify-center mb-4 group-hover:bg-primary-light transition-colors duration-300">
-        <Icon className="w-8 h-8 text-primary group-hover:text-white transition-colors duration-300" />
+    <Link 
+      to={`/category/${category.slug}`} 
+      className="flex flex-col items-center p-5 text-center group bg-white rounded-2xl border border-gray-100/90 shadow-sm hover:border-accent/40 hover:-translate-y-1 hover:shadow-card-hover transition-all duration-300"
+    >
+      <div className="w-14 h-14 rounded-2xl bg-primary/5 flex items-center justify-center mb-3.5 group-hover:bg-accent group-hover:text-white transition-all duration-300 group-hover:scale-105">
+        <Icon className="w-7 h-7 text-primary group-hover:text-white transition-colors duration-300" />
       </div>
-      <h3 className="font-heading font-semibold text-lg text-primary-dark mb-1">{category.name}</h3>
-      <p className="text-sm text-gray-500 mb-3 line-clamp-2">{category.tagline}</p>
-      <span className="text-xs font-medium text-accent bg-accent/10 px-2 py-1 rounded-full">{category.productCount} Products</span>
+      <h3 className="font-heading font-semibold text-sm sm:text-base text-primary-dark mb-1 group-hover:text-accent transition-colors">
+        {category.name}
+      </h3>
+      <p className="text-xs text-gray-500 mb-2 line-clamp-1">
+        {category.tagline}
+      </p>
+      <span className="text-[11px] font-semibold text-accent bg-accent/10 px-2.5 py-0.5 rounded-full mt-auto">
+        {category.productCount} Products
+      </span>
     </Link>
   );
 };

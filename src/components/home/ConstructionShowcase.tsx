@@ -1,152 +1,234 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import ScrollStack, { ScrollStackItem } from '@/components/ui/ScrollStack';
 import ScrollReveal from '@/components/ui/ScrollReveal';
-import { Layers, Building, Droplets, Sparkles, ShieldCheck, ArrowRight } from 'lucide-react';
+import Button from '@/components/ui/Button';
+import { Building, Layers, Droplets, Sparkles, ShieldCheck, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const stages = [
   {
     id: 1,
-    stage: 'Stage 01',
-    title: 'Foundation',
-    description: 'UltraTech OPC 53 Grade Cement, Ready Mix Concrete, and Red Bricks for deep structural strength.',
-    items: ['OPC 53 Cement', 'Ready Mix Concrete', 'First Class Red Bricks', 'Fly Ash Bricks'],
+    number: '01',
+    stage: 'Foundation',
+    summary: 'Cement • Concrete • Bricks',
+    description: 'High-compressive OPC 53 & PPC cement, ready-mix concrete formulations, and kiln-fired red bricks engineered for deep structural stability.',
+    items: ['UltraTech OPC 53 Cement', 'ACC Ready Mix Concrete', 'First Class Red Bricks', 'EcoBuild Fly Ash Bricks', 'Birla White Cement'],
     categorySlug: 'cement-concrete',
+    image: 'https://images.unsplash.com/photo-1590937195954-5a0410d68622?q=80&w=1000&auto=format&fit=crop',
     icon: Building,
-    bgClass: 'bg-[#0F2440]',
-    accentColor: 'text-accent',
-    borderClass: 'border-accent/30',
   },
   {
     id: 2,
-    stage: 'Stage 02',
-    title: 'Structure & Roofing',
-    description: 'Galvanized Metal Roofing Sheets, Steel Roof Trusses, AAC Blocks and high-load hollow blocks.',
-    items: ['Tata Metal Sheets', 'Jindal Steel Trusses', 'Magicrete AAC Blocks', 'Waterproof Membrane'],
+    number: '02',
+    stage: 'Structure',
+    summary: 'Blocks • Roofing • Steel',
+    description: 'Galvanized metal roofing sheets, engineered steel trusses, precision AAC blocks, and heavy concrete masonry for load-bearing walls.',
+    items: ['Tata Galvanized Sheets', 'Jindal Steel Roof Trusses', 'Magicrete AAC Blocks', 'Dr. Fixit Waterproof Membrane', 'BlockTech Solid Blocks'],
     categorySlug: 'roofing',
+    image: 'https://images.unsplash.com/photo-1632759145351-1d58253ac564?q=80&w=1000&auto=format&fit=crop',
     icon: Layers,
-    bgClass: 'bg-[#162E4A]',
-    accentColor: 'text-amber-400',
-    borderClass: 'border-amber-400/30',
   },
   {
     id: 3,
-    stage: 'Stage 03',
-    title: 'Utilities & MEP',
-    description: 'Heavy duty Astral PVC pipes, CPVC fittings, Havells 2.5mm fire-resistant wires, and Legrand switches.',
-    items: ['Astral PVC Pipes', 'Ashirvad CPVC', 'Havells 2.5mm Wires', 'Schneider Panels'],
+    number: '03',
+    stage: 'Utilities',
+    summary: 'Plumbing • Electrical',
+    description: 'High-pressure PVC and CPVC pipes, fire-resistant multi-strand copper cables, circuit protection breakers, and heavy-duty conduits.',
+    items: ['Astral PVC Pipes', 'Ashirvad CPVC 1"', 'Havells 2.5mm Wire Coils', 'Legrand Modular Switches', 'Schneider DB Panels'],
     categorySlug: 'plumbing',
+    image: 'https://images.unsplash.com/photo-1607472586893-edb57cb3b4e1?q=80&w=1000&auto=format&fit=crop',
     icon: Droplets,
-    bgClass: 'bg-[#102337]',
-    accentColor: 'text-sky-400',
-    borderClass: 'border-sky-400/30',
   },
   {
     id: 4,
-    stage: 'Stage 04',
-    title: 'Finishing & Interiors',
-    description: 'Kajaria Vitrified Tiles, Asian Paints Royale Interior, Teak Wood Panel Doors, and Yale Digital Locks.',
-    items: ['Kajaria Vitrified Tiles', 'Asian Paints Royale', 'Teak Wood Doors', 'Yale Digital Locks'],
+    number: '04',
+    stage: 'Finishing',
+    summary: 'Tiles • Paint • Doors & Windows',
+    description: 'Vitrified porcelain floor tiles, premium low-VOC architectural coatings, teak veneer wood doors, and smart digital locking hardware.',
+    items: ['Kajaria Vitrified Tiles', 'Asian Paints Royale Luxury', 'StoneArt Italian Marble', 'Fenesta Aluminium Windows', 'Yale Digital Locks'],
     categorySlug: 'flooring',
+    image: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=1000&auto=format&fit=crop',
     icon: Sparkles,
-    bgClass: 'bg-[#1A365D]',
-    accentColor: 'text-accent-light',
-    borderClass: 'border-accent-light/30',
   },
   {
     id: 5,
-    stage: 'Stage 05',
-    title: 'Tools & Site Safety',
-    description: 'Bosch Impact Drills, Stanley Claw Hammers, Taparia Spirit Levels, and Karam certified safety helmets.',
-    items: ['Bosch Impact Drill', 'Stanley Measuring Tape', 'Karam Safety Helmets', 'Bata Safety Shoes'],
+    number: '05',
+    stage: 'Tools & Safety',
+    summary: 'Construction Tools • Safety Equipment',
+    description: 'Industrial impact drills, professional spirit levels, certified fall-protection gear, impact-resistant helmets, and puncture-proof boots.',
+    items: ['Bosch 13mm Impact Drill', 'Stanley 24" Spirit Level', 'Karam Certified Safety Helmet', 'Bata Heavy-Duty Safety Shoes', '3M Anti-Dust Goggles'],
     categorySlug: 'tools',
+    image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=1000&auto=format&fit=crop',
     icon: ShieldCheck,
-    bgClass: 'bg-[#1B3A5C]',
-    accentColor: 'text-accent',
-    borderClass: 'border-accent/40',
   },
 ];
 
 const ConstructionShowcase: React.FC = () => {
+  const [activeStageIndex, setActiveStageIndex] = useState(0);
+  const currentStage = stages[activeStageIndex];
+  const Icon = currentStage.icon;
+
+  const handlePrev = () => {
+    setActiveStageIndex((prev) => (prev === 0 ? stages.length - 1 : prev - 1));
+  };
+
+  const handleNext = () => {
+    setActiveStageIndex((prev) => (prev === stages.length - 1 ? 0 : prev + 1));
+  };
+
   return (
-    <section className="container-custom py-12 md:py-16">
-      <div className="text-center max-w-3xl mx-auto mb-10">
-        <div className="inline-block px-3.5 py-1 rounded-full bg-accent/10 border border-accent/30 text-accent font-semibold text-xs tracking-wider uppercase mb-3">
-          Construction Journey
+    <section className="py-16 md:py-24 bg-[#071D31] text-white relative overflow-hidden">
+      {/* Subtle blueprint accent decoration */}
+      <div 
+        className="absolute inset-0 opacity-5 pointer-events-none"
+        style={{
+          backgroundImage: 'radial-gradient(circle at 50% 50%, #E87A2D 1px, transparent 1px)',
+          backgroundSize: '32px 32px'
+        }}
+      />
+
+      <div className="container-custom relative z-10">
+        {/* Section Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 md:mb-12 gap-6">
+          <div>
+            <span className="text-xs sm:text-sm font-bold tracking-widest uppercase text-accent mb-2 block">
+              CONSTRUCTION JOURNEY
+            </span>
+            <ScrollReveal
+              baseOpacity={0.15}
+              baseRotation={0}
+              blurStrength={6}
+              as="h2"
+              containerClassName="mb-2"
+              textClassName="text-3xl sm:text-4xl lg:text-5xl font-extrabold font-heading text-white tracking-tight"
+            >
+              Build From Foundation to Finish
+            </ScrollReveal>
+            <p className="text-sm sm:text-base text-gray-300 max-w-2xl leading-relaxed mt-2">
+              Explore handpicked building materials and specialized tools organized by project phase.
+            </p>
+          </div>
+
+          {/* Carousel Arrows */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handlePrev}
+              aria-label="Previous stage"
+              className="p-3 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white transition-all hover-lift active:scale-95"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <button
+              onClick={handleNext}
+              aria-label="Next stage"
+              className="p-3 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white transition-all hover-lift active:scale-95"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
         </div>
-        <ScrollReveal
-          baseOpacity={0.15}
-          baseRotation={2}
-          blurStrength={6}
-          containerClassName="mb-3"
-          textClassName="text-3xl md:text-4xl font-heading font-bold text-primary"
-        >
-          Build From Foundation to Finish
-        </ScrollReveal>
-        <p className="text-gray-600 text-base md:text-lg">
-          Discover handpicked materials and tools matched to every phase of your construction project.
-        </p>
-      </div>
 
-      <div className="h-[480px] md:h-[520px] rounded-3xl overflow-hidden border border-gray-200 shadow-xl bg-surface-dark relative">
-        <ScrollStack
-          itemDistance={75}
-          itemScale={0.03}
-          itemStackDistance={24}
-          stackPosition="15%"
-          scaleEndPosition="8%"
-          baseScale={0.88}
-          useWindowScroll={false}
-          className="h-full"
-        >
-          {stages.map((stage) => {
-            const Icon = stage.icon;
+        {/* Stage Timeline Navigation Pills */}
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3 mb-8">
+          {stages.map((stage, idx) => {
+            const isActive = idx === activeStageIndex;
             return (
-              <ScrollStackItem
+              <button
                 key={stage.id}
-                itemClassName={`${stage.bgClass} text-white border ${stage.borderClass} flex flex-col justify-between`}
+                onClick={() => setActiveStageIndex(idx)}
+                className={`text-left p-3 sm:p-4 rounded-2xl transition-all duration-300 border ${
+                  isActive
+                    ? 'bg-white/15 border-accent text-white shadow-lg shadow-accent/15'
+                    : 'bg-white/5 border-white/5 text-gray-400 hover:bg-white/10 hover:text-gray-200'
+                }`}
               >
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                      <div className="p-2 rounded-xl bg-white/10 backdrop-blur-sm">
-                        <Icon className={`w-5 h-5 ${stage.accentColor}`} />
-                      </div>
-                      <span className={`text-xs font-bold uppercase tracking-wider ${stage.accentColor}`}>
-                        {stage.stage}
-                      </span>
-                    </div>
-                    <Link
-                      to={stage.categorySlug === 'tools' ? '/tools' : `/category/${stage.categorySlug}`}
-                      className="text-xs sm:text-sm font-semibold text-white/80 hover:text-white flex items-center gap-1.5 transition-colors group"
-                    >
-                      <span>Explore Products</span>
-                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </Link>
-                  </div>
-
-                  <h3 className="text-2xl sm:text-3xl font-heading font-bold text-white mb-2">
-                    {stage.title}
-                  </h3>
-                  <p className="text-sm sm:text-base text-gray-300 max-w-2xl leading-relaxed">
-                    {stage.description}
-                  </p>
+                <div className="flex items-center justify-between mb-1">
+                  <span className={`text-xs font-mono font-bold ${isActive ? 'text-accent' : 'text-gray-400'}`}>
+                    {stage.number}
+                  </span>
+                  {isActive && <span className="w-2 h-2 rounded-full bg-accent animate-ping" />}
                 </div>
+                <div className="text-sm sm:text-base font-bold text-white truncate">
+                  {stage.stage}
+                </div>
+                <div className="text-[11px] text-gray-400 truncate hidden sm:block mt-0.5">
+                  {stage.summary}
+                </div>
+              </button>
+            );
+          })}
+        </div>
 
-                <div className="pt-4 border-t border-white/10 flex flex-wrap gap-2">
-                  {stage.items.map((item, idx) => (
+        {/* Featured Active Stage Showcase Card (Large Editorial Presentation) */}
+        <div className="bg-[#0B2742] rounded-3xl overflow-hidden border border-white/10 shadow-2xl transition-all duration-500">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center p-6 sm:p-8 lg:p-12">
+            
+            {/* Left Image Column */}
+            <div className="lg:col-span-6 relative">
+              <div className="aspect-[4/3] rounded-2xl overflow-hidden border border-white/10 shadow-xl relative bg-primary-dark">
+                <img
+                  src={currentStage.image}
+                  alt={currentStage.stage}
+                  className="w-full h-full object-cover object-center transition-transform duration-700 hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0B2742]/80 via-transparent to-transparent" />
+                <div className="absolute bottom-4 left-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/15 text-xs text-white">
+                  <Icon className="w-3.5 h-3.5 text-accent" />
+                  <span className="font-semibold">{currentStage.summary}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Information Column */}
+            <div className="lg:col-span-6 flex flex-col justify-center">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/20 border border-accent/30 text-accent text-xs font-bold tracking-widest uppercase mb-3 w-fit">
+                STAGE {currentStage.number}
+              </div>
+
+              <h3 className="text-3xl sm:text-4xl font-extrabold font-heading text-white mb-3">
+                {currentStage.stage}
+              </h3>
+
+              <p className="text-base text-gray-300 leading-relaxed mb-6">
+                {currentStage.description}
+              </p>
+
+              {/* Verified Product Tags */}
+              <div className="mb-8">
+                <div className="text-xs uppercase font-bold tracking-wider text-gray-400 mb-3">
+                  Key Products in this Phase:
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {currentStage.items.map((item, idx) => (
                     <span
                       key={idx}
-                      className="text-xs px-3 py-1 rounded-full bg-white/10 text-gray-200 border border-white/10 backdrop-blur-sm"
+                      className="text-xs px-3 py-1.5 rounded-xl bg-white/10 text-gray-200 border border-white/10 backdrop-blur-sm"
                     >
                       {item}
                     </span>
                   ))}
                 </div>
-              </ScrollStackItem>
-            );
-          })}
-        </ScrollStack>
+              </div>
+
+              {/* Action Button */}
+              <div>
+                <Link
+                  to={currentStage.categorySlug === 'tools' ? '/tools' : `/category/${currentStage.categorySlug}`}
+                >
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    className="px-7 py-3.5 text-base shadow-xl shadow-accent/25 flex items-center gap-2 hover-lift"
+                  >
+                    <span>Explore {currentStage.stage} Materials</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
       </div>
     </section>
   );

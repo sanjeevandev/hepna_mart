@@ -1,0 +1,122 @@
+/* FoundationStory.css — Cinematic Scroll & Editorial Presentation */
+
+.foundation-story {
+  background: linear-gradient(180deg, #051424 0%, #071A2B 30%, #0B2742 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Blueprint Grid Background Pattern */
+.foundation-blueprint-grid {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(to right, rgba(232, 122, 45, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(42, 90, 140, 0.07) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(circle at 60% 50%, black 20%, transparent 80%);
+  -webkit-mask-image: radial-gradient(circle at 60% 50%, black 20%, transparent 80%);
+  pointer-events: none;
+  animation: blueprintDrift 28s ease-in-out infinite alternate;
+}
+
+@keyframes blueprintDrift {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    transform: translate(-15px, 10px) scale(1.02);
+  }
+}
+
+/* Text Animations */
+.foundation-headline {
+  opacity: 0;
+  transform: translateY(45px) scale(0.97);
+  filter: blur(10px);
+  transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+              filter 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.foundation-story.is-active .foundation-headline {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+}
+
+.foundation-hepna-text {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.25s,
+              transform 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.25s,
+              color 0.3s ease;
+}
+
+.foundation-story.is-active .foundation-hepna-text {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Orange Accent Line Animation */
+.foundation-orange-line {
+  width: 0px;
+  height: 3px;
+  background: #E87A2D;
+  border-radius: 9999px;
+  transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s;
+}
+
+.foundation-story.is-active .foundation-orange-line {
+  width: 70px;
+}
+
+/* Subtitle and value points */
+.foundation-copy {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.2s,
+              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
+}
+
+.foundation-story.is-active .foundation-copy {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Right Column Visual Composition */
+.foundation-visual-wrap {
+  opacity: 0;
+  transform: translateX(60px) scale(1.06);
+  filter: blur(8px);
+  transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.15s,
+              transform 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.15s,
+              filter 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.15s;
+}
+
+.foundation-story.is-active .foundation-visual-wrap {
+  opacity: 1;
+  transform: translateX(0) scale(1);
+  filter: blur(0);
+}
+
+/* Reduced Motion Override */
+@media (prefers-reduced-motion: reduce) {
+  .foundation-blueprint-grid {
+    animation: none !important;
+  }
+  .foundation-headline,
+  .foundation-hepna-text,
+  .foundation-copy,
+  .foundation-visual-wrap {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    transition: none !important;
+  }
+  .foundation-orange-line {
+    width: 70px !important;
+    transition: none !important;
+  }
+}

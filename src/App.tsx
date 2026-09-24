@@ -4,6 +4,7 @@ import Lenis from 'lenis';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
+import PageTransition from '@/components/ui/PageTransition';
 
 // Pages
 import HomePage from '@/pages/HomePage';
@@ -98,25 +99,27 @@ function App() {
         <Header />
 
         <main className="flex-grow">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/shop" element={<ShopPage />} />
-            <Route path="/categories" element={<CategoriesPage />} />
-            <Route path="/category/:slug" element={<CategoryProductsPage />} />
-            <Route path="/product/:slug" element={<ProductDetailsPage />} />
-            <Route path="/cart" element={<CartPage />} />
-            <Route path="/checkout" element={<CheckoutPage />} />
-            <Route path="/wishlist" element={<WishlistPage />} />
-            <Route path="/orders" element={<OrdersPage />} />
-            <Route path="/account" element={<AccountPage />} />
-            <Route path="/wholesale" element={<WholesalePage />} />
-            <Route path="/tools" element={<ConstructionToolsPage />} />
-            <Route path="/offers" element={<OffersPage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/contact" element={<ContactPage />} />
-            <Route path="/search" element={<SearchResultsPage />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <PageTransition>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/shop" element={<ShopPage />} />
+              <Route path="/categories" element={<CategoriesPage />} />
+              <Route path="/category/:slug" element={<CategoryProductsPage />} />
+              <Route path="/product/:slug" element={<ProductDetailsPage />} />
+              <Route path="/cart" element={<CartPage />} />
+              <Route path="/checkout" element={<CheckoutPage />} />
+              <Route path="/wishlist" element={<WishlistPage />} />
+              <Route path="/orders" element={<OrdersPage />} />
+              <Route path="/account" element={<AccountPage />} />
+              <Route path="/wholesale" element={<WholesalePage />} />
+              <Route path="/tools" element={<ConstructionToolsPage />} />
+              <Route path="/offers" element={<OffersPage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/contact" element={<ContactPage />} />
+              <Route path="/search" element={<SearchResultsPage />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </PageTransition>
         </main>
 
         <Footer />

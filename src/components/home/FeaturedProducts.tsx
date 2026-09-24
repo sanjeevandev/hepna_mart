@@ -3,32 +3,42 @@ import ProductGrid from '@/components/product/ProductGrid';
 import { products } from '@/data/products';
 import { Link } from 'react-router-dom';
 import Button from '@/components/ui/Button';
+import { ArrowRight } from 'lucide-react';
 
 const FeaturedProducts: React.FC = () => {
   const featured = products.filter(p => p.featured).slice(0, 8);
 
   return (
-    <section className="container-custom">
-      <ProductGrid 
-        products={featured} 
-        title="Featured Products" 
-        subtitle="Handpicked premium materials for your projects" 
-        columns={4}
-        action={
-          <Link to="/shop">
-            <Button variant="outline" size="sm" className="hidden sm:inline-flex">
-              View All Products →
+    <section className="py-14 md:py-20 bg-[#F7F9FB] border-y border-gray-100/80">
+      <div className="container-custom">
+        <ProductGrid 
+          products={featured}
+          eyebrow="FEATURED PRODUCTS"
+          title="Top Selling Construction Materials" 
+          subtitle="High quality products, trusted by professionals and homeowners alike." 
+          columns={4}
+          action={
+            <Link to="/shop" className="group">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="hidden sm:inline-flex items-center gap-1.5 border-primary/20 text-primary hover:bg-primary hover:text-white transition-all hover-lift"
+              >
+                <span>View All Products</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </Link>
+          }
+        />
+        
+        <div className="text-center pt-6 sm:hidden">
+          <Link to="/shop" className="block">
+            <Button variant="outline" size="md" className="w-full flex items-center justify-center gap-2">
+              <span>View All Products</span>
+              <ArrowRight className="w-4 h-4" />
             </Button>
           </Link>
-        }
-      />
-      
-      <div className="text-center pt-2 pb-6 sm:hidden">
-        <Link to="/shop">
-          <Button variant="outline" size="md" className="w-full">
-            View All Products →
-          </Button>
-        </Link>
+        </div>
       </div>
     </section>
   );

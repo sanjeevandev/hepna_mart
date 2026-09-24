@@ -4,7 +4,7 @@ import { Instagram, Facebook, Youtube, Linkedin, MapPin, Phone, Mail } from 'luc
 
 const Footer = () => {
   return (
-    <footer className="bg-primary text-gray-300">
+    <footer className="bg-[#041321] text-gray-300 border-t border-[#0B2742]">
       <div className="container-custom pt-12 pb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           

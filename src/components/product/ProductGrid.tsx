@@ -5,6 +5,7 @@ import { Product } from '@/types';
 
 export interface ProductGridProps {
   products: Product[];
+  eyebrow?: string;
   title?: string;
   subtitle?: string;
   columns?: 2 | 3 | 4;
@@ -16,6 +17,7 @@ export interface ProductGridProps {
 
 const ProductGrid: React.FC<ProductGridProps> = ({
   products,
+  eyebrow,
   title,
   subtitle,
   columns = 4,
@@ -32,6 +34,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
 
   return (
     <ProductSection
+      eyebrow={eyebrow}
       title={title}
       subtitle={subtitle}
       action={action}
@@ -40,7 +43,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
       withGlow={withGlow}
     >
       {products.length > 0 ? (
-        <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 ${colClasses[columns]} gap-6`}>
+        <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 ${colClasses[columns]} gap-5 sm:gap-6`}>
           {products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}

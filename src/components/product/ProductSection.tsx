@@ -3,6 +3,7 @@ import BorderGlow from '@/components/ui/BorderGlow';
 import ScrollReveal from '@/components/ui/ScrollReveal';
 
 export interface ProductSectionProps {
+  eyebrow?: string;
   title?: string;
   subtitle?: string;
   action?: ReactNode;
@@ -14,6 +15,7 @@ export interface ProductSectionProps {
 }
 
 const ProductSection: React.FC<ProductSectionProps> = ({
+  eyebrow,
   title,
   subtitle,
   action,
@@ -23,28 +25,38 @@ const ProductSection: React.FC<ProductSectionProps> = ({
   dark = false,
   withGlow = true,
 }) => {
-  const bg = backgroundColor || (dark ? '#0F2440' : '#FFFFFF');
-  const glowColor = dark ? '24 95 65' : '24 85 55';
+  const bg = backgroundColor || (dark ? '#071D31' : '#FFFFFF');
+  // Subdued, elegant construction orange & deep navy tones only (no neon)
+  const glowColor = dark ? '24 80 50' : '24 70 45';
 
   return (
-    <section className={`w-full py-4 ${className}`}>
-      {(title || subtitle || action) && (
-        <div className="mb-6 flex flex-col md:flex-row md:items-end md:justify-between gap-3">
+    <section className={`w-full ${className}`}>
+      {(eyebrow || title || subtitle || action) && (
+        <div className="mb-8 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
           <div>
+            {eyebrow && (
+              <span className="text-xs sm:text-sm font-bold tracking-widest uppercase text-accent mb-2 block">
+                {eyebrow}
+              </span>
+            )}
             {title && (
               <ScrollReveal
-                baseOpacity={0.2}
-                baseRotation={2}
+                baseOpacity={0.1}
+                baseRotation={0}
                 blurStrength={6}
                 as="h2"
                 containerClassName="mb-1"
-                textClassName={`text-2xl sm:text-3xl font-bold font-heading ${dark ? 'text-white' : 'text-primary'}`}
+                textClassName={`text-2xl sm:text-3xl lg:text-4xl font-extrabold font-heading tracking-tight ${
+                  dark ? 'text-white' : 'text-primary-dark'
+                }`}
               >
                 {title}
               </ScrollReveal>
             )}
             {subtitle && (
-              <p className={`text-sm sm:text-base mt-1 ${dark ? 'text-gray-300' : 'text-gray-500'}`}>
+              <p className={`text-sm sm:text-base mt-2 max-w-2xl leading-relaxed ${
+                dark ? 'text-gray-300' : 'text-gray-600'
+              }`}>
                 {subtitle}
               </p>
             )}
@@ -55,21 +67,21 @@ const ProductSection: React.FC<ProductSectionProps> = ({
 
       {withGlow ? (
         <BorderGlow
-          edgeSensitivity={28}
+          edgeSensitivity={20}
           glowColor={glowColor}
           backgroundColor={bg}
           borderRadius={24}
-          glowRadius={36}
-          glowIntensity={0.85}
-          coneSpread={30}
+          glowRadius={28}
+          glowIntensity={0.5}
+          coneSpread={24}
           animated={false}
-          colors={['#E87A2D', '#1B3A5C', '#F5A623', '#2A5A8C']}
-          className="p-5 sm:p-7 shadow-sm transition-all"
+          colors={['#E87A2D', '#1B3A5C', '#2A5A8C']}
+          className="p-4 sm:p-6 lg:p-8 shadow-sm transition-all rounded-3xl"
         >
           {children}
         </BorderGlow>
       ) : (
-        <div className={`p-5 sm:p-7 rounded-3xl ${dark ? 'bg-primary-dark text-white' : 'bg-white'} shadow-sm border border-gray-100`}>
+        <div className={`p-4 sm:p-6 lg:p-8 rounded-3xl ${dark ? 'bg-[#071D31] text-white' : 'bg-white'} shadow-sm border border-gray-100`}>
           {children}
         </div>
       )}

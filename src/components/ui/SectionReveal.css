@@ -1,0 +1,51 @@
+.section-reveal {
+  opacity: 0;
+  transform: translateY(32px) scale(0.98);
+  filter: blur(6px);
+  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+              filter 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform, filter;
+}
+
+.section-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+  will-change: auto;
+}
+
+/* Product variant: lighter on mobile and focused on smooth entry */
+.section-reveal--product {
+  transform: translateY(24px) scale(0.99);
+  filter: blur(4px);
+  transition-duration: 0.55s;
+}
+
+.section-reveal--product.is-visible {
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+}
+
+/* Hero & Compact variants */
+.section-reveal--hero {
+  transform: translateY(20px);
+  filter: blur(4px);
+  transition-duration: 0.7s;
+}
+
+.section-reveal--hero.is-visible {
+  transform: translateY(0);
+  filter: blur(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .section-reveal,
+  .section-reveal--product,
+  .section-reveal--hero {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    transition: none !important;
+  }
+}

@@ -1,0 +1,77 @@
+/* SectionMotion — Unified, Intentional Entrance Animations */
+.section-motion {
+  opacity: 0;
+  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+              filter 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform, filter;
+}
+
+/* Variant Up (Default) */
+.section-motion--up {
+  transform: translateY(42px) scale(0.985);
+  filter: blur(8px);
+}
+
+/* Variant Left */
+.section-motion--left {
+  transform: translateX(-45px);
+  filter: blur(6px);
+}
+
+/* Variant Right */
+.section-motion--right {
+  transform: translateX(45px);
+  filter: blur(6px);
+}
+
+/* Variant Scale */
+.section-motion--scale {
+  transform: scale(0.94);
+  filter: blur(6px);
+}
+
+/* Variant Fade */
+.section-motion--fade {
+  transform: translateY(16px);
+  filter: blur(8px);
+}
+
+/* Variant Product */
+.section-motion--product {
+  transform: translateY(24px) scale(0.99);
+  filter: blur(4px);
+  transition-duration: 0.55s;
+}
+
+/* Variant Hero */
+.section-motion--hero {
+  transform: translateY(20px);
+  filter: blur(4px);
+  transition-duration: 0.7s;
+}
+
+/* Triggered State: Natural, sharp, unblurred resting position */
+.section-motion.is-visible {
+  opacity: 1;
+  transform: translate(0, 0) scale(1);
+  filter: blur(0);
+  will-change: auto;
+}
+
+/* Accessibility: Immediate display when prefers-reduced-motion is active */
+@media (prefers-reduced-motion: reduce) {
+  .section-motion,
+  .section-motion--up,
+  .section-motion--left,
+  .section-motion--right,
+  .section-motion--scale,
+  .section-motion--fade,
+  .section-motion--product,
+  .section-motion--hero {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    transition: none !important;
+  }
+}
