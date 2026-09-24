@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Heart, ShoppingCart } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Heart, ShoppingCart, Zap, Truck, CheckSquare, Square } from 'lucide-react';
 import { Product } from '@/types';
 import { useCartStore } from '@/store/cartStore';
 import { useWishlistStore } from '@/store/wishlistStore';
+import { useCompareStore } from '@/store/compareStore';
 import toast from 'react-hot-toast';
 import Rating from '@/components/ui/Rating';
 import PriceDisplay from '@/components/ui/PriceDisplay';
@@ -16,17 +17,31 @@ interface ProductCardProps {
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+  const navigate = useNavigate();
   const { addToCart } = useCartStore();
   const { toggleWishlist, isWishlisted } = useWishlistStore();
+  const { toggleCompare, isInCompare } = useCompareStore();
+  
   const [quantity, setQuantity] = useState(1);
 
   const wishlisted = isWishlisted(product.id);
+  const compared = isInCompare(product.id);
+  const inStock = product.stock && product.stock > 0;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!inStock) return;
     addToCart(product, quantity);
-    toast.success(`${product.name} added to cart!`);
+    toast.success(`Added ${quantity} × ${product.name} to cart!`);
+  };
+
+  const handleBuyNow = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!inStock) return;
+    addToCart(product, quantity);
+    navigate('/checkout');
   };
 
   const handleWishlist = (e: React.MouseEvent) => {
@@ -36,8 +51,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     if (wishlisted) {
       toast.success('Removed from wishlist');
     } else {
-      toast.success('Added to wishlist');
+      toast.success('Saved to wishlist');
     }
+  };
+
+  const handleCompareToggle = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleCompare(product);
   };
 
   return (
@@ -69,34 +90,56 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             )}
           </div>
 
-          {/* Wishlist Button with Micro-Interaction */}
-          <button 
-            onClick={handleWishlist}
-            className="absolute top-3 right-3 p-2 rounded-full bg-white/95 shadow-md hover:bg-white hover:text-accent transition-all duration-200 z-10 active:scale-90"
-            aria-label="Toggle wishlist"
-          >
-            <Heart className={`w-4 h-4 ${wishlisted ? 'fill-accent text-accent' : 'text-gray-400 hover:text-accent'}`} />
-          </button>
+          {/* Quick Action Overlay (Wishlist & Compare) */}
+          <div className="absolute top-3 right-3 flex flex-col gap-1.5 z-10">
+            {/* Wishlist Button */}
+            <button 
+              onClick={handleWishlist}
+              className="p-2 rounded-full bg-white/95 shadow-md hover:bg-white hover:text-accent transition-all duration-200 active:scale-90"
+              aria-label="Toggle wishlist"
+              title={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+            >
+              <Heart className={`w-4 h-4 ${wishlisted ? 'fill-accent text-accent' : 'text-gray-400 hover:text-accent'}`} />
+            </button>
+          </div>
         </div>
 
         {/* Content Details */}
         <div className="p-4 sm:p-5 flex flex-col flex-grow">
-          {/* Metadata */}
+          {/* Brand & Stock Status */}
           <div className="flex items-center justify-between gap-2 mb-1.5">
-            <span className="text-[11px] text-gray-500 uppercase tracking-widest font-semibold">
+            <span className="text-[11px] text-gray-500 uppercase tracking-widest font-semibold truncate">
               {product.brand}
             </span>
-            {product.stock && product.stock < 20 && (
-              <span className="text-[10px] font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
-                Only {product.stock} left
+            {inStock ? (
+              product.stock < 20 ? (
+                <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full shrink-0">
+                  Only {product.stock} left
+                </span>
+              ) : (
+                <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full shrink-0">
+                  In Stock
+                </span>
+              )
+            ) : (
+              <span className="text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full shrink-0">
+                Out of Stock
               </span>
             )}
           </div>
 
           {/* Title */}
-          <h3 className="font-heading font-semibold text-primary-dark mb-2 line-clamp-2 min-h-[2.5rem] text-sm sm:text-base leading-snug group-hover:text-accent transition-colors duration-200">
+          <h3 className="font-heading font-semibold text-primary-dark mb-1.5 line-clamp-2 min-h-[2.5rem] text-sm sm:text-base leading-snug group-hover:text-accent transition-colors duration-200">
             {product.name}
           </h3>
+
+          {/* Site Delivery Badge */}
+          {product.deliveryAvailable && (
+            <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-600 mb-2">
+              <Truck className="w-3.5 h-3.5 text-accent shrink-0" />
+              <span>Site Delivery Available</span>
+            </div>
+          )}
           
           {/* Rating */}
           <div className="mb-3">
@@ -104,7 +147,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </div>
 
           {/* Pricing */}
-          <div className="mt-auto mb-4 pt-1">
+          <div className="mt-auto mb-3 pt-1">
             <PriceDisplay 
               price={product.price} 
               mrp={product.mrp} 
@@ -115,26 +158,55 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             />
           </div>
 
-          {/* Actions: Quantity Selector & Add Button */}
-          <div className="flex items-center gap-2 mt-auto" onClick={(e) => e.preventDefault()}>
-            <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
-              <QuantitySelector 
-                quantity={quantity} 
-                onQuantityChange={setQuantity} 
-                min={1} 
-                max={product.stock || 10} 
-                size="sm" 
-              />
+          {/* Compare Checkbox */}
+          <div 
+            className="flex items-center gap-2 mb-3 cursor-pointer select-none text-xs font-medium text-gray-600 hover:text-primary transition-colors"
+            onClick={handleCompareToggle}
+          >
+            {compared ? (
+              <CheckSquare className="w-4 h-4 text-accent" />
+            ) : (
+              <Square className="w-4 h-4 text-gray-400 hover:text-gray-600" />
+            )}
+            <span className={compared ? 'text-accent font-semibold' : ''}>
+              {compared ? 'Comparing' : 'Compare'}
+            </span>
+          </div>
+
+          {/* Actions: Quantity Selector, Add to Cart & Buy Now */}
+          <div className="space-y-2 mt-auto" onClick={(e) => e.preventDefault()}>
+            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+              <div className="shrink-0">
+                <QuantitySelector 
+                  quantity={quantity} 
+                  onQuantityChange={setQuantity} 
+                  min={1} 
+                  max={product.stock || 10} 
+                  size="sm" 
+                />
+              </div>
+              <Button 
+                variant="primary" 
+                className="flex-grow text-xs sm:text-sm py-2 px-3 transition-all duration-200 hover:brightness-110 active:scale-[0.98] shadow-sm hover:shadow-md"
+                onClick={handleAddToCart}
+                disabled={!inStock}
+                icon={<ShoppingCart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+              >
+                {inStock ? 'Add to Cart' : 'Out of Stock'}
+              </Button>
             </div>
-            <Button 
-              variant="primary" 
-              className="flex-grow text-xs sm:text-sm py-2 px-3 transition-all duration-200 hover:brightness-110 active:scale-[0.98] shadow-sm hover:shadow-md"
-              onClick={handleAddToCart}
-              disabled={!product.stock || product.stock === 0}
-              icon={<ShoppingCart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
-            >
-              {product.stock && product.stock > 0 ? 'Add' : 'Out of Stock'}
-            </Button>
+
+            {/* Buy Now Button */}
+            {inStock && (
+              <button
+                type="button"
+                onClick={handleBuyNow}
+                className="w-full py-1.5 px-3 rounded-lg border border-accent/30 bg-orange-50 hover:bg-orange-100/80 text-accent text-xs font-bold flex items-center justify-center gap-1.5 transition-colors active:scale-[0.98]"
+              >
+                <Zap className="w-3.5 h-3.5 fill-accent" />
+                <span>Buy Now</span>
+              </button>
+            )}
           </div>
         </div>
       </Link>
