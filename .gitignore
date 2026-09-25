@@ -28,3 +28,20 @@ npm-debug.log*
 .env
 .env.local
 .env.*.local
+
+# Python / Backend
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+backend/.venv/
+.venv/
+env/
+venv/
+ENV/
+*.egg-info/
+.pytest_cache/
+.coverage
+*.sqlite3
+
