@@ -1,0 +1,225 @@
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import { UserProfile, AccountType, UserRole, Permission } from '@/types';
+import { hasPermission as checkRolePermission } from '@/utils/rbac';
+import toast from 'react-hot-toast';
+
+/**
+ * =========================================================================
+ * TEMPORARY LOCAL DEVELOPMENT AUTHENTICATION ADAPTER
+ * =========================================================================
+ * IMPORTANT: This store is a local state adapter for frontend prototyping and RBAC simulation.
+ * No passwords, secret tokens, or payment data are stored.
+ * In Phase 2, this will be replaced with real backend authentication (JWT/OAuth2/Sessions).
+ */
+
+export const PRESET_DEV_USERS: UserProfile[] = [
+  {
+    id: 'usr-contractor-1',
+    name: 'John Doe',
+    email: 'john.doe@buildright.in',
+    phone: '+91 98765 43210',
+    accountType: 'contractor',
+    role: 'customer',
+    companyName: 'BuildRight Constructions',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120',
+    createdAt: new Date(Date.now() - 86400000 * 45).toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 'usr-business-1',
+    name: 'Priya Sharma',
+    email: 'priya.sharma@apexinfra.com',
+    phone: '+91 98112 34567',
+    accountType: 'business',
+    role: 'customer',
+    companyName: 'Apex Infrastructure Pvt Ltd',
+    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=120',
+    createdAt: new Date(Date.now() - 86400000 * 30).toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 'usr-individual-1',
+    name: 'Rahul Mehta',
+    email: 'rahul.mehta@gmail.com',
+    phone: '+91 98220 12345',
+    accountType: 'individual',
+    role: 'customer',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120',
+    createdAt: new Date(Date.now() - 86400000 * 15).toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 'usr-admin-super',
+    name: 'Amit Patel',
+    email: 'amit.patel@hepnamart.com',
+    phone: '+91 99000 11111',
+    accountType: 'business',
+    role: 'super_admin',
+    companyName: 'HEPNA MART HQ',
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120',
+    createdAt: new Date(Date.now() - 86400000 * 90).toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 'usr-admin-procurement',
+    name: 'Rajesh Kumar',
+    email: 'rajesh.k@hepnamart.com',
+    phone: '+91 99000 22222',
+    accountType: 'business',
+    role: 'procurement_manager',
+    companyName: 'HEPNA MART Procurement Division',
+    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=120',
+    createdAt: new Date(Date.now() - 86400000 * 60).toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 'usr-admin-inventory',
+    name: 'Sneha Joshi',
+    email: 'sneha.j@hepnamart.com',
+    phone: '+91 99000 33333',
+    accountType: 'business',
+    role: 'inventory_manager',
+    companyName: 'HEPNA MART Central Yard',
+    avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=120',
+    createdAt: new Date(Date.now() - 86400000 * 50).toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 'usr-admin-order',
+    name: 'Vikram Singh',
+    email: 'vikram.s@hepnamart.com',
+    phone: '+91 99000 44444',
+    accountType: 'business',
+    role: 'order_manager',
+    companyName: 'HEPNA MART Logistics Hub',
+    avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=120',
+    createdAt: new Date(Date.now() - 86400000 * 40).toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 'usr-admin-support',
+    name: 'Ananya Rao',
+    email: 'ananya.r@hepnamart.com',
+    phone: '+91 99000 55555',
+    accountType: 'business',
+    role: 'support_staff',
+    companyName: 'HEPNA MART Customer Care',
+    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=120',
+    createdAt: new Date(Date.now() - 86400000 * 30).toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+];
+
+interface AuthState {
+  currentUser: UserProfile | null;
+  isAuthenticated: boolean;
+
+  login: (email: string, role?: UserRole, accountType?: AccountType, name?: string) => void;
+  logout: () => void;
+  updateProfile: (updates: Partial<UserProfile>) => void;
+  setAccountType: (type: AccountType) => void;
+  setRole: (role: UserRole) => void;
+  switchDevUser: (userId: string) => void;
+  hasPermission: (permission: Permission) => boolean;
+}
+
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set, get) => ({
+      // Default initial state: Contractor customer (John Doe)
+      currentUser: PRESET_DEV_USERS[0],
+      isAuthenticated: true,
+
+      login: (email, role = 'customer', accountType = 'individual', name) => {
+        const existing = PRESET_DEV_USERS.find(
+          (u) => u.email.toLowerCase() === email.toLowerCase()
+        );
+
+        if (existing) {
+          set({ currentUser: existing, isAuthenticated: true });
+          toast.success(`Welcome back, ${existing.name}!`);
+          return;
+        }
+
+        const newUser: UserProfile = {
+          id: 'usr-' + Date.now(),
+          name: name || email.split('@')[0],
+          email,
+          phone: '+91 98765 00000',
+          accountType,
+          role,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+
+        set({ currentUser: newUser, isAuthenticated: true });
+        toast.success(`Signed in as ${newUser.name}`);
+      },
+
+      logout: () => {
+        set({ currentUser: null, isAuthenticated: false });
+        toast('Signed out successfully');
+      },
+
+      updateProfile: (updates) => {
+        const current = get().currentUser;
+        if (!current) return;
+
+        const updated: UserProfile = {
+          ...current,
+          ...updates,
+          updatedAt: new Date().toISOString(),
+        };
+
+        set({ currentUser: updated });
+        toast.success('Profile updated successfully');
+      },
+
+      setAccountType: (accountType) => {
+        const current = get().currentUser;
+        if (!current) return;
+
+        set({
+          currentUser: {
+            ...current,
+            accountType,
+            updatedAt: new Date().toISOString(),
+          },
+        });
+      },
+
+      setRole: (role) => {
+        const current = get().currentUser;
+        if (!current) return;
+
+        set({
+          currentUser: {
+            ...current,
+            role,
+            updatedAt: new Date().toISOString(),
+          },
+        });
+        toast.success(`Role switched to ${role.replace('_', ' ')}`);
+      },
+
+      switchDevUser: (userId) => {
+        const target = PRESET_DEV_USERS.find((u) => u.id === userId);
+        if (target) {
+          set({ currentUser: target, isAuthenticated: true });
+          toast.success(`Switched active user to "${target.name}" (${target.role})`, {
+            icon: '🔄',
+          });
+        }
+      },
+
+      hasPermission: (permission) => {
+        const role = get().currentUser?.role;
+        return checkRolePermission(role, permission);
+      },
+    }),
+    {
+      name: 'hepna-auth',
+    }
+  )
+);

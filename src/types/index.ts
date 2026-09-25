@@ -104,7 +104,141 @@ export interface Project {
   updatedAt: string;
   materials: ProjectMaterialItem[];
   completedStages: string[];
+  ownerUserId?: string;
+  businessId?: string;
+  memberIds?: string[];
 }
+
+// --- Account, RBAC & Organization Types ---
+
+export type AccountType = 'individual' | 'contractor' | 'business';
+
+export type UserRole =
+  | 'customer'
+  | 'super_admin'
+  | 'admin'
+  | 'procurement_manager'
+  | 'inventory_manager'
+  | 'order_manager'
+  | 'support_staff';
+
+export interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  accountType: AccountType;
+  role: UserRole;
+  avatar?: string;
+  companyName?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type ContractorSpecialization =
+  | 'Residential Construction'
+  | 'Commercial Construction'
+  | 'Renovation'
+  | 'Civil Works'
+  | 'Roofing'
+  | 'Plumbing'
+  | 'Electrical'
+  | 'Interior / Finishing'
+  | 'General Contractor';
+
+export interface ContractorProfile {
+  contractorId: string;
+  userId: string;
+  businessName: string;
+  specialization: ContractorSpecialization[];
+  yearsOfExperience: number;
+  serviceArea: string;
+  projectCount?: number;
+  preferredMaterials?: string[];
+  createdAt: string;
+}
+
+export interface BusinessProfile {
+  id: string;
+  userId: string;
+  businessName: string;
+  businessType: string;
+  gstin?: string;
+  pan?: string;
+  registeredAddress: string;
+  city: string;
+  state: string;
+  pincode: string;
+  contactPerson: string;
+  contactPhone: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type TeamMemberRole =
+  | 'Owner'
+  | 'Admin'
+  | 'Procurement Manager'
+  | 'Project Manager'
+  | 'Viewer';
+
+export interface TeamMember {
+  id: string;
+  businessId: string;
+  userId?: string;
+  name: string;
+  email: string;
+  role: TeamMemberRole;
+  status: 'active' | 'invited' | 'inactive';
+  joinedAt: string;
+}
+
+export interface ConstructionSite {
+  id: string;
+  userId: string;
+  projectId?: string;
+  siteName: string;
+  contactPerson: string;
+  contactPhone: string;
+  address: string;
+  landmark?: string;
+  city: string;
+  district?: string;
+  state: string;
+  pincode: string;
+  accessRoad?: string;
+  vehicleAccess?: string;
+  unloadingInstructions?: string;
+  isDefault?: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type Permission =
+  | 'dashboard.view'
+  | 'products.view'
+  | 'products.create'
+  | 'products.edit'
+  | 'products.delete'
+  | 'inventory.view'
+  | 'inventory.update'
+  | 'orders.view'
+  | 'orders.update'
+  | 'orders.cancel'
+  | 'customers.view'
+  | 'customers.edit'
+  | 'projects.view'
+  | 'projects.edit'
+  | 'boq.view'
+  | 'boq.edit'
+  | 'quotes.view'
+  | 'quotes.manage'
+  | 'suppliers.view'
+  | 'suppliers.manage'
+  | 'pricing.view'
+  | 'pricing.manage'
+  | 'reports.view'
+  | 'settings.manage';
 
 // --- Address & Delivery ---
 

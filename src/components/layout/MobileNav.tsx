@@ -1,7 +1,9 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { X, User, Heart, Package, Info, Phone, Store, Percent, PenTool, Users } from 'lucide-react';
+import { X, User, Heart, Package, Info, Phone, Store, Percent, PenTool, Users, ShieldCheck } from 'lucide-react';
 import { categories } from '@/data/categories';
+import { useAuthStore } from '@/store/authStore';
+import { isInternalStaff } from '@/utils/rbac';
 import { 
   Building2, Layers, Home, Droplets, Zap, 
   Grid3x3, DoorOpen, Paintbrush, Wrench, 
@@ -112,6 +114,17 @@ const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
                 <Heart className="h-5 w-5 text-primary" /> Wishlist
               </Link>
             </li>
+            {currentUser && isInternalStaff(currentUser.role) && (
+              <li>
+                <Link
+                  to="/admin"
+                  onClick={onClose}
+                  className="flex items-center gap-3 text-purple-700 font-bold bg-purple-50 px-2.5 py-1.5 rounded-lg border border-purple-200"
+                >
+                  <ShieldCheck className="h-5 w-5 text-purple-600" /> Staff Admin Portal
+                </Link>
+              </li>
+            )}
           </ul>
         </div>
 

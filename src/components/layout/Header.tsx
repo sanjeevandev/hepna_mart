@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Search, MapPin, User, Heart, ShoppingCart, Menu, X, HardHat, Calculator } from 'lucide-react';
+import { Search, MapPin, User, Heart, ShoppingCart, Menu, X, HardHat, Calculator, ShieldCheck } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 import { useWishlistStore } from '@/store/wishlistStore';
 import { useSearchStore } from '@/store/searchStore';
+import { useAuthStore } from '@/store/authStore';
+import { isInternalStaff } from '@/utils/rbac';
 import SearchBar from '../ui/SearchBar';
 import MobileNav from './MobileNav';
 import GooeyNav, { GooeyNavItem } from '../ui/GooeyNav';
@@ -22,6 +24,7 @@ const Header: React.FC = () => {
   const location = useLocation();
   const cartItemCount = useCartStore((state) => state.getItemCount());
   const wishlistItems = useWishlistStore((state) => state.items);
+  const currentUser = useAuthStore((state) => state.currentUser);
   
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -154,6 +157,17 @@ const Header: React.FC = () => {
                 <User className="h-4 w-4" />
                 <span className="hidden 2xl:block">Account</span>
               </Link>
+
+              {/* Admin Portal Link (Only for Staff Roles) */}
+              {currentUser && isInternalStaff(currentUser.role) && (
+                <Link
+                  to="/admin"
+                  className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 border border-purple-400/30 transition-colors text-xs font-bold"
+                >
+                  <ShieldCheck className="h-4 w-4 text-purple-300" />
+                  <span>Admin</span>
+                </Link>
+              )}
 
               {/* Wishlist Link */}
               <Link

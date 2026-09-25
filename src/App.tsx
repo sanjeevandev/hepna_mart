@@ -33,6 +33,24 @@ import CostCalculatorPage from '@/pages/CostCalculatorPage';
 import EstimatesPage from '@/pages/EstimatesPage';
 import EstimateDetailsPage from '@/pages/EstimateDetailsPage';
 
+import AccountSetupPage from '@/pages/AccountSetupPage';
+
+// Admin Architecture & Pages
+import AdminRoute from '@/components/admin/AdminRoute';
+import AdminLayout from '@/components/admin/AdminLayout';
+import AdminOverviewPage from '@/pages/admin/AdminOverviewPage';
+import AdminProductsPage from '@/pages/admin/AdminProductsPage';
+import AdminInventoryPage from '@/pages/admin/AdminInventoryPage';
+import AdminOrdersPage from '@/pages/admin/AdminOrdersPage';
+import AdminCustomersPage from '@/pages/admin/AdminCustomersPage';
+import AdminProjectsPage from '@/pages/admin/AdminProjectsPage';
+import AdminBOQsPage from '@/pages/admin/AdminBOQsPage';
+import AdminQuotesPage from '@/pages/admin/AdminQuotesPage';
+import AdminSuppliersPage from '@/pages/admin/AdminSuppliersPage';
+import AdminPricingPage from '@/pages/admin/AdminPricingPage';
+import AdminReportsPage from '@/pages/admin/AdminReportsPage';
+import AdminSettingsPage from '@/pages/admin/AdminSettingsPage';
+
 // Lenis smooth scroll and scroll restoration provider
 function SmoothScrollProvider({ children }: { children: React.ReactNode }) {
   const { pathname } = useLocation();
@@ -101,48 +119,182 @@ const NotFound: React.FC = () => (
   </div>
 );
 
+function AppContent() {
+  const { pathname } = useLocation();
+  const isAdminRoute = pathname.startsWith('/admin');
+
+  return (
+    <div className="flex flex-col min-h-screen">
+      {!isAdminRoute && <Header />}
+
+      <main className="flex-grow">
+        <PageTransition>
+          <Routes>
+            {/* Public Storefront & Customer Routes */}
+            <Route path="/" element={<HomePage />} />
+            <Route path="/shop" element={<ShopPage />} />
+            <Route path="/categories" element={<CategoriesPage />} />
+            <Route path="/category/:slug" element={<CategoryProductsPage />} />
+            <Route path="/product/:slug" element={<ProductDetailsPage />} />
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/wishlist" element={<WishlistPage />} />
+            <Route path="/orders" element={<OrdersPage />} />
+            <Route path="/orders/:orderId" element={<OrderDetailPage />} />
+            <Route path="/account/orders/:orderId" element={<OrderDetailPage />} />
+            <Route path="/account" element={<AccountPage />} />
+            <Route path="/account/setup" element={<AccountSetupPage />} />
+            <Route path="/wholesale" element={<WholesalePage />} />
+            <Route path="/tools" element={<ConstructionToolsPage />} />
+            <Route path="/offers" element={<OffersPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/search" element={<SearchResultsPage />} />
+            <Route path="/projects" element={<ProjectsDashboardPage />} />
+            <Route path="/projects/new" element={<CreateProjectPage />} />
+            <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
+            <Route path="/projects/:projectId/boq" element={<ProjectBOQPage />} />
+            <Route path="/calculator" element={<CostCalculatorPage />} />
+            <Route path="/estimates" element={<EstimatesPage />} />
+            <Route path="/estimates/:estimateId" element={<EstimateDetailsPage />} />
+
+            {/* Internal Admin Routes with RBAC Guard & Dedicated Admin Layout */}
+            <Route
+              path="/admin"
+              element={
+                <AdminRoute requiredPermission="dashboard.view">
+                  <AdminLayout>
+                    <AdminOverviewPage />
+                  </AdminLayout>
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin/products"
+              element={
+                <AdminRoute requiredPermission="products.view">
+                  <AdminLayout>
+                    <AdminProductsPage />
+                  </AdminLayout>
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin/inventory"
+              element={
+                <AdminRoute requiredPermission="inventory.view">
+                  <AdminLayout>
+                    <AdminInventoryPage />
+                  </AdminLayout>
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin/orders"
+              element={
+                <AdminRoute requiredPermission="orders.view">
+                  <AdminLayout>
+                    <AdminOrdersPage />
+                  </AdminLayout>
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin/customers"
+              element={
+                <AdminRoute requiredPermission="customers.view">
+                  <AdminLayout>
+                    <AdminCustomersPage />
+                  </AdminLayout>
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin/projects"
+              element={
+                <AdminRoute requiredPermission="projects.view">
+                  <AdminLayout>
+                    <AdminProjectsPage />
+                  </AdminLayout>
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin/boqs"
+              element={
+                <AdminRoute requiredPermission="boq.view">
+                  <AdminLayout>
+                    <AdminBOQsPage />
+                  </AdminLayout>
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin/quotes"
+              element={
+                <AdminRoute requiredPermission="quotes.view">
+                  <AdminLayout>
+                    <AdminQuotesPage />
+                  </AdminLayout>
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin/suppliers"
+              element={
+                <AdminRoute requiredPermission="suppliers.view">
+                  <AdminLayout>
+                    <AdminSuppliersPage />
+                  </AdminLayout>
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin/pricing"
+              element={
+                <AdminRoute requiredPermission="pricing.view">
+                  <AdminLayout>
+                    <AdminPricingPage />
+                  </AdminLayout>
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin/reports"
+              element={
+                <AdminRoute requiredPermission="reports.view">
+                  <AdminLayout>
+                    <AdminReportsPage />
+                  </AdminLayout>
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin/settings"
+              element={
+                <AdminRoute requiredPermission="settings.manage">
+                  <AdminLayout>
+                    <AdminSettingsPage />
+                  </AdminLayout>
+                </AdminRoute>
+              }
+            />
+
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </PageTransition>
+      </main>
+
+      {!isAdminRoute && <Footer />}
+      {!isAdminRoute && <ProductCompareBar />}
+    </div>
+  );
+}
+
 function App() {
   return (
     <SmoothScrollProvider>
-      <div className="flex flex-col min-h-screen">
-        <Header />
-
-        <main className="flex-grow">
-          <PageTransition>
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/shop" element={<ShopPage />} />
-              <Route path="/categories" element={<CategoriesPage />} />
-              <Route path="/category/:slug" element={<CategoryProductsPage />} />
-              <Route path="/product/:slug" element={<ProductDetailsPage />} />
-              <Route path="/cart" element={<CartPage />} />
-              <Route path="/checkout" element={<CheckoutPage />} />
-              <Route path="/wishlist" element={<WishlistPage />} />
-              <Route path="/orders" element={<OrdersPage />} />
-              <Route path="/orders/:orderId" element={<OrderDetailPage />} />
-              <Route path="/account/orders/:orderId" element={<OrderDetailPage />} />
-              <Route path="/account" element={<AccountPage />} />
-              <Route path="/wholesale" element={<WholesalePage />} />
-              <Route path="/tools" element={<ConstructionToolsPage />} />
-              <Route path="/offers" element={<OffersPage />} />
-              <Route path="/about" element={<AboutPage />} />
-              <Route path="/contact" element={<ContactPage />} />
-              <Route path="/search" element={<SearchResultsPage />} />
-              <Route path="/projects" element={<ProjectsDashboardPage />} />
-              <Route path="/projects/new" element={<CreateProjectPage />} />
-              <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
-              <Route path="/projects/:projectId/boq" element={<ProjectBOQPage />} />
-              <Route path="/calculator" element={<CostCalculatorPage />} />
-              <Route path="/estimates" element={<EstimatesPage />} />
-              <Route path="/estimates/:estimateId" element={<EstimateDetailsPage />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </PageTransition>
-        </main>
-
-        <Footer />
-        <ProductCompareBar />
-      </div>
+      <AppContent />
     </SmoothScrollProvider>
   );
 }
