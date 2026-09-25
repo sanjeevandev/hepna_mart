@@ -40,11 +40,13 @@ import AdminRoute from '@/components/admin/AdminRoute';
 import AdminLayout from '@/components/admin/AdminLayout';
 import AdminOverviewPage from '@/pages/admin/AdminOverviewPage';
 import AdminProductsPage from '@/pages/admin/AdminProductsPage';
+import AdminCategoriesPage from '@/pages/admin/AdminCategoriesPage';
 import AdminInventoryPage from '@/pages/admin/AdminInventoryPage';
 import AdminOrdersPage from '@/pages/admin/AdminOrdersPage';
 import AdminCustomersPage from '@/pages/admin/AdminCustomersPage';
 import AdminProjectsPage from '@/pages/admin/AdminProjectsPage';
 import AdminBOQsPage from '@/pages/admin/AdminBOQsPage';
+import AdminEstimatesPage from '@/pages/admin/AdminEstimatesPage';
 import AdminQuotesPage from '@/pages/admin/AdminQuotesPage';
 import AdminSuppliersPage from '@/pages/admin/AdminSuppliersPage';
 import AdminPricingPage from '@/pages/admin/AdminPricingPage';
@@ -180,6 +182,16 @@ function AppContent() {
               }
             />
             <Route
+              path="/admin/categories"
+              element={
+                <AdminRoute requiredPermission="categories.view">
+                  <AdminLayout>
+                    <AdminCategoriesPage />
+                  </AdminLayout>
+                </AdminRoute>
+              }
+            />
+            <Route
               path="/admin/inventory"
               element={
                 <AdminRoute requiredPermission="inventory.view">
@@ -225,6 +237,16 @@ function AppContent() {
                 <AdminRoute requiredPermission="boq.view">
                   <AdminLayout>
                     <AdminBOQsPage />
+                  </AdminLayout>
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin/estimates"
+              element={
+                <AdminRoute requiredPermission="estimates.view">
+                  <AdminLayout>
+                    <AdminEstimatesPage />
                   </AdminLayout>
                 </AdminRoute>
               }
