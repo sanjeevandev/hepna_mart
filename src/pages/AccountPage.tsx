@@ -163,7 +163,7 @@ const AccountPage: React.FC = () => {
                     </label>
                   </div>
                   <div className="pt-4">
-                    <Button variant="outline" className="text-danger border-danger hover:bg-danger hover:text-white">
+                    <Button variant="outline-danger">
                       Delete Account
                     </Button>
                   </div>

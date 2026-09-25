@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Search, MapPin, User, Heart, ShoppingCart, Menu, X } from 'lucide-react';
+import { Search, MapPin, User, Heart, ShoppingCart, Menu, X, HardHat, Calculator } from 'lucide-react';
 import { useCartStore } from '@/store/cartStore';
 import { useWishlistStore } from '@/store/wishlistStore';
 import { useSearchStore } from '@/store/searchStore';
@@ -127,6 +127,24 @@ const Header: React.FC = () => {
                 <MapPin className="h-4 w-4 text-accent" />
                 <span>Deliver to Site</span>
               </button>
+
+              {/* Cost Calculator Link */}
+              <Link
+                to="/calculator"
+                className="hidden xl:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors text-xs font-semibold"
+              >
+                <Calculator className="h-4 w-4 text-accent" />
+                <span>Calculator</span>
+              </Link>
+
+              {/* Projects / BOQ Link */}
+              <Link
+                to="/projects"
+                className="hidden xl:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors text-xs font-semibold"
+              >
+                <HardHat className="h-4 w-4 text-accent" />
+                <span>Projects</span>
+              </Link>
 
               {/* Account Link */}
               <Link

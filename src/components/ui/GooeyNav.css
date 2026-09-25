@@ -37,136 +37,35 @@
   isolation: isolate;
 }
 
-.gooey-nav-container nav {
-  display: flex;
-  position: relative;
-  transform: translate3d(0, 0, 0.01px);
-}
-
-.gooey-nav-container nav ul {
-  display: flex;
-  gap: 0.5rem;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  position: relative;
-  z-index: 3;
-  color: white;
-}
-
-.gooey-nav-container nav ul li {
-  border-radius: 9999px;
-  position: relative;
-  cursor: pointer;
-  transition:
-    background-color 0.25s ease,
-    color 0.25s ease;
-  color: rgba(255, 255, 255, 0.85);
-}
-
-.gooey-nav-container nav ul li a {
-  display: inline-block;
-  padding: 0.4rem 0.9rem;
-  text-decoration: none;
-  font-weight: 500;
-  font-size: 0.875rem;
-  white-space: nowrap;
-  transition: color 0.2s ease;
-}
-
-.gooey-nav-container nav ul li:hover a {
-  color: #FFFFFF;
-}
-
-.gooey-nav-container nav ul li:focus-within:has(:focus-visible) {
-  box-shadow: 0 0 0 2px #E87A2D;
-}
-
-/* Background Pill on Active Item */
-.gooey-nav-container nav ul li::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 9999px;
-  background: #FFFFFF;
-  opacity: 0;
-  transform: scale(0.92);
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
-              opacity 0.25s ease;
-  z-index: -1;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
-}
-
-.gooey-nav-container nav ul li.active {
-  color: #071A2B;
-  font-weight: 600;
-}
-
-.gooey-nav-container nav ul li.active a {
-  color: #071A2B;
-}
-
-.gooey-nav-container nav ul li.active::after {
-  opacity: 1;
-  transform: scale(1);
-}
-
-/* Morphing Effect Elements */
-.gooey-nav-container .effect {
+/* ==================================================
+   LAYER 1: Animated Morphing White Pill & Particles
+   Positioned BEHIND the text (z-index: 1)
+   ================================================== */
+.gooey-nav-container .effect.filter {
   position: absolute;
   left: 0;
   top: 0;
   width: 0;
   height: 0;
-  opacity: 1;
+  z-index: 1;
   pointer-events: none;
-  display: grid;
-  place-items: center;
-  z-index: 2;
-}
-
-.gooey-nav-container .effect.text {
-  color: transparent;
-  pointer-events: none;
-  font-size: 0.875rem;
-  font-weight: 600;
-  opacity: 0;
-}
-
-/* SVG Gooey Filter Container — NO BLACK BACKGROUND, NO BLEND MODE BUGS */
-.gooey-nav-container .effect.filter {
   filter: url(#gooey-nav-filter);
   -webkit-filter: url(#gooey-nav-filter);
-  background: transparent !important;
+  transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              top 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              width 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              height 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Explicitly disable the legacy black pseudo-element */
-.gooey-nav-container .effect.filter::before {
-  content: none !important;
-  display: none !important;
-  background: transparent !important;
-}
-
+/* The White Active Pill */
 .gooey-nav-container .effect.filter::after {
   content: '';
   position: absolute;
   inset: 0;
   background: #FFFFFF;
-  transform: scale(0);
-  opacity: 0;
-  z-index: -1;
   border-radius: 9999px;
-}
-
-.gooey-nav-container .effect.active::after {
-  animation: gooeyPill 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-@keyframes gooeyPill {
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  z-index: 1;
 }
 
 /* Particles for Gooey Morphing */
@@ -174,24 +73,24 @@
 .point {
   display: block;
   opacity: 0;
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   border-radius: 100%;
   transform-origin: center;
 }
 
 .particle {
-  --time: 4s;
+  --time: 3s;
   position: absolute;
-  top: calc(50% - 8px);
-  left: calc(50% - 8px);
-  animation: particle calc(var(--time)) ease 1 -350ms;
+  top: calc(50% - 7px);
+  left: calc(50% - 7px);
+  animation: particle calc(var(--time)) ease 1 -300ms;
 }
 
 .point {
   background: var(--color);
   opacity: 1;
-  animation: point calc(var(--time)) ease 1 -350ms;
+  animation: point calc(var(--time)) ease 1 -300ms;
 }
 
 @keyframes particle {
@@ -250,15 +149,79 @@
   }
 }
 
+/* ==================================================
+   LAYER 2: Navigation Links & Text
+   Positioned ABOVE the active pill (z-index: 2)
+   ================================================== */
+.gooey-nav-container nav {
+  display: flex;
+  position: relative;
+  z-index: 2;
+}
+
+.gooey-nav-container nav ul {
+  display: flex;
+  gap: 0.25rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  position: relative;
+  z-index: 2;
+}
+
+.gooey-nav-container nav ul li {
+  position: relative;
+  z-index: 2;
+  border-radius: 9999px;
+  cursor: pointer;
+}
+
+/* Navigation Link Label */
+.gooey-nav-container nav ul li a,
+.gooey-nav-label {
+  position: relative;
+  z-index: 2;
+  display: inline-block;
+  padding: 0.45rem 1rem;
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.82);
+  transition: color 0.2s ease, font-weight 0.2s ease;
+  user-select: none;
+}
+
+/* Hover state on inactive item */
+.gooey-nav-container nav ul li:hover a {
+  color: #FFFFFF;
+}
+
+/* Focus visible state */
+.gooey-nav-container nav ul li:focus-within:has(:focus-visible) {
+  box-shadow: 0 0 0 2px #E87A2D;
+}
+
+/* ACTIVE ITEM: Dark Navy Text above the White Pill */
+.gooey-nav-container nav ul li.active a,
+.gooey-nav-container nav ul li.active .gooey-nav-label {
+  color: #071A2B !important;
+  font-weight: 700;
+}
+
+.gooey-nav-container nav ul li.active:hover a,
+.gooey-nav-container nav ul li.active:hover .gooey-nav-label {
+  color: #071A2B !important;
+}
+
+/* Accessibility: Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .particle,
   .point {
     animation: none !important;
     display: none !important;
   }
-  .gooey-nav-container .effect.active::after {
-    animation: none !important;
-    transform: scale(1) !important;
-    opacity: 1 !important;
+  .gooey-nav-container .effect.filter {
+    transition: none !important;
   }
 }

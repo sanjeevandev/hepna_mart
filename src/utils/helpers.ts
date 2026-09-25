@@ -1,4 +1,4 @@
-import { Product, SearchFilters, SortOption } from '@/types';
+import { Product, SearchFilters } from '@/types';
 
 export function generateSlug(name: string): string {
   return name
@@ -7,92 +7,127 @@ export function generateSlug(name: string): string {
     .replace(/(^-|-$)+/g, '');
 }
 
-export function filterProducts(products: Product[], filters: SearchFilters, query?: string): Product[] {
-  let filtered = [...products];
+export function filterProducts(
+  products: Product[] = [],
+  filtersOrQuery?: SearchFilters | string,
+  queryOrFilters?: string | SearchFilters
+): Product[] {
+  let productsList = Array.isArray(products) ? [...products] : [];
 
-  if (query) {
-    const lowerQuery = query.toLowerCase();
-    filtered = filtered.filter(
+  let query: string = '';
+  let filters: SearchFilters = {};
+
+  if (typeof filtersOrQuery === 'string') {
+    query = filtersOrQuery;
+  } else if (filtersOrQuery && typeof filtersOrQuery === 'object') {
+    filters = filtersOrQuery;
+  }
+
+  if (typeof queryOrFilters === 'string') {
+    query = queryOrFilters;
+  } else if (queryOrFilters && typeof queryOrFilters === 'object') {
+    filters = queryOrFilters;
+  }
+
+  // Filter by text search query
+  if (query && typeof query === 'string' && query.trim()) {
+    const lowerQuery = query.toLowerCase().trim();
+    productsList = productsList.filter(
       (p) =>
-        p.name.toLowerCase().includes(lowerQuery) ||
-        p.brand.toLowerCase().includes(lowerQuery) ||
-        p.category.toLowerCase().includes(lowerQuery) ||
-        p.description.toLowerCase().includes(lowerQuery)
+        p.name?.toLowerCase().includes(lowerQuery) ||
+        p.brand?.toLowerCase().includes(lowerQuery) ||
+        p.category?.toLowerCase().includes(lowerQuery) ||
+        p.subcategory?.toLowerCase().includes(lowerQuery) ||
+        p.description?.toLowerCase().includes(lowerQuery) ||
+        (p.specifications &&
+          Object.values(p.specifications).some((val) =>
+            val.toLowerCase().includes(lowerQuery)
+          ))
     );
   }
 
+  // Filter by category
   if (filters.category) {
-    filtered = filtered.filter((p) => p.category === filters.category);
+    productsList = productsList.filter((p) => p.category === filters.category);
   }
 
-  if (filters.brand && filters.brand.length > 0) {
-    filtered = filtered.filter((p) => filters.brand!.includes(p.brand));
+  // Filter by brand
+  if (filters.brand) {
+    productsList = productsList.filter((p) => p.brand === filters.brand);
   }
 
-  if (filters.priceRange) {
-    filtered = filtered.filter(
+  // Filter by price range
+  if (filters.priceRange && Array.isArray(filters.priceRange) && filters.priceRange.length === 2) {
+    productsList = productsList.filter(
       (p) => p.price >= filters.priceRange![0] && p.price <= filters.priceRange![1]
     );
   }
 
+  // Filter by rating
   if (filters.rating) {
-    filtered = filtered.filter((p) => p.rating >= filters.rating!);
+    productsList = productsList.filter((p) => (p.rating || 0) >= filters.rating!);
   }
 
+  // Filter by stock
   if (filters.inStock) {
-    filtered = filtered.filter((p) => p.stock > 0);
+    productsList = productsList.filter((p) => (p.stock || 0) > 0);
   }
 
+  // Filter by wholesale / bulk availability
   if (filters.wholesale) {
-    filtered = filtered.filter((p) => p.bulkPrice !== undefined);
+    productsList = productsList.filter((p) => p.bulkPrice !== undefined);
   }
 
+  // Sorting
   if (filters.sortBy) {
     switch (filters.sortBy) {
-      case 'price-asc':
-        filtered.sort((a, b) => a.price - b.price);
+      case 'price-low':
+        productsList.sort((a, b) => a.price - b.price);
         break;
-      case 'price-desc':
-        filtered.sort((a, b) => b.price - a.price);
+      case 'price-high':
+        productsList.sort((a, b) => b.price - a.price);
         break;
-      case 'rating-desc':
-        filtered.sort((a, b) => b.rating - a.rating);
+      case 'rating':
+        productsList.sort((a, b) => (b.rating || 0) - (a.rating || 0));
         break;
       case 'newest':
-        filtered.sort((a, b) => (a.newArrival === b.newArrival ? 0 : a.newArrival ? -1 : 1));
+        productsList.sort((a, b) => (a.newArrival === b.newArrival ? 0 : a.newArrival ? -1 : 1));
         break;
-      case 'popularity':
-        filtered.sort((a, b) => b.reviews - a.reviews);
+      case 'discount':
+        productsList.sort((a, b) => (b.discount || 0) - (a.discount || 0));
         break;
+      case 'relevance':
       default:
+        productsList.sort((a, b) => (b.reviews || 0) - (a.reviews || 0));
         break;
     }
   }
 
-  return filtered;
+  return productsList;
 }
 
-export function getProductsByCategory(products: Product[], categorySlug: string): Product[] {
-  return products.filter((p) => p.category === categorySlug);
+export function getProductsByCategory(products: Product[] = [], categorySlug: string): Product[] {
+  return (products || []).filter((p) => p.category === categorySlug);
 }
 
-export function getRelatedProducts(products: Product[], product: Product, limit: number = 4): Product[] {
-  return products
+export function getRelatedProducts(products: Product[] = [], product: Product, limit: number = 4): Product[] {
+  if (!product) return [];
+  return (products || [])
     .filter((p) => p.category === product.category && p.id !== product.id)
     .slice(0, limit);
 }
 
 export function calculateDiscount(mrp: number, price: number): number {
-  if (mrp <= price) return 0;
+  if (!mrp || mrp <= price) return 0;
   return Math.round(((mrp - price) / mrp) * 100);
 }
 
-export function getBrands(products: Product[]): string[] {
-  const brands = new Set(products.map((p) => p.brand));
+export function getBrands(products: Product[] = []): string[] {
+  const brands = new Set((products || []).map((p) => p.brand).filter(Boolean));
   return Array.from(brands).sort();
 }
 
-export function getCategories(products: Product[]): string[] {
-  const categories = new Set(products.map((p) => p.category));
-  return Array.from(categories).sort();
+export function getCategories(products: Product[] = []): string[] {
+  const cats = new Set((products || []).map((p) => p.category).filter(Boolean));
+  return Array.from(cats).sort();
 }

@@ -48,7 +48,11 @@ const SearchResultsPage: React.FC = () => {
         {/* Sidebar Filters */}
         <aside className={`w-full md:w-1/4 ${showMobileFilters ? 'block' : 'hidden md:block'}`}>
           <div className="sticky top-24">
-            <ProductFilters />
+            <ProductFilters
+              products={products}
+              currentFilters={filters}
+              onFilterChange={useSearchStore.getState().setFilters}
+            />
           </div>
         </aside>
 

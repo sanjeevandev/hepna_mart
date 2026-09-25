@@ -13,14 +13,16 @@ import PriceDisplay from '@/components/ui/PriceDisplay';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 import QuantitySelector from '@/components/ui/QuantitySelector';
-import { ChevronRight, Heart, ShoppingCart, Truck, Shield, Layers, Check, Zap } from 'lucide-react';
+import { ChevronRight, Heart, ShoppingCart, Truck, Shield, Layers, Check, Zap, FolderPlus } from 'lucide-react';
 import toast from 'react-hot-toast';
+import AddToProjectModal from '@/components/project/AddToProjectModal';
 
 const ProductDetailsPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<'desc' | 'specs' | 'features' | 'reviews'>('desc');
+  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
   
   const addToCart = useCartStore((state) => state.addToCart);
   const { toggleWishlist, isWishlisted } = useWishlistStore();
@@ -148,35 +150,44 @@ const ProductDetailsPage: React.FC = () => {
                       <ShoppingCart size={18} />
                       <span>Add to Cart</span>
                     </Button>
-                    <Button 
-                      className="flex-1 flex items-center justify-center gap-2 py-3 bg-orange-500 hover:bg-orange-600 text-white" 
+                    <button 
+                      type="button"
+                      className="flex-1 flex items-center justify-center gap-2 py-3 rounded-lg border border-accent/40 bg-orange-50 hover:bg-orange-100 text-accent font-bold text-sm sm:text-base transition-colors active:scale-[0.98] select-none" 
                       onClick={handleBuyNow}
                     >
-                      <Zap size={18} />
+                      <Zap size={18} className="fill-accent" />
                       <span>Buy Now</span>
-                    </Button>
+                    </button>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-2.5">
                   <button 
                     onClick={handleToggleWishlist}
-                    className={`flex-1 py-2.5 px-4 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 transition-colors ${
+                    className={`flex-1 min-w-[120px] py-2.5 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-colors ${
                       wishlisted ? 'border-accent text-accent bg-accent/5' : 'border-gray-200 text-gray-700 hover:border-gray-400 bg-white'
                     }`}
                   >
-                    <Heart size={16} className={wishlisted ? 'fill-accent text-accent' : ''} />
-                    <span>{wishlisted ? 'In Wishlist' : 'Add to Wishlist'}</span>
+                    <Heart size={15} className={wishlisted ? 'fill-accent text-accent' : ''} />
+                    <span>{wishlisted ? 'Wishlisted' : 'Wishlist'}</span>
                   </button>
 
                   <button 
                     onClick={() => toggleCompare(product)}
-                    className={`flex-1 py-2.5 px-4 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 transition-colors ${
+                    className={`flex-1 min-w-[120px] py-2.5 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-colors ${
                       compared ? 'border-accent text-accent bg-accent/5' : 'border-gray-200 text-gray-700 hover:border-gray-400 bg-white'
                     }`}
                   >
-                    <Layers size={16} />
-                    <span>{compared ? 'In Compare List' : 'Compare Specs'}</span>
+                    <Layers size={15} />
+                    <span>{compared ? 'Comparing' : 'Compare'}</span>
+                  </button>
+
+                  <button 
+                    onClick={() => setIsProjectModalOpen(true)}
+                    className="flex-1 min-w-[120px] py-2.5 px-3 rounded-xl border border-accent/40 bg-orange-50/60 hover:bg-orange-100 text-accent text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+                  >
+                    <FolderPlus size={15} />
+                    <span>+ Add to Project</span>
                   </button>
                 </div>
               </div>
@@ -185,6 +196,13 @@ const ProductDetailsPage: React.FC = () => {
                 This item is currently out of stock. Contact our bulk desk for incoming batch allocation.
               </div>
             )}
+
+            {/* Add To Project Modal */}
+            <AddToProjectModal
+              product={product}
+              isOpen={isProjectModalOpen}
+              onClose={() => setIsProjectModalOpen(false)}
+            />
 
             {/* Delivery & Assurance info */}
             <div className="border-t border-gray-100 pt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">

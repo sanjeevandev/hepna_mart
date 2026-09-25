@@ -55,13 +55,13 @@ const Footer = () => {
           <div>
             <h3 className="text-white font-heading font-semibold text-lg mb-4">Shop</h3>
             <ul className="space-y-3 text-sm">
-              <li><Link to="/category/cement" className="hover:text-accent transition-colors">Cement & Mixes</Link></li>
+              <li><Link to="/category/cement-concrete" className="hover:text-accent transition-colors">Cement & Mixes</Link></li>
               <li><Link to="/category/bricks-blocks" className="hover:text-accent transition-colors">Bricks & Blocks</Link></li>
               <li><Link to="/category/roofing" className="hover:text-accent transition-colors">Roofing Materials</Link></li>
               <li><Link to="/category/plumbing" className="hover:text-accent transition-colors">Plumbing & Pipes</Link></li>
               <li><Link to="/category/electrical" className="hover:text-accent transition-colors">Electrical</Link></li>
               <li><Link to="/category/flooring" className="hover:text-accent transition-colors">Flooring & Tiles</Link></li>
-              <li><Link to="/category/tools" className="hover:text-accent transition-colors">Tools & Equipment</Link></li>
+              <li><Link to="/category/construction-tools" className="hover:text-accent transition-colors">Tools & Equipment</Link></li>
             </ul>
           </div>
 
@@ -73,6 +73,8 @@ const Footer = () => {
               <li><Link to="#" className="hover:text-accent transition-colors">Returns & Refunds</Link></li>
               <li><Link to="#" className="hover:text-accent transition-colors">Payment Methods</Link></li>
               <li><Link to="/orders" className="hover:text-accent transition-colors">Order Tracking</Link></li>
+              <li><Link to="/calculator" className="hover:text-accent transition-colors">Cost Calculator</Link></li>
+              <li><Link to="/projects" className="hover:text-accent transition-colors">Project Builder & BOQ</Link></li>
               <li><Link to="/wholesale" className="hover:text-accent transition-colors">Bulk Orders</Link></li>
               <li><Link to="#" className="hover:text-accent transition-colors">FAQ</Link></li>
             </ul>

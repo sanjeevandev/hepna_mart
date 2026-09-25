@@ -125,7 +125,7 @@ const FoundationStory: React.FC = () => {
                   </Button>
                 </Link>
                 <Link to="/wholesale">
-                  <Button variant="outline" size="lg" className="px-7 py-3 text-base border-white/30 text-white hover:bg-white hover:text-primary-dark">
+                  <Button variant="outline-white" size="lg" className="px-7 py-3 text-base">
                     Request Project Quote
                   </Button>
                 </Link>

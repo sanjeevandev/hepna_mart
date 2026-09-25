@@ -46,9 +46,9 @@ const ConstructionToolsPage: React.FC = () => {
                 {categories.map((cat, idx) => {
                   const Icon = cat.icon;
                   return (
-                    <button key={idx} className="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-full transition-colors border border-white/10">
+                    <button key={idx} className="flex items-center gap-2 bg-white/10 hover:bg-white/20 active:bg-white/30 text-white px-4 py-2 rounded-full transition-colors border border-white/15 select-none">
                       <Icon size={16} className="text-accent" />
-                      <span className="text-sm font-medium">{cat.name}</span>
+                      <span className="text-sm font-medium text-white">{cat.name}</span>
                     </button>
                   );
                 })}

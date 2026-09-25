@@ -59,6 +59,53 @@ export interface CartItem {
   quantity: number;
 }
 
+// --- Project & BOQ Types ---
+
+export type ProjectType =
+  | 'House'
+  | 'Villa'
+  | 'Apartment'
+  | 'Commercial'
+  | 'Industrial'
+  | 'Renovation';
+
+export type ProjectStage =
+  | 'Foundation'
+  | 'Structure'
+  | 'Masonry'
+  | 'Plumbing & Electrical'
+  | 'Flooring'
+  | 'Finishing'
+  | 'Complete Project';
+
+export interface ProjectMaterialItem {
+  productId: string;
+  quantity: number;
+  unit: string;
+  purchasedQuantity?: number;
+  wastagePercent?: number;
+  stage?: string;
+  notes?: string;
+  addedAt: string;
+  priceAtAddition?: number;
+}
+
+export interface Project {
+  id: string;
+  name: string;
+  type: ProjectType;
+  builtUpArea: number;
+  areaUnit: 'sq.ft' | 'sq.m';
+  floors: number;
+  stage: ProjectStage;
+  city: string;
+  pincode: string;
+  createdAt: string;
+  updatedAt: string;
+  materials: ProjectMaterialItem[];
+  completedStages: string[];
+}
+
 // --- Address & Delivery ---
 
 export interface DeliveryAddress {
@@ -83,13 +130,22 @@ export interface DeliveryAddress {
 // --- Order Types ---
 
 export type OrderStatus =
-  | 'pending'
   | 'confirmed'
   | 'processing'
+  | 'packed'
   | 'shipped'
   | 'out-for-delivery'
   | 'delivered'
   | 'cancelled';
+
+export interface OrderStatusHistoryItem {
+  status: OrderStatus;
+  title: string;
+  description: string;
+  timestamp?: string;
+  completed: boolean;
+  active?: boolean;
+}
 
 export interface Order {
   id: string;
@@ -104,6 +160,13 @@ export interface Order {
   deliveryAddress: DeliveryAddress;
   paymentMethod: string;
   estimatedDelivery: string;
+  deliveryWindow?: string;
+  projectId?: string;
+  projectName?: string;
+  quotationId?: string;
+  statusHistory?: OrderStatusHistoryItem[];
+  cancellationReason?: string;
+  cancelledAt?: string;
 }
 
 // --- Wholesale / Bulk ---
@@ -172,4 +235,61 @@ export interface Review {
   comment: string;
   date: string;
   helpful: number;
+}
+
+// --- Construction Calculator & Estimate Types ---
+
+export type ConstructionQuality = 'economy' | 'standard' | 'premium';
+
+export interface CalculatorProjectInputs {
+  projectType: ProjectType;
+  builtUpArea: number;
+  areaUnit: 'sq.ft' | 'sq.m';
+  floors: number;
+  quality: ConstructionQuality;
+  city: string;
+  projectId?: string;
+  projectName?: string;
+}
+
+export interface EstimatedMaterialLine {
+  id: string;
+  categoryName: string;
+  categorySlug: string;
+  categoryIcon?: string;
+  coefficientDescription: string;
+  quantity: number;
+  unit: string;
+  matchedProductId: string;
+  productName: string;
+  brand: string;
+  image?: string;
+  priceAtEstimate: number;
+  lineTotalAtEstimate: number;
+  currentPrice: number;
+  currentLineTotal: number;
+  priceStatus: 'current' | 'updated' | 'unavailable' | 'no-price';
+  inStock: boolean;
+  stockCount: number;
+}
+
+export interface ConstructionEstimate {
+  id: string;
+  inputs: CalculatorProjectInputs;
+  materials: EstimatedMaterialLine[];
+  subtotalAtEstimate: number;
+  taxAtEstimate: number;
+  deliveryAtEstimate: number;
+  totalAtEstimate: number;
+  currentSubtotal: number;
+  currentTax: number;
+  currentDelivery: number;
+  currentTotal: number;
+  priceDifference: number;
+  hasPriceChanges: boolean;
+  createdAt: string;
+  updatedAt: string;
+  priceSnapshotTimestamp: string;
+  validityDays: number;
+  notes?: string;
 }

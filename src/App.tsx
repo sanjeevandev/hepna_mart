@@ -17,6 +17,7 @@ import CartPage from '@/pages/CartPage';
 import CheckoutPage from '@/pages/CheckoutPage';
 import WishlistPage from '@/pages/WishlistPage';
 import OrdersPage from '@/pages/OrdersPage';
+import OrderDetailPage from '@/pages/OrderDetailPage';
 import AccountPage from '@/pages/AccountPage';
 import WholesalePage from '@/pages/WholesalePage';
 import ConstructionToolsPage from '@/pages/ConstructionToolsPage';
@@ -24,6 +25,13 @@ import OffersPage from '@/pages/OffersPage';
 import AboutPage from '@/pages/AboutPage';
 import ContactPage from '@/pages/ContactPage';
 import SearchResultsPage from '@/pages/SearchResultsPage';
+import ProjectsDashboardPage from '@/pages/ProjectsDashboardPage';
+import CreateProjectPage from '@/pages/CreateProjectPage';
+import ProjectDetailPage from '@/pages/ProjectDetailPage';
+import ProjectBOQPage from '@/pages/ProjectBOQPage';
+import CostCalculatorPage from '@/pages/CostCalculatorPage';
+import EstimatesPage from '@/pages/EstimatesPage';
+import EstimateDetailsPage from '@/pages/EstimateDetailsPage';
 
 // Lenis smooth scroll and scroll restoration provider
 function SmoothScrollProvider({ children }: { children: React.ReactNode }) {
@@ -111,6 +119,8 @@ function App() {
               <Route path="/checkout" element={<CheckoutPage />} />
               <Route path="/wishlist" element={<WishlistPage />} />
               <Route path="/orders" element={<OrdersPage />} />
+              <Route path="/orders/:orderId" element={<OrderDetailPage />} />
+              <Route path="/account/orders/:orderId" element={<OrderDetailPage />} />
               <Route path="/account" element={<AccountPage />} />
               <Route path="/wholesale" element={<WholesalePage />} />
               <Route path="/tools" element={<ConstructionToolsPage />} />
@@ -118,6 +128,13 @@ function App() {
               <Route path="/about" element={<AboutPage />} />
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/search" element={<SearchResultsPage />} />
+              <Route path="/projects" element={<ProjectsDashboardPage />} />
+              <Route path="/projects/new" element={<CreateProjectPage />} />
+              <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
+              <Route path="/projects/:projectId/boq" element={<ProjectBOQPage />} />
+              <Route path="/calculator" element={<CostCalculatorPage />} />
+              <Route path="/estimates" element={<EstimatesPage />} />
+              <Route path="/estimates/:estimateId" element={<EstimateDetailsPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </PageTransition>

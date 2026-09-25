@@ -78,9 +78,9 @@ const BulkOrderBanner: React.FC = () => {
 
               <Link to="/contact" className="w-full">
                 <Button 
-                  variant="outline" 
+                  variant="outline-white" 
                   size="lg" 
-                  className="w-full text-base py-4 px-8 border-white/30 text-white hover:bg-white hover:text-primary-dark flex items-center justify-center gap-2 transition-all hover-lift"
+                  className="w-full text-base py-4 px-8 flex items-center justify-center gap-2 hover-lift"
                 >
                   <PhoneCall className="w-4 h-4" />
                   <span>Speak with Expert</span>

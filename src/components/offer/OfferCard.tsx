@@ -55,7 +55,7 @@ const OfferCard: React.FC<OfferCardProps> = ({ offer }) => {
           </p>
           
           <div className="mt-auto">
-            <span className="inline-flex items-center gap-2 text-sm font-semibold bg-white/10 hover:bg-white/20 transition-colors backdrop-blur-sm px-4 py-2 rounded-lg border border-white/20">
+            <span className="inline-flex items-center gap-2 text-sm font-bold bg-white/15 group-hover:bg-white text-white group-hover:text-[#071A2B] transition-all backdrop-blur-sm px-4 py-2 rounded-lg border border-white/20 shadow-sm">
               Shop Now
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />

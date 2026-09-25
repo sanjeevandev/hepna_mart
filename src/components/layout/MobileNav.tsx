@@ -5,7 +5,7 @@ import { categories } from '@/data/categories';
 import { 
   Building2, Layers, Home, Droplets, Zap, 
   Grid3x3, DoorOpen, Paintbrush, Wrench, 
-  Hammer, Bath, HardHat, Package as PackageIcon 
+  Hammer, Bath, HardHat, Calculator, Package as PackageIcon 
 } from 'lucide-react';
 
 interface MobileNavProps {
@@ -95,6 +95,16 @@ const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
             <li>
               <Link to="/orders" onClick={onClose} className="flex items-center gap-3 text-gray-700 font-medium">
                 <Package className="h-5 w-5 text-primary" /> My Orders
+              </Link>
+            </li>
+            <li>
+              <Link to="/calculator" onClick={onClose} className="flex items-center gap-3 text-gray-700 font-medium">
+                <Calculator className="h-5 w-5 text-accent" /> Cost Calculator
+              </Link>
+            </li>
+            <li>
+              <Link to="/projects" onClick={onClose} className="flex items-center gap-3 text-gray-700 font-medium">
+                <HardHat className="h-5 w-5 text-accent" /> Project Builder & BOQ
               </Link>
             </li>
             <li>

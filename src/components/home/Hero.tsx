@@ -108,9 +108,9 @@ const Hero: React.FC = () => {
             </Link>
             <Link to="/categories">
               <Button
-                variant="outline"
+                variant="outline-white"
                 size="lg"
-                className="w-full sm:w-auto text-base sm:text-lg px-8 py-3.5 border-white/40 text-white hover:bg-white hover:text-primary-dark backdrop-blur-md transition-all hover-lift"
+                className="w-full sm:w-auto text-base sm:text-lg px-8 py-3.5 hover-lift"
               >
                 Explore Categories
               </Button>

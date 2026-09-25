@@ -32,21 +32,33 @@
   }
 
   .btn-primary {
-    @apply bg-accent hover:bg-accent-dark text-white font-semibold py-3 px-6 rounded-lg
-           transition-all duration-300 hover:shadow-lg active:scale-[0.97]
-           focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2;
+    @apply bg-accent hover:bg-accent-dark active:bg-[#BA6224] text-white font-semibold py-3 px-6 rounded-lg
+           transition-all duration-300 hover:shadow-lg active:scale-[0.98] select-none
+           focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2;
   }
 
   .btn-secondary {
-    @apply bg-primary hover:bg-primary-light text-white font-semibold py-3 px-6 rounded-lg
-           transition-all duration-300 hover:shadow-lg active:scale-[0.97]
-           focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
+    @apply bg-primary hover:bg-primary-light active:bg-primary-dark text-white font-semibold py-3 px-6 rounded-lg
+           transition-all duration-300 hover:shadow-lg active:scale-[0.98] select-none
+           focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2;
+  }
+
+  .btn-dark {
+    @apply bg-[#071A2B] hover:bg-[#0B2742] active:bg-[#041321] text-white font-semibold py-3 px-6 rounded-lg
+           transition-all duration-300 hover:shadow-lg active:scale-[0.98] select-none
+           focus:outline-none focus-visible:ring-2 focus-visible:ring-[#071A2B] focus-visible:ring-offset-2;
   }
 
   .btn-outline {
-    @apply border-2 border-primary text-primary hover:bg-primary hover:text-white
-           font-semibold py-3 px-6 rounded-lg transition-all duration-300
-           focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
+    @apply border-2 border-primary text-primary bg-transparent hover:bg-primary hover:text-white
+           active:bg-primary-dark active:text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 select-none
+           focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2;
+  }
+
+  .btn-outline-white {
+    @apply border border-white/40 bg-white/5 text-white hover:bg-white hover:text-[#071A2B]
+           active:bg-white/90 active:text-[#071A2B] font-semibold py-3 px-6 rounded-lg transition-all duration-300 select-none
+           backdrop-blur-md focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-[#071A2B];
   }
 
   .card {

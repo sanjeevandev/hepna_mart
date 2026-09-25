@@ -131,9 +131,9 @@ const ToolsFeature: React.FC = () => {
               </span>
               <Link to="/category/safety-equipment">
                 <Button 
-                  variant="outline" 
+                  variant="outline-white" 
                   size="md" 
-                  className="flex items-center gap-2 border-white/30 text-white hover:bg-white hover:text-primary-dark hover-lift"
+                  className="flex items-center gap-2 hover-lift"
                 >
                   <span>Safety Gear</span>
                   <ArrowRight className="w-4 h-4" />

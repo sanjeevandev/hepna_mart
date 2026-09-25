@@ -21,11 +21,11 @@ export interface GooeyNavProps {
 
 const GooeyNav: React.FC<GooeyNavProps> = ({
   items,
-  animationTime = 500,
+  animationTime = 450,
   particleCount = 12,
-  particleDistances = [75, 10],
-  particleR = 90,
-  timeVariance = 250,
+  particleDistances = [70, 10],
+  particleR = 80,
+  timeVariance = 200,
   colors = [1, 2, 3, 1, 2, 4],
   initialActiveIndex = 0,
   onItemClick,
@@ -34,7 +34,6 @@ const GooeyNav: React.FC<GooeyNavProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLUListElement>(null);
   const filterRef = useRef<HTMLSpanElement>(null);
-  const textRef = useRef<HTMLSpanElement>(null);
   const [activeIndex, setActiveIndex] = useState(initialActiveIndex);
 
   useEffect(() => {
@@ -94,7 +93,7 @@ const GooeyNav: React.FC<GooeyNavProps> = ({
           try {
             element.removeChild(particle);
           } catch {
-            // Do nothing
+            // Do nothing if already removed
           }
         }, t);
       }, 30);
@@ -102,7 +101,7 @@ const GooeyNav: React.FC<GooeyNavProps> = ({
   };
 
   const updateEffectPosition = (element: HTMLElement) => {
-    if (!containerRef.current || !filterRef.current || !textRef.current) return;
+    if (!containerRef.current || !filterRef.current) return;
     const containerRect = containerRef.current.getBoundingClientRect();
     const pos = element.getBoundingClientRect();
 
@@ -113,8 +112,6 @@ const GooeyNav: React.FC<GooeyNavProps> = ({
       height: `${pos.height}px`,
     };
     Object.assign(filterRef.current.style, styles);
-    Object.assign(textRef.current.style, styles);
-    textRef.current.innerText = (element as HTMLElement).innerText || '';
   };
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, index: number) => {
@@ -133,15 +130,6 @@ const GooeyNav: React.FC<GooeyNavProps> = ({
     if (filterRef.current) {
       const particles = filterRef.current.querySelectorAll('.particle');
       particles.forEach((p) => filterRef.current?.removeChild(p));
-    }
-
-    if (textRef.current) {
-      textRef.current.classList.remove('active');
-      void textRef.current.offsetWidth;
-      textRef.current.classList.add('active');
-    }
-
-    if (filterRef.current) {
       makeParticles(filterRef.current);
     }
   };
@@ -168,7 +156,6 @@ const GooeyNav: React.FC<GooeyNavProps> = ({
     const activeLi = navRef.current.querySelectorAll('li')[activeIndex] as HTMLElement | undefined;
     if (activeLi) {
       updateEffectPosition(activeLi);
-      textRef.current?.classList.add('active');
     }
 
     const resizeObserver = new ResizeObserver(() => {
@@ -184,7 +171,7 @@ const GooeyNav: React.FC<GooeyNavProps> = ({
 
   return (
     <div className={`gooey-nav-container ${className}`} ref={containerRef}>
-      {/* SVG ColorMatrix Filter for clean Alpha-based Gooey effect (No black background, no black box) */}
+      {/* SVG ColorMatrix Filter for Alpha-based Gooey effect */}
       <svg
         className="gooey-nav-svg-filter"
         aria-hidden="true"
@@ -204,6 +191,10 @@ const GooeyNav: React.FC<GooeyNavProps> = ({
         </defs>
       </svg>
 
+      {/* 1. Background Morphing Active Pill & Particles (Layer 1, Behind Text) */}
+      <span className="effect filter" ref={filterRef} />
+
+      {/* 2. Navigation List & Labels (Layer 2, Above Pill) */}
       <nav>
         <ul ref={navRef}>
           {items.map((item, index) => (
@@ -212,6 +203,7 @@ const GooeyNav: React.FC<GooeyNavProps> = ({
                 href={item.href}
                 onClick={(e) => handleClick(e, index)}
                 onKeyDown={(e) => handleKeyDown(e, index)}
+                className="gooey-nav-label"
               >
                 {item.label}
               </a>
@@ -219,8 +211,6 @@ const GooeyNav: React.FC<GooeyNavProps> = ({
           ))}
         </ul>
       </nav>
-      <span className="effect filter" ref={filterRef} />
-      <span className="effect text" ref={textRef} />
     </div>
   );
 };

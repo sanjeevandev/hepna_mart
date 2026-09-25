@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Building, TrendingDown, Clock, ShieldCheck, Plus, Trash2, HardHat, FileText, CheckCircle2, Truck, PhoneCall, Mail, Calculator } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import ScrollReveal from '@/components/ui/ScrollReveal';
@@ -24,24 +25,40 @@ const COMMON_UNITS = [
 ];
 
 const WholesalePage: React.FC = () => {
+  const location = useLocation();
+  const stateData = location.state as {
+    prefillProjectName?: string;
+    prefillCity?: string;
+    prefillMaterials?: { material: string; quantity: string; unit: string }[];
+  } | null;
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  const [projectName, setProjectName] = useState('');
+  const [projectName, setProjectName] = useState(stateData?.prefillProjectName || '');
   const [companyName, setCompanyName] = useState('');
   const [contactName, setContactName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [siteLocation, setSiteLocation] = useState('');
+  const [siteLocation, setSiteLocation] = useState(stateData?.prefillCity || '');
   const [requiredDate, setRequiredDate] = useState('');
   const [projectStage, setProjectStage] = useState('Foundation & Structure');
   const [additionalNotes, setAdditionalNotes] = useState('');
 
-  const [items, setItems] = useState<ProjectQuoteItem[]>([
-    { id: 1, material: 'OPC 53 Grade Cement', quantity: '500', unit: 'Bags (50kg)' },
-    { id: 2, material: 'Fe 550D TMT Rebar (12mm & 16mm)', quantity: '15', unit: 'Tonnes (MT)' },
-  ]);
+  const [items, setItems] = useState<ProjectQuoteItem[]>(
+    stateData?.prefillMaterials && stateData.prefillMaterials.length > 0
+      ? stateData.prefillMaterials.map((m, idx) => ({
+          id: idx + 1,
+          material: m.material,
+          quantity: m.quantity,
+          unit: m.unit || 'Bags (50kg)',
+        }))
+      : [
+          { id: 1, material: 'OPC 53 Grade Cement', quantity: '500', unit: 'Bags (50kg)' },
+          { id: 2, material: 'Fe 550D TMT Rebar (12mm & 16mm)', quantity: '15', unit: 'Tonnes (MT)' },
+        ]
+  );
 
   const addItem = () => {
     setItems((prev) => [

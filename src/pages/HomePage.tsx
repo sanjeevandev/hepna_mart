@@ -11,6 +11,8 @@ import ToolsFeature from '@/components/home/ToolsFeature';
 import DealsSection from '@/components/home/DealsSection';
 import BulkOrderBanner from '@/components/home/BulkOrderBanner';
 import WhyChooseUs from '@/components/home/WhyChooseUs';
+import ProjectBuilderSection from '@/components/home/ProjectBuilderSection';
+import CostPlannerSection from '@/components/home/CostPlannerSection';
 import SectionMotion from '@/components/ui/SectionMotion';
 import Button from '@/components/ui/Button';
 import heroImage from '@/assets/images/hepna-construction-hero.webp';
@@ -69,9 +71,9 @@ const HomePage: React.FC = () => {
             </Link>
             <Link to="/wholesale">
               <Button
-                variant="outline"
+                variant="outline-white"
                 size="lg"
-                className="px-7 py-3 text-base border-white/40 text-white hover:bg-white hover:text-[#071A2B] backdrop-blur-md hover-lift"
+                className="px-7 py-3 text-base hover-lift"
               >
                 Request B2B Quote
               </Button>
@@ -120,7 +122,17 @@ const HomePage: React.FC = () => {
           <DealsSection />
         </SectionMotion>
 
-        {/* 9. B2B WHOLESALE / BULK MATERIALS (#071A2B) */}
+        {/* 9. PROJECT BUILDER & BOQ PLANNER (#071A2B) */}
+        <SectionMotion variant="up">
+          <ProjectBuilderSection />
+        </SectionMotion>
+
+        {/* 10. SMART CONSTRUCTION COST CALCULATOR (#071A2B) */}
+        <SectionMotion variant="up">
+          <CostPlannerSection />
+        </SectionMotion>
+
+        {/* 11. B2B WHOLESALE / BULK MATERIALS (#071A2B) */}
         <SectionMotion variant="up">
           <BulkOrderBanner />
         </SectionMotion>
