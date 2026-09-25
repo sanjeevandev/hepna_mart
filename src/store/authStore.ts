@@ -2,15 +2,21 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { UserProfile, AccountType, UserRole, Permission } from '@/types';
 import { hasPermission as checkRolePermission } from '@/utils/rbac';
+import {
+  apiClient,
+  removeAuthToken,
+  LoginPayload,
+  RegisterPayload,
+  BackendUserResponse,
+} from '@/lib/api';
 import toast from 'react-hot-toast';
 
 /**
  * =========================================================================
- * TEMPORARY LOCAL DEVELOPMENT AUTHENTICATION ADAPTER
+ * AUTHENTICATION STORE & SESSION ADAPTER
  * =========================================================================
- * IMPORTANT: This store is a local state adapter for frontend prototyping and RBAC simulation.
- * No passwords, secret tokens, or payment data are stored.
- * In Phase 2, this will be replaced with real backend authentication (JWT/OAuth2/Sessions).
+ * Authoritative integration with FastAPI backend in Phase 2B.
+ * Maintains local development personas for instant testing & offline fallback.
  */
 
 export const PRESET_DEV_USERS: UserProfile[] = [
@@ -123,10 +129,26 @@ export const PRESET_DEV_USERS: UserProfile[] = [
   },
 ];
 
+function transformBackendUser(user: BackendUserResponse): UserProfile {
+  return {
+    id: user.id,
+    name: user.full_name || `${user.first_name} ${user.last_name}`.trim(),
+    email: user.email,
+    phone: user.phone || '+91 98765 00000',
+    accountType: user.account_type as AccountType,
+    role: user.role as UserRole,
+    companyName: user.company_name || undefined,
+    createdAt: user.created_at,
+    updatedAt: new Date().toISOString(),
+  };
+}
+
 interface AuthState {
   currentUser: UserProfile | null;
   isAuthenticated: boolean;
+  serverPermissions: string[];
 
+  // Local / Mock methods
   login: (email: string, role?: UserRole, accountType?: AccountType, name?: string) => void;
   logout: () => void;
   updateProfile: (updates: Partial<UserProfile>) => void;
@@ -134,6 +156,11 @@ interface AuthState {
   setRole: (role: UserRole) => void;
   switchDevUser: (userId: string) => void;
   hasPermission: (permission: Permission) => boolean;
+
+  // Backend integration methods
+  loginWithBackend: (credentials: LoginPayload) => Promise<boolean>;
+  registerWithBackend: (payload: RegisterPayload) => Promise<boolean>;
+  fetchCurrentUser: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -142,6 +169,7 @@ export const useAuthStore = create<AuthState>()(
       // Default initial state: Super Admin (Sanjeevan) for seamless dev admin panel access
       currentUser: PRESET_DEV_USERS[0],
       isAuthenticated: true,
+      serverPermissions: [],
 
       login: (email, role = 'customer', accountType = 'individual', name) => {
         const existing = PRESET_DEV_USERS.find(
@@ -149,7 +177,7 @@ export const useAuthStore = create<AuthState>()(
         );
 
         if (existing) {
-          set({ currentUser: existing, isAuthenticated: true });
+          set({ currentUser: existing, isAuthenticated: true, serverPermissions: [] });
           toast.success(`Welcome back, ${existing.name}!`);
           return;
         }
@@ -165,12 +193,14 @@ export const useAuthStore = create<AuthState>()(
           updatedAt: new Date().toISOString(),
         };
 
-        set({ currentUser: newUser, isAuthenticated: true });
+        set({ currentUser: newUser, isAuthenticated: true, serverPermissions: [] });
         toast.success(`Signed in as ${newUser.name}`);
       },
 
       logout: () => {
-        set({ currentUser: null, isAuthenticated: false });
+        removeAuthToken();
+        apiClient.auth.logout().catch(() => {});
+        set({ currentUser: null, isAuthenticated: false, serverPermissions: [] });
         toast('Signed out successfully');
       },
 
@@ -218,7 +248,7 @@ export const useAuthStore = create<AuthState>()(
       switchDevUser: (userId) => {
         const target = PRESET_DEV_USERS.find((u) => u.id === userId);
         if (target) {
-          set({ currentUser: target, isAuthenticated: true });
+          set({ currentUser: target, isAuthenticated: true, serverPermissions: [] });
           toast.success(`Switched active user to "${target.name}" (${target.role})`, {
             icon: '🔄',
           });
@@ -226,8 +256,76 @@ export const useAuthStore = create<AuthState>()(
       },
 
       hasPermission: (permission) => {
-        const role = get().currentUser?.role;
-        return checkRolePermission(role, permission);
+        const { serverPermissions, currentUser } = get();
+        if (serverPermissions && serverPermissions.length > 0) {
+          return serverPermissions.includes(permission);
+        }
+        return checkRolePermission(currentUser?.role, permission);
+      },
+
+      loginWithBackend: async (credentials) => {
+        try {
+          const res = await apiClient.auth.login(credentials);
+          if (res.data?.user) {
+            const userProfile = transformBackendUser(res.data.user);
+            // Fetch complete permissions
+            let permissions: string[] = [];
+            try {
+              const meRes = await apiClient.auth.getMe();
+              permissions = meRes.data?.permissions || [];
+            } catch {
+              // Non-fatal
+            }
+
+            set({
+              currentUser: userProfile,
+              isAuthenticated: true,
+              serverPermissions: permissions,
+            });
+            toast.success(`Welcome back, ${userProfile.name}!`);
+            return true;
+          }
+          return false;
+        } catch (err: any) {
+          toast.error(err.message || 'Login failed');
+          return false;
+        }
+      },
+
+      registerWithBackend: async (payload) => {
+        try {
+          const res = await apiClient.auth.register(payload);
+          if (res.data?.user) {
+            const userProfile = transformBackendUser(res.data.user);
+            set({
+              currentUser: userProfile,
+              isAuthenticated: true,
+              serverPermissions: [],
+            });
+            toast.success(`Welcome to HEPNA MART, ${userProfile.name}!`);
+            return true;
+          }
+          return false;
+        } catch (err: any) {
+          toast.error(err.message || 'Registration failed');
+          return false;
+        }
+      },
+
+      fetchCurrentUser: async () => {
+        try {
+          const res = await apiClient.auth.getMe();
+          if (res.data) {
+            const userProfile = transformBackendUser(res.data);
+            set({
+              currentUser: userProfile,
+              isAuthenticated: true,
+              serverPermissions: res.data.permissions || [],
+            });
+          }
+        } catch {
+          // Token invalid or expired
+        }
       },
     }),
     {
@@ -235,3 +333,4 @@ export const useAuthStore = create<AuthState>()(
     }
   )
 );
+

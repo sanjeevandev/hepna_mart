@@ -1,17 +1,20 @@
 from fastapi import APIRouter
-from app.api.v1.endpoints import health
+from app.api.v1.endpoints import health, auth, admin_test
 
 api_router = APIRouter()
 
 # Health & Diagnostics
 api_router.include_router(health.router, tags=["Health & Diagnostics"])
 
+# Authentication & Session Management
+api_router.include_router(auth.router, prefix="/auth", tags=["Authentication & User Security"])
+
+# Staff & RBAC Gatekeeper Testing
+api_router.include_router(admin_test.router, prefix="/admin", tags=["Staff Administration & RBAC"])
+
 # =========================================================================
-# FUTURE PHASE 2+ ROUTE REGISTRATIONS (Modular Placeholders)
+# FUTURE DOMAIN ROUTE REGISTRATIONS (Subphases 2C+)
 # =========================================================================
-# The following routes will be plugged in systematically in subphases 2B-2D:
-#
-# api_router.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 # api_router.include_router(users.router, prefix="/users", tags=["Users & Profiles"])
 # api_router.include_router(products.router, prefix="/products", tags=["Products Catalog"])
 # api_router.include_router(categories.router, prefix="/categories", tags=["Categories & Taxonomy"])
@@ -23,4 +26,3 @@ api_router.include_router(health.router, tags=["Health & Diagnostics"])
 # api_router.include_router(estimates.router, prefix="/estimates", tags=["Cost Calculator Estimates"])
 # api_router.include_router(quotes.router, prefix="/quotes", tags=["Wholesale Quotations"])
 # api_router.include_router(suppliers.router, prefix="/suppliers", tags=["Suppliers & Mills"])
-# api_router.include_router(admin.router, prefix="/admin", tags=["Staff Administration"])

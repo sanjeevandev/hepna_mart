@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     # Security
     SECRET_KEY: str = "dev_insecure_secret_key_please_change_in_production_9918237192"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
+    ENABLE_DEV_SEED_USERS: bool = False
 
     # Database
     DATABASE_URL: Optional[str] = "postgresql://postgres:postgres@localhost:5432/hepna_mart"

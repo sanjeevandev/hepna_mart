@@ -69,19 +69,45 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 - **ReDoc UI**: [http://localhost:8000/redoc](http://localhost:8000/redoc)
 - **OpenAPI Schema**: [http://localhost:8000/api/v1/openapi.json](http://localhost:8000/api/v1/openapi.json)
 
-### 9. Test API Health Endpoints
+### 9. Test API Health & Auth Endpoints
 ```bash
 # General Service Health
 curl -s http://localhost:8000/api/v1/health
 
-# Response:
-# {"status":"ok","service":"hepna-mart-api","version":"1.0.0"}
-
 # Active Database Connectivity Ping
 curl -s http://localhost:8000/api/v1/health/db
+
+# Customer Registration
+curl -X POST http://localhost:8000/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "customer@example.com",
+    "password": "SecurePassword123!",
+    "first_name": "Rohan",
+    "last_name": "Sharma",
+    "account_type": "contractor"
+  }'
+
+# User Login
+curl -X POST http://localhost:8000/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "customer@example.com",
+    "password": "SecurePassword123!"
+  }'
+
+# Fetch Authenticated Profile & Permissions
+curl -s http://localhost:8000/api/v1/auth/me \
+  -H "Authorization: Bearer <YOUR_ACCESS_TOKEN>"
 ```
 
-### 10. Start Frontend (React + Vite)
+### 10. Run Automated Backend Test Suite
+```bash
+# Run all auth & RBAC tests
+PYTHONPATH=backend backend/.venv/bin/pytest backend/tests/test_auth.py -v
+```
+
+### 11. Start Frontend (React + Vite)
 From the project root:
 ```bash
 npm run dev
@@ -89,6 +115,17 @@ npm run dev
 Frontend runs at: [http://localhost:3000](http://localhost:3000)
 
 ---
+
+## 🔐 Authentication & RBAC Architecture (Phase 2B)
+
+- **Password Hashing**: RFC 9106 Argon2id via `argon2-cffi`
+- **Session Tokens**: JWT with HMAC-SHA256 signature and 24h expiration
+- **Role Hierarchy & Separation**:
+  - Customer Account Types: `individual`, `contractor`, `business`
+  - Internal Staff Roles: `super_admin`, `admin`, `procurement_manager`, `inventory_manager`, `order_manager`, `support_staff`, `customer`
+- **Public Registration Guard**: Forces `role = "customer"` to prevent privilege escalation
+- **Declarative Guards**: FastAPI dependencies `require_staff`, `require_admin`, `require_super_admin`, `require_permission(Permission)`
+
 
 ## 📁 Directory Architecture
 
