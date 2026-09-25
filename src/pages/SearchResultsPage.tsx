@@ -15,8 +15,10 @@ const SearchResultsPage: React.FC = () => {
   const queryParam = searchParams.get('q') || '';
   const { setQuery, filters } = useSearchStore();
   const [showMobileFilters, setShowMobileFilters] = useState(false);
-  const [allProductsList, setAllProductsList] = useState<Product[]>(defaultProducts);
-  const [loading, setLoading] = useState(false);
+  const [productsList, setProductsList] = useState<Product[]>([]);
+  const [totalCount, setTotalCount] = useState<number>(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -26,20 +28,39 @@ const SearchResultsPage: React.FC = () => {
   useEffect(() => {
     let mounted = true;
     setLoading(true);
-    catalogService.getProducts({ page_size: 100 }).then((res) => {
-      if (mounted && res && res.products.length > 0) {
-        setAllProductsList(res.products);
-      }
-      if (mounted) setLoading(false);
-    }).catch(() => {
-      if (mounted) setLoading(false);
-    });
+    setError(null);
+
+    catalogService.getProducts({
+      search: queryParam || undefined,
+      category: filters.category || undefined,
+      brand: filters.brand || undefined,
+      min_price: filters.minPrice,
+      max_price: filters.maxPrice,
+      in_stock: filters.inStock,
+      sort: filters.sortBy || 'popular',
+      page: 1,
+      page_size: 60,
+    })
+      .then((res) => {
+        if (mounted) {
+          setProductsList(res.products);
+          setTotalCount(res.total);
+          setLoading(false);
+        }
+      })
+      .catch((err: any) => {
+        if (mounted) {
+          setError(err.message || 'Unable to load products. Please try again.');
+          setLoading(false);
+        }
+      });
+
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [queryParam, filters]);
 
-  const filteredProducts = filterProducts(allProductsList, queryParam, filters);
+  const filteredProducts = productsList;
 
   return (
     <div className="container-custom py-8">
@@ -69,7 +90,7 @@ const SearchResultsPage: React.FC = () => {
         <aside className={`w-full md:w-1/4 ${showMobileFilters ? 'block' : 'hidden md:block'}`}>
           <div className="sticky top-24">
             <ProductFilters
-              products={allProductsList}
+              products={productsList}
               currentFilters={filters}
               onFilterChange={useSearchStore.getState().setFilters}
             />
@@ -78,7 +99,23 @@ const SearchResultsPage: React.FC = () => {
 
         {/* Main Content */}
         <main className="w-full md:w-3/4">
-          {filteredProducts.length > 0 ? (
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20 bg-white rounded-xl border border-gray-100 shadow-sm">
+              <Search className="w-8 h-8 text-accent animate-pulse mb-3" />
+              <p className="text-xs font-bold text-gray-500">Searching materials catalog...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-16 bg-white rounded-xl border border-red-200 shadow-sm p-8 max-w-md mx-auto">
+              <h3 className="text-base font-bold text-red-600 mb-2">Search unavailable</h3>
+              <p className="text-xs text-gray-500 mb-4">{error}</p>
+              <Button
+                variant="primary"
+                onClick={() => setQuery(queryParam)}
+              >
+                Retry Search
+              </Button>
+            </div>
+          ) : filteredProducts.length > 0 ? (
             <ProductGrid products={filteredProducts} />
           ) : (
             <div className="text-center py-20 bg-white rounded-xl shadow-sm border border-gray-100">

@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { X, User, Heart, Package, Info, Phone, Store, Percent, PenTool, Users, ShieldCheck } from 'lucide-react';
-import { categories } from '@/data/categories';
+import { catalogService } from '@/services/catalogService';
+import { Category } from '@/types';
 import { useAuthStore } from '@/store/authStore';
 import { isInternalStaff } from '@/utils/rbac';
 import { 
@@ -34,6 +35,23 @@ const getCategoryIcon = (iconName: string) => {
 };
 
 const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
+  const { currentUser } = useAuthStore();
+  const [categoriesList, setCategoriesList] = useState<Category[]>([]);
+
+  useEffect(() => {
+    let mounted = true;
+    catalogService.getCategories()
+      .then((cats) => {
+        if (mounted && cats && cats.length > 0) {
+          setCategoriesList(cats);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   // Prevent scrolling on body when menu is open
   useEffect(() => {
     if (isOpen) {
@@ -147,7 +165,7 @@ const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
         <div className="py-4 px-4">
           <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">Categories</h3>
           <ul className="space-y-4">
-            {categories.map((category) => (
+            {categoriesList.map((category) => (
               <li key={category.id}>
                 <Link 
                   to={`/category/${category.slug}`} 

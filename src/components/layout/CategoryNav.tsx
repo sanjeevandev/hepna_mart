@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { 
   Building2, Layers, Home, Droplets, Zap, 
   Grid3x3, DoorOpen, Paintbrush, Wrench, 
   Hammer, Bath, HardHat, Package 
 } from 'lucide-react';
-import { categories } from '@/data/categories';
+import { catalogService } from '@/services/catalogService';
+import { Category } from '@/types';
 
 // Icon mapping based on strings from category data
 const getCategoryIcon = (iconName: string) => {
@@ -27,14 +28,29 @@ const getCategoryIcon = (iconName: string) => {
   return icons[iconName] || <Package className="w-5 h-5" />;
 };
 
-const CategoryNav = () => {
+const CategoryNav: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
+  const [categoriesList, setCategoriesList] = useState<Category[]>([]);
+
+  useEffect(() => {
+    let mounted = true;
+    catalogService.getCategories()
+      .then((cats) => {
+        if (mounted && cats && cats.length > 0) {
+          setCategoriesList(cats);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   return (
     <div className="w-full bg-white">
       <div className="container-custom">
         <ul className="flex flex-row overflow-x-auto hide-scrollbar py-2 md:py-0 md:flex-wrap md:justify-center gap-1 md:gap-4 lg:gap-8">
-          {categories.map((category) => {
+          {categoriesList.map((category) => {
             const isActive = slug === category.slug;
             
             return (

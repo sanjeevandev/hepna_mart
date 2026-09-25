@@ -9,15 +9,17 @@ import ScrollReveal from '@/components/ui/ScrollReveal';
 import { ArrowRight } from 'lucide-react';
 
 const CategorySection: React.FC = () => {
-  const [categories, setCategories] = useState<Category[]>(defaultCategories);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
     let mounted = true;
-    catalogService.getCategories().then((cats) => {
-      if (mounted && cats && cats.length > 0) {
-        setCategories(cats);
-      }
-    });
+    catalogService.getCategories()
+      .then((cats) => {
+        if (mounted && cats && cats.length > 0) {
+          setCategories(cats);
+        }
+      })
+      .catch(() => {});
     return () => {
       mounted = false;
     };

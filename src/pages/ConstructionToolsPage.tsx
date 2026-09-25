@@ -1,18 +1,33 @@
-import React, { useEffect } from 'react';
-import { products } from '@/data/products';
+import React, { useEffect, useState } from 'react';
+import { catalogService } from '@/services/catalogService';
+import { Product } from '@/types';
 import ProductGrid from '@/components/product/ProductGrid';
 import ScrollReveal from '@/components/ui/ScrollReveal';
 import SectionReveal from '@/components/ui/SectionReveal';
 import { Wrench, Hammer, HardHat, Zap, Ruler } from 'lucide-react';
 
 const ConstructionToolsPage: React.FC = () => {
+  const [tools, setTools] = useState<Product[]>([]);
+
   useEffect(() => {
     window.scrollTo(0, 0);
+    let isMounted = true;
+    catalogService.getProducts({ limit: 100 })
+      .then((res) => {
+        if (isMounted) {
+          const filtered = res.items.filter(
+            p => p.category === 'construction-tools' || p.category === 'safety-equipment'
+          );
+          setTools(filtered);
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to load tools:', err);
+      });
+    return () => {
+      isMounted = false;
+    };
   }, []);
-
-  const tools = products.filter(
-    p => p.category === 'construction-tools' || p.category === 'safety-equipment'
-  );
 
   const categories = [
     { name: 'Hand Tools', icon: Wrench },

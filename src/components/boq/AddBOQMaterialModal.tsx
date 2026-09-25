@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { X, Search, Plus, HardHat, Check, Layers, AlertCircle, Building } from 'lucide-react';
-import { products } from '@/data/products';
+import { catalogService } from '@/services/catalogService';
 import { Product } from '@/types';
 import { formatPrice } from '@/utils/formatPrice';
 import Button from '@/components/ui/Button';
@@ -53,6 +53,7 @@ export const AddBOQMaterialModal: React.FC<AddBOQMaterialModalProps> = ({
   onAddMaterial,
   defaultStage = 'Foundation',
 }) => {
+  const [catalogList, setCatalogList] = useState<Product[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [quantity, setQuantity] = useState<number>(10);
@@ -61,10 +62,24 @@ export const AddBOQMaterialModal: React.FC<AddBOQMaterialModalProps> = ({
   const [wastagePercent, setWastagePercent] = useState<number>(5);
   const [notes, setNotes] = useState<string>('');
 
+  useEffect(() => {
+    let isMounted = true;
+    catalogService.getProducts({ limit: 100 })
+      .then((res) => {
+        if (isMounted) setCatalogList(res.items);
+      })
+      .catch((err) => {
+        console.error('Failed to load products for BOQ modal:', err);
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const filteredProducts = useMemo(() => {
-    if (!searchQuery.trim()) return products.slice(0, 12);
+    if (!searchQuery.trim()) return catalogList.slice(0, 12);
     const q = searchQuery.toLowerCase();
-    return products
+    return catalogList
       .filter(
         (p) =>
           p.name.toLowerCase().includes(q) ||
@@ -73,7 +88,7 @@ export const AddBOQMaterialModal: React.FC<AddBOQMaterialModalProps> = ({
           (p.subcategory && p.subcategory.toLowerCase().includes(q))
       )
       .slice(0, 15);
-  }, [searchQuery]);
+  }, [searchQuery, catalogList]);
 
   if (!isOpen) return null;
 

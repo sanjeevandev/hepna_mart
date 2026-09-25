@@ -1,17 +1,31 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { offers } from '@/data/offers';
-import { products } from '@/data/products';
+import { catalogService } from '@/services/catalogService';
+import { Product } from '@/types';
 import OfferCard from '@/components/offer/OfferCard';
 import ProductGrid from '@/components/product/ProductGrid';
 import ScrollReveal from '@/components/ui/ScrollReveal';
 import { Tag } from 'lucide-react';
 
 const OffersPage: React.FC = () => {
+  const [newArrivals, setNewArrivals] = useState<Product[]>([]);
+
   useEffect(() => {
     window.scrollTo(0, 0);
+    let isMounted = true;
+    catalogService.getProducts({ limit: 4, sort: 'newest' })
+      .then((res) => {
+        if (isMounted) {
+          setNewArrivals(res.items);
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to load new arrivals:', err);
+      });
+    return () => {
+      isMounted = false;
+    };
   }, []);
-
-  const newArrivals = products.slice(0, 4);
 
   return (
     <div className="container-custom py-12">

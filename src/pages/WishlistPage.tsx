@@ -1,17 +1,36 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useWishlistStore } from '@/store/wishlistStore';
-import { products } from '@/data/products';
+import { catalogService } from '@/services/catalogService';
+import { Product } from '@/types';
 import ProductGrid from '@/components/product/ProductGrid';
 import SectionReveal from '@/components/ui/SectionReveal';
 import ScrollReveal from '@/components/ui/ScrollReveal';
-import { Heart } from 'lucide-react';
+import { Heart, Loader2 } from 'lucide-react';
 
 const WishlistPage: React.FC = () => {
   const { items } = useWishlistStore();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   
   useEffect(() => {
     window.scrollTo(0, 0);
+    let isMounted = true;
+    catalogService.getProducts({ limit: 100 })
+      .then((res) => {
+        if (isMounted) {
+          setProducts(res.items);
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to load products for wishlist:', err);
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const wishlistedProducts = products.filter(p => items.includes(p.id));

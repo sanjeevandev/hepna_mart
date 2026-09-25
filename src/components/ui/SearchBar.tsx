@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, X, Clock, ArrowUpRight, Sparkles, Building2, Package, Tag } from 'lucide-react';
-import { products } from '@/data/products';
-import { categories } from '@/data/categories';
+import { catalogService } from '@/services/catalogService';
+import { Product, Category } from '@/types';
 import { formatPrice } from '@/utils/formatPrice';
 
 interface SearchBarProps {
@@ -28,10 +28,14 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [categoriesList, setCategoriesList] = useState<Category[]>([]);
+  const [popularProducts, setPopularProducts] = useState<Product[]>([]);
+  const [matchedProducts, setMatchedProducts] = useState<Product[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Load recent searches from localStorage
+  // Load recent searches from localStorage & popular items from backend
   useEffect(() => {
     try {
       const saved = localStorage.getItem(RECENT_SEARCHES_KEY);
@@ -41,6 +45,14 @@ const SearchBar: React.FC<SearchBarProps> = ({
     } catch {
       // ignore JSON parse errors
     }
+
+    catalogService.getCategories().then((cats) => {
+      if (cats && cats.length > 0) setCategoriesList(cats);
+    }).catch(() => {});
+
+    catalogService.getFeaturedProducts(3).then((prods) => {
+      if (prods && prods.length > 0) setPopularProducts(prods);
+    }).catch(() => {});
   }, []);
 
   const saveRecentSearch = (term: string) => {
@@ -94,14 +106,39 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
   const trimmedQuery = value.trim().toLowerCase();
 
-  // Instant Suggestions computation
-  const { matchedCategories, matchedBrands, matchedProducts } = useMemo(() => {
+  // Debounced backend search for matching products
+  useEffect(() => {
     if (!trimmedQuery) {
-      return { matchedCategories: [], matchedBrands: [], matchedProducts: [] };
+      setMatchedProducts([]);
+      setIsSearching(false);
+      return;
+    }
+
+    setIsSearching(true);
+    const timer = setTimeout(() => {
+      catalogService.getProducts({ search: trimmedQuery, page_size: 5 })
+        .then((res) => {
+          setMatchedProducts(res.products || []);
+        })
+        .catch(() => {
+          setMatchedProducts([]);
+        })
+        .finally(() => {
+          setIsSearching(false);
+        });
+    }, 200);
+
+    return () => clearTimeout(timer);
+  }, [trimmedQuery]);
+
+  // Instant Suggestions computation for categories & brands
+  const { matchedCategories, matchedBrands } = useMemo(() => {
+    if (!trimmedQuery) {
+      return { matchedCategories: [], matchedBrands: [] };
     }
 
     // Match categories
-    const matchedCats = categories
+    const matchedCats = categoriesList
       .filter(
         (c) =>
           c.name.toLowerCase().includes(trimmedQuery) ||
@@ -109,42 +146,22 @@ const SearchBar: React.FC<SearchBarProps> = ({
       )
       .slice(0, 3);
 
-    // Match brands
-    const allBrands = Array.from(new Set(products.map((p) => p.brand).filter(Boolean)));
-    const matchedBr = allBrands
-      .filter((b) => b.toLowerCase().includes(trimmedQuery))
-      .slice(0, 3);
-
-    // Match products by name, brand, category, subcategory, or specifications
-    const matchedProds = products
-      .filter((p) => {
-        if (p.name.toLowerCase().includes(trimmedQuery)) return true;
-        if (p.brand.toLowerCase().includes(trimmedQuery)) return true;
-        if (p.category.toLowerCase().includes(trimmedQuery)) return true;
-        if (p.subcategory.toLowerCase().includes(trimmedQuery)) return true;
-        if (p.description.toLowerCase().includes(trimmedQuery)) return true;
-        if (
-          p.specifications &&
-          Object.values(p.specifications).some((spec) =>
-            spec.toLowerCase().includes(trimmedQuery)
-          )
-        ) {
-          return true;
-        }
-        return false;
-      })
-      .slice(0, 5);
+    // Extract brands from matched products and categories
+    const brandsSet = new Set<string>();
+    matchedProducts.forEach((p) => {
+      if (p.brand && p.brand.toLowerCase().includes(trimmedQuery)) {
+        brandsSet.add(p.brand);
+      }
+    });
 
     return {
       matchedCategories: matchedCats,
-      matchedBrands: matchedBr,
-      matchedProducts: matchedProds,
+      matchedBrands: Array.from(brandsSet).slice(0, 3),
     };
-  }, [trimmedQuery]);
+  }, [trimmedQuery, categoriesList, matchedProducts]);
 
   // Featured / Popular fallback items when query is empty
-  const popularCategories = useMemo(() => categories.slice(0, 4), []);
-  const popularProducts = useMemo(() => products.filter((p) => p.featured).slice(0, 3), []);
+  const popularCategories = useMemo(() => categoriesList.slice(0, 4), [categoriesList]);
 
   const handleExecuteSearch = (searchTerm: string) => {
     const term = searchTerm.trim();

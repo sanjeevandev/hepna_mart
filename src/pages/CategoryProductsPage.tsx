@@ -13,27 +13,31 @@ const CategoryProductsPage: React.FC = () => {
   const [category, setCategory] = useState<Category | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
-  useEffect(() => {
-    window.scrollTo(0, 0);
+  const loadCategoryData = () => {
     if (!slug) return;
-
-    let isMounted = true;
     setLoading(true);
+    setError(null);
 
     Promise.all([
       catalogService.getCategoryBySlug(slug),
       catalogService.getProducts({ category: slug, page_size: 60 }),
-    ]).then(([catData, prodData]) => {
-      if (!isMounted) return;
-      setCategory(catData);
-      setProducts(prodData.products);
-      setLoading(false);
-    });
+    ])
+      .then(([catData, prodData]) => {
+        setCategory(catData);
+        setProducts(prodData.products);
+        setLoading(false);
+      })
+      .catch((err: any) => {
+        setError(err.message || 'Unable to load category supplies. Please try again.');
+        setLoading(false);
+      });
+  };
 
-    return () => {
-      isMounted = false;
-    };
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    loadCategoryData();
   }, [slug]);
 
   if (loading) {
@@ -41,6 +45,21 @@ const CategoryProductsPage: React.FC = () => {
       <div className="container-custom py-24 flex flex-col items-center justify-center">
         <Loader2 className="w-8 h-8 text-accent animate-spin mb-3" />
         <p className="text-xs font-bold text-gray-500">Loading category supplies...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container-custom py-20 text-center max-w-md mx-auto">
+        <h2 className="text-2xl font-bold text-red-600 mb-2">Failed to load category</h2>
+        <p className="text-xs text-gray-500 mb-6">{error}</p>
+        <button
+          onClick={loadCategoryData}
+          className="px-6 py-2.5 bg-accent hover:bg-accent-dark text-white rounded-xl text-xs font-bold transition-colors"
+        >
+          Retry Connection
+        </button>
       </div>
     );
   }

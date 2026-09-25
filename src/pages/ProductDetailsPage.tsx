@@ -27,33 +27,37 @@ const ProductDetailsPage: React.FC = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   const addToCart = useCartStore((state) => state.addToCart);
   const { toggleWishlist, isWishlisted } = useWishlistStore();
   const { toggleCompare, isInCompare } = useCompareStore();
 
+  const loadProduct = () => {
+    if (!slug) return;
+    setLoading(true);
+    setError(null);
+
+    catalogService.getProductBySlug(slug)
+      .then((p) => {
+        setProduct(p);
+        setLoading(false);
+
+        if (p) {
+          catalogService.getRelatedProducts(p.category, p.id, 4).then((rel) => {
+            setRelatedProducts(rel);
+          }).catch(() => {});
+        }
+      })
+      .catch((err: any) => {
+        setError(err.message || 'Unable to load product specification. Please try again.');
+        setLoading(false);
+      });
+  };
+
   useEffect(() => {
     window.scrollTo(0, 0);
-    if (!slug) return;
-
-    let isMounted = true;
-    setLoading(true);
-
-    catalogService.getProductBySlug(slug).then((p) => {
-      if (!isMounted) return;
-      setProduct(p);
-      setLoading(false);
-
-      if (p) {
-        catalogService.getRelatedProducts(p.category, p.id, 4).then((rel) => {
-          if (isMounted) setRelatedProducts(rel);
-        });
-      }
-    });
-
-    return () => {
-      isMounted = false;
-    };
+    loadProduct();
   }, [slug]);
 
   if (loading) {
@@ -61,6 +65,26 @@ const ProductDetailsPage: React.FC = () => {
       <div className="container-custom py-24 flex flex-col items-center justify-center">
         <Loader2 className="w-10 h-10 text-accent animate-spin mb-4" />
         <p className="text-sm font-bold text-gray-600">Loading product specification...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container-custom py-20 text-center max-w-md mx-auto">
+        <h2 className="text-2xl font-bold text-red-600 mb-2">Failed to load product</h2>
+        <p className="text-xs text-gray-500 mb-6">{error}</p>
+        <div className="flex justify-center gap-3">
+          <button
+            onClick={loadProduct}
+            className="px-5 py-2 bg-accent hover:bg-accent-dark text-white rounded-xl text-xs font-bold transition-colors"
+          >
+            Retry Connection
+          </button>
+          <Link to="/shop" className="px-5 py-2 border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-xl text-xs font-bold transition-colors">
+            Back to Catalog
+          </Link>
+        </div>
       </div>
     );
   }
@@ -308,14 +332,27 @@ const ProductDetailsPage: React.FC = () => {
                       <th className="py-3 px-4 bg-gray-50 font-bold text-gray-900 w-1/3">Subcategory</th>
                       <td className="py-3 px-4 text-gray-700">{product.subcategory}</td>
                     </tr>
-                    {product.specifications && Object.entries(product.specifications).map(([key, val]) => (
-                      <tr key={key}>
-                        <th className="py-3 px-4 bg-gray-50 font-bold text-gray-900 w-1/3 capitalize">
-                          {key.replace(/([A-Z])/g, ' $1').trim()}
-                        </th>
-                        <td className="py-3 px-4 text-gray-700">{val}</td>
-                      </tr>
-                    ))}
+                    {product.specifications && (
+                      Array.isArray(product.specifications) ? (
+                        (product.specifications as any[]).map((spec: any, idx: number) => (
+                          <tr key={idx}>
+                            <th className="py-3 px-4 bg-gray-50 font-bold text-gray-900 w-1/3 capitalize">
+                              {(spec.key || spec.name || '').replace(/([A-Z])/g, ' $1').trim()}
+                            </th>
+                            <td className="py-3 px-4 text-gray-700">{spec.value || ''}</td>
+                          </tr>
+                        ))
+                      ) : (
+                        Object.entries(product.specifications).map(([key, val]) => (
+                          <tr key={key}>
+                            <th className="py-3 px-4 bg-gray-50 font-bold text-gray-900 w-1/3 capitalize">
+                              {key.replace(/([A-Z])/g, ' $1').trim()}
+                            </th>
+                            <td className="py-3 px-4 text-gray-700">{val}</td>
+                          </tr>
+                        ))
+                      )
+                    )}
                   </tbody>
                 </table>
               </div>
