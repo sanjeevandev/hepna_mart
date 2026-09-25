@@ -1,12 +1,21 @@
-import React, { useEffect } from 'react';
-import { categories } from '@/data/categories';
+import React, { useEffect, useState } from 'react';
+import { Category } from '@/types';
+import catalogService from '@/services/catalogService';
 import CategoryCard from '@/components/category/CategoryCard';
 import SectionMotion from '@/components/ui/SectionMotion';
 import ScrollReveal from '@/components/ui/ScrollReveal';
+import { Loader2 } from 'lucide-react';
 
 const CategoriesPage: React.FC = () => {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     window.scrollTo(0, 0);
+    catalogService.getCategories().then((data) => {
+      setCategories(data);
+      setLoading(false);
+    });
   }, []);
 
   return (
@@ -33,11 +42,18 @@ const CategoriesPage: React.FC = () => {
       </SectionMotion>
 
       <SectionMotion variant="up">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-5">
-          {categories.map((category) => (
-            <CategoryCard key={category.id} category={category} />
-          ))}
-        </div>
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <Loader2 className="w-8 h-8 text-accent animate-spin mb-3" />
+            <p className="text-xs font-bold text-gray-500">Loading catalog taxonomy...</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-5">
+            {categories.map((category) => (
+              <CategoryCard key={category.id} category={category} />
+            ))}
+          </div>
+        )}
       </SectionMotion>
     </div>
   );

@@ -95,6 +95,210 @@ export function removeAuthToken(): void {
   }
 }
 
+export interface BackendCategory {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string | null;
+  tagline?: string | null;
+  icon?: string | null;
+  image?: string | null;
+  parent_id?: string | null;
+  is_active: boolean;
+  sort_order: number;
+  subcategories?: string[];
+  product_count?: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BackendCategoryListItem {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string | null;
+  tagline?: string | null;
+  icon?: string | null;
+  image?: string | null;
+  parent_id?: string | null;
+  is_active: boolean;
+  sort_order: number;
+  subcategories?: string[];
+  product_count: number;
+}
+
+export interface CreateCategoryPayload {
+  name: string;
+  slug: string;
+  description?: string;
+  tagline?: string;
+  icon?: string;
+  image?: string;
+  parent_id?: string;
+  is_active?: boolean;
+  sort_order?: number;
+  subcategories?: string[];
+}
+
+export interface UpdateCategoryPayload {
+  name?: string;
+  slug?: string;
+  description?: string;
+  tagline?: string;
+  icon?: string;
+  image?: string;
+  parent_id?: string;
+  is_active?: boolean;
+  sort_order?: number;
+  subcategories?: string[];
+}
+
+export interface BackendProduct {
+  id: string;
+  name: string;
+  slug: string;
+  sku?: string | null;
+  brand: string;
+  category_id: string;
+  category_slug?: string | null;
+  category_name?: string | null;
+  subcategory?: string | null;
+  description?: string | null;
+  short_description?: string | null;
+  price: number;
+  mrp: number;
+  discount_percent: number;
+  unit: string;
+  rating: number;
+  review_count: number;
+  bulk_price?: number | null;
+  minimum_bulk_quantity?: number | null;
+  delivery_available: boolean;
+  is_featured: boolean;
+  is_new: boolean;
+  is_offer: boolean;
+  is_active: boolean;
+  images: string[];
+  specifications?: any;
+  features: string[];
+  stock: number;
+  available_stock?: number;
+  reserved_stock?: number;
+  category?: BackendCategory | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BackendProductListResponse {
+  items: BackendProduct[];
+  page: number;
+  page_size: number;
+  total: number;
+  total_pages: number;
+}
+
+export interface ProductQueryParams {
+  search?: string;
+  category?: string;
+  brand?: string;
+  min_price?: number;
+  max_price?: number;
+  rating?: number;
+  in_stock?: boolean;
+  featured?: boolean;
+  new?: boolean;
+  offer?: boolean;
+  active_only?: boolean;
+  sort?: string;
+  page?: number;
+  page_size?: number;
+}
+
+export interface CreateProductPayload {
+  name: string;
+  slug: string;
+  sku?: string;
+  brand: string;
+  category_id: string;
+  subcategory?: string;
+  description?: string;
+  short_description?: string;
+  price: number;
+  mrp: number;
+  discount_percent?: number;
+  unit?: string;
+  rating?: number;
+  review_count?: number;
+  bulk_price?: number;
+  minimum_bulk_quantity?: number;
+  delivery_available?: boolean;
+  is_featured?: boolean;
+  is_new?: boolean;
+  is_offer?: boolean;
+  is_active?: boolean;
+  images?: string[];
+  specifications?: any;
+  features?: string[];
+  initial_stock?: number;
+}
+
+export interface UpdateProductPayload {
+  name?: string;
+  slug?: string;
+  sku?: string;
+  brand?: string;
+  category_id?: string;
+  subcategory?: string;
+  description?: string;
+  short_description?: string;
+  price?: number;
+  mrp?: number;
+  discount_percent?: number;
+  unit?: string;
+  rating?: number;
+  review_count?: number;
+  bulk_price?: number;
+  minimum_bulk_quantity?: number;
+  delivery_available?: boolean;
+  is_featured?: boolean;
+  is_new?: boolean;
+  is_offer?: boolean;
+  is_active?: boolean;
+  images?: string[];
+  specifications?: any;
+  features?: string[];
+}
+
+export interface BackendInventory {
+  id: string;
+  product_id: string;
+  quantity: number;
+  reserved_quantity: number;
+  available_quantity: number;
+  low_stock_threshold: number;
+  warehouse: string;
+  location?: string | null;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BackendInventoryListItem extends BackendInventory {
+  product_name?: string | null;
+  product_slug?: string | null;
+  product_sku?: string | null;
+  category_name?: string | null;
+  category_slug?: string | null;
+}
+
+export interface UpdateInventoryPayload {
+  quantity?: number;
+  reserved_quantity?: number;
+  low_stock_threshold?: number;
+  warehouse?: string;
+  location?: string;
+}
+
 class ApiClient {
   private baseUrl: string;
 
@@ -221,6 +425,109 @@ class ApiClient {
   };
 
   /**
+   * Categories API Namespace
+   */
+  readonly categories = {
+    list: async (activeOnly: boolean = true): Promise<ApiResponse<BackendCategoryListItem[]>> => {
+      return this.get<BackendCategoryListItem[]>(`categories?active_only=${activeOnly}`);
+    },
+
+    getBySlug: async (slug: string): Promise<ApiResponse<BackendCategory>> => {
+      return this.get<BackendCategory>(`categories/slug/${encodeURIComponent(slug)}`);
+    },
+
+    getById: async (id: string): Promise<ApiResponse<BackendCategory>> => {
+      return this.get<BackendCategory>(`categories/${encodeURIComponent(id)}`);
+    },
+
+    create: async (payload: CreateCategoryPayload): Promise<ApiResponse<BackendCategory>> => {
+      return this.post<BackendCategory>('categories', payload);
+    },
+
+    update: async (id: string, payload: UpdateCategoryPayload): Promise<ApiResponse<BackendCategory>> => {
+      return this.put<BackendCategory>(`categories/${encodeURIComponent(id)}`, payload);
+    },
+
+    delete: async (id: string): Promise<ApiResponse<{ detail: string; deleted: boolean }>> => {
+      return this.delete<{ detail: string; deleted: boolean }>(`categories/${encodeURIComponent(id)}`);
+    },
+  };
+
+  /**
+   * Products API Namespace
+   */
+  readonly products = {
+    list: async (params: ProductQueryParams = {}): Promise<ApiResponse<BackendProductListResponse>> => {
+      const query = new URLSearchParams();
+      if (params.search) query.set('search', params.search);
+      if (params.category) query.set('category', params.category);
+      if (params.brand) query.set('brand', params.brand);
+      if (params.min_price !== undefined) query.set('min_price', String(params.min_price));
+      if (params.max_price !== undefined) query.set('max_price', String(params.max_price));
+      if (params.rating !== undefined) query.set('rating', String(params.rating));
+      if (params.in_stock !== undefined) query.set('in_stock', String(params.in_stock));
+      if (params.featured !== undefined) query.set('featured', String(params.featured));
+      if (params.new !== undefined) query.set('new', String(params.new));
+      if (params.offer !== undefined) query.set('offer', String(params.offer));
+      if (params.active_only !== undefined) query.set('active_only', String(params.active_only));
+      if (params.sort) query.set('sort', params.sort);
+      if (params.page !== undefined) query.set('page', String(params.page));
+      if (params.page_size !== undefined) query.set('page_size', String(params.page_size));
+
+      const qs = query.toString();
+      return this.get<BackendProductListResponse>(`products${qs ? `?${qs}` : ''}`);
+    },
+
+    getBySlug: async (slug: string): Promise<ApiResponse<BackendProduct>> => {
+      return this.get<BackendProduct>(`products/slug/${encodeURIComponent(slug)}`);
+    },
+
+    getById: async (id: string): Promise<ApiResponse<BackendProduct>> => {
+      return this.get<BackendProduct>(`products/${encodeURIComponent(id)}`);
+    },
+
+    create: async (payload: CreateProductPayload): Promise<ApiResponse<BackendProduct>> => {
+      return this.post<BackendProduct>('products', payload);
+    },
+
+    update: async (id: string, payload: UpdateProductPayload): Promise<ApiResponse<BackendProduct>> => {
+      return this.put<BackendProduct>(`products/${encodeURIComponent(id)}`, payload);
+    },
+
+    delete: async (id: string, hardDelete: boolean = false): Promise<ApiResponse<{ detail: string; deleted: boolean }>> => {
+      return this.delete<{ detail: string; deleted: boolean }>(`products/${encodeURIComponent(id)}?hard_delete=${hardDelete}`);
+    },
+  };
+
+  /**
+   * Inventory API Namespace
+   */
+  readonly inventory = {
+    list: async (lowStockOnly: boolean = false, warehouse?: string): Promise<ApiResponse<BackendInventoryListItem[]>> => {
+      const query = new URLSearchParams();
+      if (lowStockOnly) query.set('low_stock_only', 'true');
+      if (warehouse) query.set('warehouse', warehouse);
+      const qs = query.toString();
+      return this.get<BackendInventoryListItem[]>(`inventory${qs ? `?${qs}` : ''}`);
+    },
+
+    getLowStock: async (warehouse?: string): Promise<ApiResponse<BackendInventoryListItem[]>> => {
+      const query = new URLSearchParams();
+      if (warehouse) query.set('warehouse', warehouse);
+      const qs = query.toString();
+      return this.get<BackendInventoryListItem[]>(`inventory/low-stock${qs ? `?${qs}` : ''}`);
+    },
+
+    getByProductId: async (productId: string): Promise<ApiResponse<BackendInventory>> => {
+      return this.get<BackendInventory>(`inventory/${encodeURIComponent(productId)}`);
+    },
+
+    update: async (productId: string, payload: UpdateInventoryPayload): Promise<ApiResponse<BackendInventory>> => {
+      return this.put<BackendInventory>(`inventory/${encodeURIComponent(productId)}`, payload);
+    },
+  };
+
+  /**
    * Probes the backend health endpoint.
    */
   async checkHealth(): Promise<{ isHealthy: boolean; service?: string; version?: string }> {
@@ -239,4 +546,5 @@ class ApiClient {
 
 export const apiClient = new ApiClient(API_BASE_URL);
 export default apiClient;
+
 

@@ -1,12 +1,28 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import CategoryCard from '@/components/category/CategoryCard';
-import { categories } from '@/data/categories';
+import { categories as defaultCategories } from '@/data/categories';
+import { catalogService } from '@/services/catalogService';
+import { Category } from '@/types';
 import { Link } from 'react-router-dom';
 import Button from '@/components/ui/Button';
 import ScrollReveal from '@/components/ui/ScrollReveal';
 import { ArrowRight } from 'lucide-react';
 
 const CategorySection: React.FC = () => {
+  const [categories, setCategories] = useState<Category[]>(defaultCategories);
+
+  useEffect(() => {
+    let mounted = true;
+    catalogService.getCategories().then((cats) => {
+      if (mounted && cats && cats.length > 0) {
+        setCategories(cats);
+      }
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   return (
     <section className="py-16 md:py-24 bg-white">
       <div className="container-custom">

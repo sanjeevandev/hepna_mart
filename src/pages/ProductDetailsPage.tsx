@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { products } from '@/data/products';
+import { Product } from '@/types';
+import catalogService from '@/services/catalogService';
 import { useCartStore } from '@/store/cartStore';
 import { useWishlistStore } from '@/store/wishlistStore';
 import { useCompareStore } from '@/store/compareStore';
-import { getRelatedProducts } from '@/utils/helpers';
 import ProductGallery from '@/components/product/ProductGallery';
 import ProductGrid from '@/components/product/ProductGrid';
 import SectionReveal from '@/components/ui/SectionReveal';
@@ -13,7 +13,7 @@ import PriceDisplay from '@/components/ui/PriceDisplay';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 import QuantitySelector from '@/components/ui/QuantitySelector';
-import { ChevronRight, Heart, ShoppingCart, Truck, Shield, Layers, Check, Zap, FolderPlus } from 'lucide-react';
+import { ChevronRight, Heart, ShoppingCart, Truck, Shield, Layers, Check, Zap, FolderPlus, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import AddToProjectModal from '@/components/project/AddToProjectModal';
 
@@ -23,6 +23,10 @@ const ProductDetailsPage: React.FC = () => {
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<'desc' | 'specs' | 'features' | 'reviews'>('desc');
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
+
+  const [product, setProduct] = useState<Product | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   
   const addToCart = useCartStore((state) => state.addToCart);
   const { toggleWishlist, isWishlisted } = useWishlistStore();
@@ -30,22 +34,47 @@ const ProductDetailsPage: React.FC = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    if (!slug) return;
+
+    let isMounted = true;
+    setLoading(true);
+
+    catalogService.getProductBySlug(slug).then((p) => {
+      if (!isMounted) return;
+      setProduct(p);
+      setLoading(false);
+
+      if (p) {
+        catalogService.getRelatedProducts(p.category, p.id, 4).then((rel) => {
+          if (isMounted) setRelatedProducts(rel);
+        });
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
   }, [slug]);
 
-  const product = products.find((p) => p.slug === slug);
+  if (loading) {
+    return (
+      <div className="container-custom py-24 flex flex-col items-center justify-center">
+        <Loader2 className="w-10 h-10 text-accent animate-spin mb-4" />
+        <p className="text-sm font-bold text-gray-600">Loading product specification...</p>
+      </div>
+    );
+  }
   
   if (!product) {
     return (
       <div className="container-custom py-20 text-center">
         <h1 className="text-3xl font-bold mb-4">Product Not Found</h1>
-        <Link to="/shop" className="text-accent hover:underline">
+        <Link to="/shop" className="text-accent hover:underline font-bold">
           Continue Shopping
         </Link>
       </div>
     );
   }
-
-  const relatedProducts = getRelatedProducts(products, product, 4);
   const wishlisted = isWishlisted(product.id);
   const compared = isInCompare(product.id);
   const inStock = product.stock && product.stock > 0;

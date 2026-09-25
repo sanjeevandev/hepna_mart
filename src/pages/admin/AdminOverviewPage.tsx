@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Package,
@@ -22,7 +22,9 @@ import {
 import { useAuthStore } from '@/store/authStore';
 import { useProjectStore } from '@/store/projectStore';
 import { useOrderStore } from '@/store/orderStore';
-import { products } from '@/data/products';
+import { products as defaultProducts } from '@/data/products';
+import { catalogService } from '@/services/catalogService';
+import { Product } from '@/types';
 import { formatPrice } from '@/utils/formatPrice';
 import { getRoleLabel } from '@/utils/rbac';
 
@@ -30,9 +32,22 @@ export const AdminOverviewPage: React.FC = () => {
   const { currentUser } = useAuthStore();
   const { projects } = useProjectStore();
   const { orders } = useOrderStore();
+  const [productsList, setProductsList] = useState<Product[]>(defaultProducts);
+
+  useEffect(() => {
+    let mounted = true;
+    catalogService.getProducts({ page_size: 100 }).then((res) => {
+      if (mounted && res && res.products.length > 0) {
+        setProductsList(res.products);
+      }
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const role = currentUser?.role || 'admin';
-  const lowStockProducts = products.filter((p) => p.stock && p.stock < 150).slice(0, 5);
+  const lowStockProducts = productsList.filter((p) => p.stock && p.stock < 150).slice(0, 5);
 
   const pendingOrders = orders.filter((o) => o.status === 'processing' || o.status === 'confirmed');
   const totalOrdersRevenue = orders.reduce((acc, o) => acc + o.total, 0);
@@ -118,7 +133,7 @@ export const AdminOverviewPage: React.FC = () => {
               <span className="text-xs font-bold uppercase tracking-wider">Products (SKUs)</span>
               <Package className="w-4 h-4 text-emerald-600 group-hover:scale-110 transition-transform" />
             </div>
-            <div className="text-2xl font-black text-slate-900">{products.length}</div>
+            <div className="text-2xl font-black text-slate-900">{productsList.length}</div>
             <div className="text-[11px] text-slate-400 mt-1">Across 12 building categories</div>
           </Link>
 

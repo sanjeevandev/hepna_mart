@@ -1,13 +1,42 @@
-import React, { useState } from 'react';
-import { Layers, Search, Eye, Package, Tag, ArrowRight } from 'lucide-react';
-import { categories } from '@/data/categories';
-import { products } from '@/data/products';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Layers, Search, Eye, Package, Tag, ArrowRight, RefreshCw } from 'lucide-react';
+import { categories as defaultCategories } from '@/data/categories';
+import { products as defaultProducts } from '@/data/products';
+import { catalogService } from '@/services/catalogService';
+import { Category, Product } from '@/types';
 import { Link } from 'react-router-dom';
 
 export const AdminCategoriesPage: React.FC = () => {
+  const [categoriesList, setCategoriesList] = useState<Category[]>(defaultCategories);
+  const [productsList, setProductsList] = useState<Product[]>(defaultProducts);
+  const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredCategories = categories.filter((cat) =>
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [cats, prodsRes] = await Promise.all([
+        catalogService.getCategories(false),
+        catalogService.getProducts({ page_size: 100 }),
+      ]);
+      if (cats && cats.length > 0) {
+        setCategoriesList(cats);
+      }
+      if (prodsRes && prodsRes.products.length > 0) {
+        setProductsList(prodsRes.products);
+      }
+    } catch {
+      // Keep defaults
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const filteredCategories = categoriesList.filter((cat) =>
     cat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     cat.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -22,12 +51,23 @@ export const AdminCategoriesPage: React.FC = () => {
               Material Categories & Taxonomy
             </h1>
             <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-200 text-slate-700">
-              {categories.length} Categories
+              {categoriesList.length} Categories
             </span>
           </div>
           <p className="text-xs text-slate-500 mt-0.5">
             Manage product category taxonomy, subcategory assignments, and catalog hierarchy
           </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={loadData}
+            disabled={loading}
+            className="px-3 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-accent' : 'text-slate-400'}`} />
+            <span>{loading ? 'Refreshing...' : 'Refresh'}</span>
+          </button>
         </div>
       </div>
 
@@ -48,7 +88,7 @@ export const AdminCategoriesPage: React.FC = () => {
       {/* Categories Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredCategories.map((cat) => {
-          const categoryProducts = products.filter((p) => p.category === cat.slug);
+          const categoryProducts = productsList.filter((p) => p.category === cat.slug);
 
           return (
             <div
@@ -65,7 +105,7 @@ export const AdminCategoriesPage: React.FC = () => {
                     />
                   </div>
                   <span className="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold">
-                    {categoryProducts.length} SKUs in Catalog
+                    {categoryProducts.length > 0 ? categoryProducts.length : (cat.productCount || 0)} SKUs in Catalog
                   </span>
                 </div>
 

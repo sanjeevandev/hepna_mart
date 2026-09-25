@@ -1,0 +1,2632 @@
+{
+  "categories": [
+    {
+      "id": "cat-1",
+      "name": "Cement & Concrete",
+      "slug": "cement-concrete",
+      "description": "Premium quality cement, concrete mix, and binding materials for strong foundations.",
+      "tagline": "Strong foundations start here.",
+      "icon": "Building2",
+      "image": "https://images.unsplash.com/photo-1590937195954-5a0410d68622?w=400",
+      "productCount": 5,
+      "subcategories": [
+        "OPC Cement",
+        "PPC Cement",
+        "PSC Cement",
+        "Ready Mix",
+        "White Cement"
+      ]
+    },
+    {
+      "id": "cat-2",
+      "name": "Bricks & Blocks",
+      "slug": "bricks-blocks",
+      "description": "High strength bricks and blocks for durable walls.",
+      "tagline": "Build stronger walls.",
+      "icon": "Layers",
+      "image": "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=400",
+      "productCount": 5,
+      "subcategories": [
+        "Red Bricks",
+        "Fly Ash Bricks",
+        "Concrete Blocks",
+        "AAC Blocks",
+        "Solid Blocks"
+      ]
+    },
+    {
+      "id": "cat-3",
+      "name": "Roofing",
+      "slug": "roofing",
+      "description": "Reliable roofing materials to protect your structures.",
+      "tagline": "Shelter that lasts.",
+      "icon": "Home",
+      "image": "https://images.unsplash.com/photo-1632759145351-1d58253ac564?w=400",
+      "productCount": 5,
+      "subcategories": [
+        "Metal Sheets",
+        "Roof Trusses",
+        "Ridge Caps",
+        "Roofing Nails",
+        "Waterproofing"
+      ]
+    },
+    {
+      "id": "cat-4",
+      "name": "Plumbing",
+      "slug": "plumbing",
+      "description": "Pipes, fittings, and accessories for all plumbing needs.",
+      "tagline": "Reliable pipes and fittings.",
+      "icon": "Droplets",
+      "image": "https://images.unsplash.com/photo-1607472586893-edb57cb3b4e1?w=400",
+      "productCount": 6,
+      "subcategories": [
+        "PVC Pipes",
+        "CPVC Pipes",
+        "Pipe Fittings",
+        "Taps",
+        "Fixtures"
+      ]
+    },
+    {
+      "id": "cat-5",
+      "name": "Electrical",
+      "slug": "electrical",
+      "description": "Safe and efficient electrical materials and components.",
+      "tagline": "Power your project safely.",
+      "icon": "Zap",
+      "image": "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400",
+      "productCount": 5,
+      "subcategories": [
+        "Wires",
+        "Switches",
+        "MCBs",
+        "Panels",
+        "Conduits"
+      ]
+    },
+    {
+      "id": "cat-6",
+      "name": "Flooring",
+      "slug": "flooring",
+      "description": "Elegant tiles and flooring solutions for every space.",
+      "tagline": "Beautiful floors, built to last.",
+      "icon": "Grid3x3",
+      "image": "https://images.unsplash.com/photo-1581858726788-75bc0f6a952d?w=400",
+      "productCount": 5,
+      "subcategories": [
+        "Ceramic Tiles",
+        "Vitrified Tiles",
+        "Adhesive",
+        "Grout",
+        "Marble"
+      ]
+    },
+    {
+      "id": "cat-7",
+      "name": "Doors & Windows",
+      "slug": "doors-windows",
+      "description": "Sturdy and stylish doors and windows for your project.",
+      "tagline": "Frames that complete your space.",
+      "icon": "DoorOpen",
+      "image": "https://images.unsplash.com/photo-1534349762230-e0cadf78f5da?w=400",
+      "productCount": 5,
+      "subcategories": [
+        "Wooden Doors",
+        "PVC Doors",
+        "Glass Windows",
+        "Handles",
+        "Locks"
+      ]
+    },
+    {
+      "id": "cat-8",
+      "name": "Paint & Finishing",
+      "slug": "paint-finishing",
+      "description": "Paints, primers, and finishes for a perfect look.",
+      "tagline": "The perfect finish.",
+      "icon": "Paintbrush",
+      "image": "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=400",
+      "productCount": 5,
+      "subcategories": [
+        "Interior",
+        "Exterior",
+        "Primer",
+        "Putty",
+        "Accessories"
+      ]
+    },
+    {
+      "id": "cat-9",
+      "name": "Hardware",
+      "slug": "hardware",
+      "description": "Nails, screws, and essential hardware items.",
+      "tagline": "Every bolt and nut you need.",
+      "icon": "Wrench",
+      "image": "https://images.unsplash.com/photo-1530982011887-3cc11cc85693?w=400",
+      "productCount": 5,
+      "subcategories": [
+        "Nails",
+        "Screws",
+        "Bolts",
+        "Adhesives",
+        "Fasteners"
+      ]
+    },
+    {
+      "id": "cat-10",
+      "name": "Construction Tools",
+      "slug": "construction-tools",
+      "description": "Durable tools for masonry, carpentry, and more.",
+      "tagline": "Tools made for the job.",
+      "icon": "Hammer",
+      "image": "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=400",
+      "productCount": 6,
+      "subcategories": [
+        "Hand Tools",
+        "Power Tools",
+        "Measuring",
+        "Masonry",
+        "Welding"
+      ]
+    },
+    {
+      "id": "cat-11",
+      "name": "Bathroom & Sanitary",
+      "slug": "bathroom-sanitary",
+      "description": "Modern sanitaryware and bathroom accessories.",
+      "tagline": "Complete bathroom solutions.",
+      "icon": "Bath",
+      "image": "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=400",
+      "productCount": 5,
+      "subcategories": [
+        "Wash Basin",
+        "Toilet",
+        "Shower",
+        "Accessories",
+        "Fittings"
+      ]
+    },
+    {
+      "id": "cat-12",
+      "name": "Safety Equipment",
+      "slug": "safety-equipment",
+      "description": "Protective gear to keep you safe on the site.",
+      "tagline": "Safety comes first.",
+      "icon": "HardHat",
+      "image": "https://images.unsplash.com/photo-1587783852033-0498b958fb44?w=400",
+      "productCount": 5,
+      "subcategories": [
+        "Helmets",
+        "Gloves",
+        "Shoes",
+        "Goggles",
+        "Vests"
+      ]
+    }
+  ],
+  "products": [
+    {
+      "id": "prod-1",
+      "name": "UltraTech OPC 53 Grade Cement",
+      "slug": "ultratech-opc-53-grade-cement",
+      "brand": "UltraTech",
+      "category": "cement-concrete",
+      "subcategory": "OPC Cement",
+      "description": "High quality OPC 53 grade cement for strong and durable construction. Ideal for foundation and structural work.",
+      "images": [
+        "https://images.unsplash.com/photo-1590937195954-5a0410d68622?w=400"
+      ],
+      "price": 390,
+      "mrp": 420,
+      "discount": 7,
+      "unit": "Bag",
+      "stock": 500,
+      "rating": 4.5,
+      "reviews": 450,
+      "bulkPrice": 330,
+      "minimumBulkQuantity": 50,
+      "deliveryAvailable": true,
+      "featured": true,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Grade",
+          "value": "OPC 53"
+        },
+        {
+          "key": "Weight",
+          "value": "50 kg"
+        },
+        {
+          "key": "Color",
+          "value": "Grey"
+        }
+      ],
+      "features": [
+        "High Compressive Strength",
+        "Quick Setting Time",
+        "Superior Quality"
+      ]
+    },
+    {
+      "id": "prod-2",
+      "name": "ACC PPC Cement",
+      "slug": "acc-ppc-cement",
+      "brand": "ACC",
+      "category": "cement-concrete",
+      "subcategory": "PPC Cement",
+      "description": "Premium quality Portland Pozzolana Cement offering superior strength and durability. Suitable for all general construction.",
+      "images": [
+        "https://images.unsplash.com/photo-1590937195954-5a0410d68622?w=400"
+      ],
+      "price": 370,
+      "mrp": 400,
+      "discount": 7,
+      "unit": "Bag",
+      "stock": 350,
+      "rating": 4.3,
+      "reviews": 320,
+      "bulkPrice": 315,
+      "minimumBulkQuantity": 50,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Type",
+          "value": "PPC"
+        },
+        {
+          "key": "Weight",
+          "value": "50 kg"
+        },
+        {
+          "key": "Color",
+          "value": "Grey"
+        }
+      ],
+      "features": [
+        "Better Workability",
+        "Corrosion Resistant",
+        "Less Heat of Hydration"
+      ]
+    },
+    {
+      "id": "prod-3",
+      "name": "Ambuja PSC Cement",
+      "slug": "ambuja-psc-cement",
+      "brand": "Ambuja",
+      "category": "cement-concrete",
+      "subcategory": "PSC Cement",
+      "description": "Portland Slag Cement designed for robust and long-lasting concrete structures. Highly resistant to chemical attacks.",
+      "images": [
+        "https://images.unsplash.com/photo-1590937195954-5a0410d68622?w=400"
+      ],
+      "price": 385,
+      "mrp": 415,
+      "discount": 7,
+      "unit": "Bag",
+      "stock": 250,
+      "rating": 4.4,
+      "reviews": 280,
+      "bulkPrice": 330,
+      "minimumBulkQuantity": 50,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Type",
+          "value": "PSC"
+        },
+        {
+          "key": "Weight",
+          "value": "50 kg"
+        }
+      ],
+      "features": [
+        "Chemical Resistance",
+        "High Ultimate Strength",
+        "Durable Concrete"
+      ]
+    },
+    {
+      "id": "prod-4",
+      "name": "ACC Ready Mix Concrete",
+      "slug": "acc-ready-mix-concrete",
+      "brand": "ACC",
+      "category": "cement-concrete",
+      "subcategory": "Ready Mix",
+      "description": "Factory-made concrete mixed accurately for direct structural applications. Ensures consistent quality and saves time.",
+      "images": [
+        "https://images.unsplash.com/photo-1590937195954-5a0410d68622?w=400"
+      ],
+      "price": 5200,
+      "mrp": 5800,
+      "discount": 10,
+      "unit": "Cu.m",
+      "stock": 100,
+      "rating": 4.6,
+      "reviews": 150,
+      "bulkPrice": 4800,
+      "minimumBulkQuantity": 10,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": true,
+      "specifications": [
+        {
+          "key": "Grade",
+          "value": "M25/M30"
+        },
+        {
+          "key": "Delivery",
+          "value": "Transit Mixer"
+        }
+      ],
+      "features": [
+        "Precision Mixing",
+        "High Quality Standards",
+        "Ready to Use"
+      ]
+    },
+    {
+      "id": "prod-5",
+      "name": "Birla White Cement",
+      "slug": "birla-white-cement",
+      "brand": "Birla",
+      "category": "cement-concrete",
+      "subcategory": "White Cement",
+      "description": "Premium white cement offering exceptional whiteness and strength. Perfect for architectural and decorative applications.",
+      "images": [
+        "https://images.unsplash.com/photo-1590937195954-5a0410d68622?w=400"
+      ],
+      "price": 520,
+      "mrp": 580,
+      "discount": 10,
+      "unit": "Bag",
+      "stock": 120,
+      "rating": 4.2,
+      "reviews": 200,
+      "bulkPrice": 450,
+      "minimumBulkQuantity": 20,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Type",
+          "value": "White Portland"
+        },
+        {
+          "key": "Weight",
+          "value": "50 kg"
+        }
+      ],
+      "features": [
+        "High Whiteness",
+        "Superior Fineness",
+        "Excellent Binding"
+      ]
+    },
+    {
+      "id": "prod-6",
+      "name": "First Class Red Bricks",
+      "slug": "first-class-red-bricks",
+      "brand": "Local Premium",
+      "category": "bricks-blocks",
+      "subcategory": "Red Bricks",
+      "description": "High quality fired clay red bricks with excellent load-bearing capacity. Uniform shape and size for perfect masonry.",
+      "images": [
+        "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=400"
+      ],
+      "price": 8,
+      "mrp": 10,
+      "discount": 20,
+      "unit": "Piece",
+      "stock": 10000,
+      "rating": 4.1,
+      "reviews": 350,
+      "bulkPrice": 6.5,
+      "minimumBulkQuantity": 1000,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Material",
+          "value": "Clay"
+        },
+        {
+          "key": "Class",
+          "value": "First Class"
+        }
+      ],
+      "features": [
+        "High Strength",
+        "Uniform Shape",
+        "Excellent Thermal Insulation"
+      ]
+    },
+    {
+      "id": "prod-7",
+      "name": "Fly Ash Bricks",
+      "slug": "fly-ash-bricks",
+      "brand": "EcoBuild",
+      "category": "bricks-blocks",
+      "subcategory": "Fly Ash Bricks",
+      "description": "Eco-friendly fly ash bricks offering excellent strength and lower water absorption. Ideal for cost-effective construction.",
+      "images": [
+        "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=400"
+      ],
+      "price": 7,
+      "mrp": 9,
+      "discount": 22,
+      "unit": "Piece",
+      "stock": 15000,
+      "rating": 4.3,
+      "reviews": 400,
+      "bulkPrice": 5.5,
+      "minimumBulkQuantity": 1000,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Material",
+          "value": "Fly Ash & Cement"
+        },
+        {
+          "key": "Size",
+          "value": "Standard"
+        }
+      ],
+      "features": [
+        "Eco-Friendly",
+        "Lightweight",
+        "Low Water Absorption"
+      ]
+    },
+    {
+      "id": "prod-8",
+      "name": "Concrete Hollow Blocks",
+      "slug": "concrete-hollow-blocks",
+      "brand": "BlockTech",
+      "category": "bricks-blocks",
+      "subcategory": "Concrete Blocks",
+      "description": "Durable hollow concrete blocks for faster construction and better acoustic insulation. Cost-effective walling solution.",
+      "images": [
+        "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=400"
+      ],
+      "price": 45,
+      "mrp": 55,
+      "discount": 18,
+      "unit": "Piece",
+      "stock": 2000,
+      "rating": 4.2,
+      "reviews": 180,
+      "bulkPrice": 38,
+      "minimumBulkQuantity": 100,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Type",
+          "value": "Hollow"
+        },
+        {
+          "key": "Material",
+          "value": "Concrete"
+        }
+      ],
+      "features": [
+        "Faster Construction",
+        "Good Insulation",
+        "Sturdy"
+      ]
+    },
+    {
+      "id": "prod-9",
+      "name": "AAC Blocks",
+      "slug": "aac-blocks",
+      "brand": "Magicrete",
+      "category": "bricks-blocks",
+      "subcategory": "AAC Blocks",
+      "description": "Autoclaved Aerated Concrete blocks are lightweight and offer superior thermal insulation. Reduces structural dead load.",
+      "images": [
+        "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=400"
+      ],
+      "price": 65,
+      "mrp": 80,
+      "discount": 18,
+      "unit": "Piece",
+      "stock": 3000,
+      "rating": 4.5,
+      "reviews": 250,
+      "bulkPrice": 55,
+      "minimumBulkQuantity": 100,
+      "deliveryAvailable": true,
+      "featured": true,
+      "newArrival": true,
+      "specifications": [
+        {
+          "key": "Type",
+          "value": "AAC"
+        },
+        {
+          "key": "Weight",
+          "value": "Lightweight"
+        }
+      ],
+      "features": [
+        "Excellent Thermal Insulation",
+        "Fire Resistant",
+        "Acoustic Insulation"
+      ]
+    },
+    {
+      "id": "prod-10",
+      "name": "Solid Concrete Blocks",
+      "slug": "solid-concrete-blocks",
+      "brand": "BlockTech",
+      "category": "bricks-blocks",
+      "subcategory": "Solid Blocks",
+      "description": "High density solid concrete blocks for heavy load-bearing walls. Provides excellent durability and strength.",
+      "images": [
+        "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=400"
+      ],
+      "price": 38,
+      "mrp": 45,
+      "discount": 15,
+      "unit": "Piece",
+      "stock": 2500,
+      "rating": 4,
+      "reviews": 150,
+      "bulkPrice": 32,
+      "minimumBulkQuantity": 100,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Type",
+          "value": "Solid"
+        },
+        {
+          "key": "Material",
+          "value": "Concrete"
+        }
+      ],
+      "features": [
+        "High Load Bearing",
+        "Durable",
+        "Uniform Dimensions"
+      ]
+    },
+    {
+      "id": "prod-11",
+      "name": "Galvanized Metal Roofing Sheet",
+      "slug": "galvanized-metal-roofing-sheet",
+      "brand": "TATA",
+      "category": "roofing",
+      "subcategory": "Metal Sheets",
+      "description": "Corrosion resistant galvanized metal roofing sheets for industrial and residential applications. Ensures long life.",
+      "images": [
+        "https://images.unsplash.com/photo-1632759145351-1d58253ac564?w=400"
+      ],
+      "price": 850,
+      "mrp": 980,
+      "discount": 13,
+      "unit": "Sheet",
+      "stock": 500,
+      "rating": 4.4,
+      "reviews": 210,
+      "bulkPrice": 750,
+      "minimumBulkQuantity": 20,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Material",
+          "value": "Galvanized Steel"
+        },
+        {
+          "key": "Thickness",
+          "value": "0.45mm"
+        }
+      ],
+      "features": [
+        "Rust Resistant",
+        "High Durability",
+        "Easy Installation"
+      ]
+    },
+    {
+      "id": "prod-12",
+      "name": "Steel Roof Truss",
+      "slug": "steel-roof-truss",
+      "brand": "Jindal",
+      "category": "roofing",
+      "subcategory": "Roof Trusses",
+      "description": "Pre-fabricated steel roof trusses offering superior structural integrity. Designed for heavy load applications.",
+      "images": [
+        "https://images.unsplash.com/photo-1632759145351-1d58253ac564?w=400"
+      ],
+      "price": 8500,
+      "mrp": 9500,
+      "discount": 10,
+      "unit": "Piece",
+      "stock": 50,
+      "rating": 4.6,
+      "reviews": 85,
+      "bulkPrice": 7800,
+      "minimumBulkQuantity": 5,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Material",
+          "value": "Steel"
+        },
+        {
+          "key": "Type",
+          "value": "Prefabricated"
+        }
+      ],
+      "features": [
+        "High Structural Strength",
+        "Termite Proof",
+        "Quick Assembly"
+      ]
+    },
+    {
+      "id": "prod-13",
+      "name": "Ridge Cap",
+      "slug": "ridge-cap",
+      "brand": "TATA",
+      "category": "roofing",
+      "subcategory": "Ridge Caps",
+      "description": "Matching ridge caps to complete your roofing installation. Prevents water leakage at the roof peak.",
+      "images": [
+        "https://images.unsplash.com/photo-1632759145351-1d58253ac564?w=400"
+      ],
+      "price": 450,
+      "mrp": 520,
+      "discount": 13,
+      "unit": "Piece",
+      "stock": 200,
+      "rating": 4.2,
+      "reviews": 120,
+      "bulkPrice": 380,
+      "minimumBulkQuantity": 20,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Material",
+          "value": "Galvanized Steel"
+        }
+      ],
+      "features": [
+        "Perfect Fit",
+        "Weather Proof",
+        "Color Matched"
+      ]
+    },
+    {
+      "id": "prod-14",
+      "name": "Roofing Nails (1kg pack)",
+      "slug": "roofing-nails",
+      "brand": "FastnFix",
+      "category": "roofing",
+      "subcategory": "Roofing Nails",
+      "description": "High quality galvanized roofing nails with washers. Ensures secure and leak-proof fastening of metal sheets.",
+      "images": [
+        "https://images.unsplash.com/photo-1632759145351-1d58253ac564?w=400"
+      ],
+      "price": 180,
+      "mrp": 220,
+      "discount": 18,
+      "unit": "Pack",
+      "stock": 800,
+      "rating": 4,
+      "reviews": 300,
+      "bulkPrice": 150,
+      "minimumBulkQuantity": 10,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Material",
+          "value": "Galvanized Iron"
+        },
+        {
+          "key": "Weight",
+          "value": "1 kg"
+        }
+      ],
+      "features": [
+        "Includes Washers",
+        "Rust Proof",
+        "Strong Grip"
+      ]
+    },
+    {
+      "id": "prod-15",
+      "name": "Waterproof Membrane",
+      "slug": "waterproof-membrane",
+      "brand": "Dr. Fixit",
+      "category": "roofing",
+      "subcategory": "Waterproofing",
+      "description": "Heavy duty waterproof membrane for flat roofs and terraces. Provides complete protection against water seepage.",
+      "images": [
+        "https://images.unsplash.com/photo-1632759145351-1d58253ac564?w=400"
+      ],
+      "price": 2800,
+      "mrp": 3200,
+      "discount": 12,
+      "unit": "Roll",
+      "stock": 150,
+      "rating": 4.5,
+      "reviews": 190,
+      "bulkPrice": 2400,
+      "minimumBulkQuantity": 5,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": true,
+      "specifications": [
+        {
+          "key": "Coverage",
+          "value": "10 sq.m"
+        },
+        {
+          "key": "Thickness",
+          "value": "3mm"
+        }
+      ],
+      "features": [
+        "100% Waterproof",
+        "High Flexibility",
+        "UV Resistant"
+      ]
+    },
+    {
+      "id": "prod-16",
+      "name": "Astral PVC Pipe 4 inch",
+      "slug": "astral-pvc-pipe-4-inch",
+      "brand": "Astral",
+      "category": "plumbing",
+      "subcategory": "PVC Pipes",
+      "description": "Durable 4-inch PVC pipes suitable for drainage and waste water systems. Lead-free and corrosion resistant.",
+      "images": [
+        "https://images.unsplash.com/photo-1607472586893-edb57cb3b4e1?w=400"
+      ],
+      "price": 480,
+      "mrp": 550,
+      "discount": 12,
+      "unit": "Piece",
+      "stock": 400,
+      "rating": 4.5,
+      "reviews": 310,
+      "bulkPrice": 420,
+      "minimumBulkQuantity": 20,
+      "deliveryAvailable": true,
+      "featured": true,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Diameter",
+          "value": "4 inch"
+        },
+        {
+          "key": "Length",
+          "value": "6 meters"
+        }
+      ],
+      "features": [
+        "Lead Free",
+        "High Impact Strength",
+        "Leak Proof"
+      ]
+    },
+    {
+      "id": "prod-17",
+      "name": "Ashirvad CPVC Pipe",
+      "slug": "ashirvad-cpvc-pipe",
+      "brand": "Ashirvad",
+      "category": "plumbing",
+      "subcategory": "CPVC Pipes",
+      "description": "High performance CPVC pipes for hot and cold water distribution. Can withstand high temperatures and pressures.",
+      "images": [
+        "https://images.unsplash.com/photo-1607472586893-edb57cb3b4e1?w=400"
+      ],
+      "price": 320,
+      "mrp": 380,
+      "discount": 15,
+      "unit": "Meter",
+      "stock": 600,
+      "rating": 4.4,
+      "reviews": 240,
+      "bulkPrice": 280,
+      "minimumBulkQuantity": 50,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Material",
+          "value": "CPVC"
+        },
+        {
+          "key": "Application",
+          "value": "Hot & Cold Water"
+        }
+      ],
+      "features": [
+        "Temperature Resistant",
+        "Chemical Resistant",
+        "Long Life"
+      ]
+    },
+    {
+      "id": "prod-18",
+      "name": "PVC Pipe Fittings Set",
+      "slug": "pvc-pipe-fittings-set",
+      "brand": "Finolex",
+      "category": "plumbing",
+      "subcategory": "Pipe Fittings",
+      "description": "Comprehensive set of PVC pipe fittings including elbows, tees, and couplers. Precision engineered for perfect fit.",
+      "images": [
+        "https://images.unsplash.com/photo-1607472586893-edb57cb3b4e1?w=400"
+      ],
+      "price": 250,
+      "mrp": 310,
+      "discount": 19,
+      "unit": "Set",
+      "stock": 300,
+      "rating": 4.2,
+      "reviews": 150,
+      "bulkPrice": 210,
+      "minimumBulkQuantity": 10,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Material",
+          "value": "PVC"
+        },
+        {
+          "key": "Pieces",
+          "value": "10 per set"
+        }
+      ],
+      "features": [
+        "Tight Fit",
+        "Crack Resistant",
+        "Durable"
+      ]
+    },
+    {
+      "id": "prod-19",
+      "name": "Jaguar Bathroom Tap",
+      "slug": "jaguar-bathroom-tap",
+      "brand": "Jaguar",
+      "category": "plumbing",
+      "subcategory": "Taps",
+      "description": "Elegant chrome plated bathroom tap offering smooth operation and water saving features. Built with solid brass.",
+      "images": [
+        "https://images.unsplash.com/photo-1607472586893-edb57cb3b4e1?w=400"
+      ],
+      "price": 3200,
+      "mrp": 4000,
+      "discount": 20,
+      "unit": "Piece",
+      "stock": 120,
+      "rating": 4.6,
+      "reviews": 400,
+      "bulkPrice": 2800,
+      "minimumBulkQuantity": 5,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Material",
+          "value": "Brass"
+        },
+        {
+          "key": "Finish",
+          "value": "Chrome"
+        }
+      ],
+      "features": [
+        "Smooth Operation",
+        "Water Saving Aerator",
+        "Rust Free"
+      ]
+    },
+    {
+      "id": "prod-20",
+      "name": "Hindware Kitchen Sink",
+      "slug": "hindware-kitchen-sink",
+      "brand": "Hindware",
+      "category": "plumbing",
+      "subcategory": "Fixtures",
+      "description": "Premium stainless steel single bowl kitchen sink. Features sound reduction pads and anti-condensation coating.",
+      "images": [
+        "https://images.unsplash.com/photo-1607472586893-edb57cb3b4e1?w=400"
+      ],
+      "price": 8500,
+      "mrp": 10000,
+      "discount": 15,
+      "unit": "Piece",
+      "stock": 80,
+      "rating": 4.3,
+      "reviews": 210,
+      "bulkPrice": 7500,
+      "minimumBulkQuantity": 5,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Material",
+          "value": "Stainless Steel 304"
+        },
+        {
+          "key": "Type",
+          "value": "Single Bowl"
+        }
+      ],
+      "features": [
+        "Scratch Resistant",
+        "Sound Deadening",
+        "Easy to Clean"
+      ]
+    },
+    {
+      "id": "prod-21",
+      "name": "Hindware Western Toilet",
+      "slug": "hindware-western-toilet",
+      "brand": "Hindware",
+      "category": "plumbing",
+      "subcategory": "Fixtures",
+      "description": "Modern ceramic western toilet with dual flush system. Ergonomic design for maximum comfort and hygiene.",
+      "images": [
+        "https://images.unsplash.com/photo-1607472586893-edb57cb3b4e1?w=400"
+      ],
+      "price": 12000,
+      "mrp": 15000,
+      "discount": 20,
+      "unit": "Set",
+      "stock": 60,
+      "rating": 4.5,
+      "reviews": 180,
+      "bulkPrice": 10500,
+      "minimumBulkQuantity": 5,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Material",
+          "value": "Ceramic"
+        },
+        {
+          "key": "Flush",
+          "value": "Dual Flush"
+        }
+      ],
+      "features": [
+        "Soft Close Seat",
+        "Water Efficient",
+        "Stain Resistant"
+      ]
+    },
+    {
+      "id": "prod-22",
+      "name": "Havells Electrical Wire 2.5mm",
+      "slug": "havells-electrical-wire-2-5mm",
+      "brand": "Havells",
+      "category": "electrical",
+      "subcategory": "Wires",
+      "description": "Flame retardant PVC insulated industrial cables. Provides high conductivity and ensures maximum safety.",
+      "images": [
+        "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400"
+      ],
+      "price": 2800,
+      "mrp": 3200,
+      "discount": 12,
+      "unit": "Coil",
+      "stock": 250,
+      "rating": 4.6,
+      "reviews": 340,
+      "bulkPrice": 2400,
+      "minimumBulkQuantity": 10,
+      "deliveryAvailable": true,
+      "featured": true,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Size",
+          "value": "2.5 sq.mm"
+        },
+        {
+          "key": "Length",
+          "value": "90m"
+        }
+      ],
+      "features": [
+        "Flame Retardant",
+        "High Conductivity Copper",
+        "Anti-Termite"
+      ]
+    },
+    {
+      "id": "prod-23",
+      "name": "Legrand Modular Switch",
+      "slug": "legrand-modular-switch",
+      "brand": "Legrand",
+      "category": "electrical",
+      "subcategory": "Switches",
+      "description": "Sleek and modern modular switches offering a premium feel. Built with flame retardant polycarbonate.",
+      "images": [
+        "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400"
+      ],
+      "price": 185,
+      "mrp": 230,
+      "discount": 19,
+      "unit": "Piece",
+      "stock": 1000,
+      "rating": 4.3,
+      "reviews": 290,
+      "bulkPrice": 155,
+      "minimumBulkQuantity": 50,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Rating",
+          "value": "10A"
+        },
+        {
+          "key": "Material",
+          "value": "Polycarbonate"
+        }
+      ],
+      "features": [
+        "Spark Proof",
+        "Smooth Operation",
+        "Durable Finish"
+      ]
+    },
+    {
+      "id": "prod-24",
+      "name": "Havells MCB 32A",
+      "slug": "havells-mcb-32a",
+      "brand": "Havells",
+      "category": "electrical",
+      "subcategory": "MCBs",
+      "description": "High performance Miniature Circuit Breaker for robust protection against overload and short circuits.",
+      "images": [
+        "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400"
+      ],
+      "price": 420,
+      "mrp": 500,
+      "discount": 16,
+      "unit": "Piece",
+      "stock": 400,
+      "rating": 4.5,
+      "reviews": 210,
+      "bulkPrice": 350,
+      "minimumBulkQuantity": 20,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Rating",
+          "value": "32A"
+        },
+        {
+          "key": "Poles",
+          "value": "Single Pole"
+        }
+      ],
+      "features": [
+        "Quick Trip Mechanism",
+        "High Breaking Capacity",
+        "Energy Limiting"
+      ]
+    },
+    {
+      "id": "prod-25",
+      "name": "Schneider Distribution Board",
+      "slug": "schneider-distribution-board",
+      "brand": "Schneider",
+      "category": "electrical",
+      "subcategory": "Panels",
+      "description": "Aesthetic and durable distribution board with pre-fitted busbars. Ensures neat and safe wiring distribution.",
+      "images": [
+        "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400"
+      ],
+      "price": 5800,
+      "mrp": 6800,
+      "discount": 14,
+      "unit": "Piece",
+      "stock": 80,
+      "rating": 4.7,
+      "reviews": 140,
+      "bulkPrice": 5000,
+      "minimumBulkQuantity": 5,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": true,
+      "specifications": [
+        {
+          "key": "Ways",
+          "value": "12 Way"
+        },
+        {
+          "key": "Material",
+          "value": "CRCA Steel"
+        }
+      ],
+      "features": [
+        "Powder Coated Finish",
+        "Spacious for Wiring",
+        "IP43 Protection"
+      ]
+    },
+    {
+      "id": "prod-26",
+      "name": "PVC Conduit Pipe 25mm",
+      "slug": "pvc-conduit-pipe-25mm",
+      "brand": "Finolex",
+      "category": "electrical",
+      "subcategory": "Conduits",
+      "description": "Rigid PVC conduit pipes for safe electrical wiring installations. Fire retardant and crush resistant.",
+      "images": [
+        "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400"
+      ],
+      "price": 85,
+      "mrp": 110,
+      "discount": 22,
+      "unit": "Meter",
+      "stock": 1200,
+      "rating": 4.1,
+      "reviews": 160,
+      "bulkPrice": 70,
+      "minimumBulkQuantity": 100,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Diameter",
+          "value": "25mm"
+        },
+        {
+          "key": "Type",
+          "value": "Heavy Duty"
+        }
+      ],
+      "features": [
+        "Fire Retardant",
+        "Impact Resistant",
+        "Easy Bending"
+      ]
+    },
+    {
+      "id": "prod-27",
+      "name": "Kajaria Ceramic Floor Tile",
+      "slug": "kajaria-ceramic-floor-tile",
+      "brand": "Kajaria",
+      "category": "flooring",
+      "subcategory": "Ceramic Tiles",
+      "description": "Beautiful and durable ceramic floor tiles featuring a matte finish. Perfect for living rooms and bedrooms.",
+      "images": [
+        "https://images.unsplash.com/photo-1581858726788-75bc0f6a952d?w=400"
+      ],
+      "price": 55,
+      "mrp": 70,
+      "discount": 21,
+      "unit": "Sq.ft",
+      "stock": 5000,
+      "rating": 4.4,
+      "reviews": 320,
+      "bulkPrice": 48,
+      "minimumBulkQuantity": 500,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Size",
+          "value": "600x600 mm"
+        },
+        {
+          "key": "Finish",
+          "value": "Matte"
+        }
+      ],
+      "features": [
+        "Anti-Skid",
+        "Stain Resistant",
+        "Easy to Clean"
+      ]
+    },
+    {
+      "id": "prod-28",
+      "name": "Somany Vitrified Tiles",
+      "slug": "somany-vitrified-tiles",
+      "brand": "Somany",
+      "category": "flooring",
+      "subcategory": "Vitrified Tiles",
+      "description": "High gloss double charged vitrified tiles offering a luxurious mirror-like finish. Extremely durable and scratch resistant.",
+      "images": [
+        "https://images.unsplash.com/photo-1581858726788-75bc0f6a952d?w=400"
+      ],
+      "price": 85,
+      "mrp": 105,
+      "discount": 19,
+      "unit": "Sq.ft",
+      "stock": 4000,
+      "rating": 4.5,
+      "reviews": 410,
+      "bulkPrice": 75,
+      "minimumBulkQuantity": 500,
+      "deliveryAvailable": true,
+      "featured": true,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Size",
+          "value": "800x800 mm"
+        },
+        {
+          "key": "Finish",
+          "value": "High Gloss"
+        }
+      ],
+      "features": [
+        "Double Charged",
+        "Scratch Resistant",
+        "Low Water Absorption"
+      ]
+    },
+    {
+      "id": "prod-29",
+      "name": "MYK Laticrete Tile Adhesive",
+      "slug": "myk-laticrete-tile-adhesive",
+      "brand": "MYK Laticrete",
+      "category": "flooring",
+      "subcategory": "Adhesive",
+      "description": "High strength polymer modified tile adhesive for fixing ceramic and vitrified tiles on interior and exterior floors.",
+      "images": [
+        "https://images.unsplash.com/photo-1581858726788-75bc0f6a952d?w=400"
+      ],
+      "price": 450,
+      "mrp": 520,
+      "discount": 13,
+      "unit": "Bag",
+      "stock": 300,
+      "rating": 4.3,
+      "reviews": 210,
+      "bulkPrice": 390,
+      "minimumBulkQuantity": 20,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Weight",
+          "value": "20 kg"
+        },
+        {
+          "key": "Coverage",
+          "value": "40-50 sq.ft"
+        }
+      ],
+      "features": [
+        "High Bond Strength",
+        "No Shrinkage",
+        "Water Resistant"
+      ]
+    },
+    {
+      "id": "prod-30",
+      "name": "Roff Rainbow Grout",
+      "slug": "roff-rainbow-grout",
+      "brand": "Roff",
+      "category": "flooring",
+      "subcategory": "Grout",
+      "description": "Premium unsanded cementitious tile grout available in multiple colors. Formulated to resist cracks and color fading.",
+      "images": [
+        "https://images.unsplash.com/photo-1581858726788-75bc0f6a952d?w=400"
+      ],
+      "price": 280,
+      "mrp": 340,
+      "discount": 17,
+      "unit": "Kg",
+      "stock": 500,
+      "rating": 4.1,
+      "reviews": 150,
+      "bulkPrice": 240,
+      "minimumBulkQuantity": 20,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Joint Width",
+          "value": "1-3 mm"
+        },
+        {
+          "key": "Type",
+          "value": "Cementitious"
+        }
+      ],
+      "features": [
+        "Color Fast",
+        "Water Resistant",
+        "Anti-Fungal"
+      ]
+    },
+    {
+      "id": "prod-31",
+      "name": "Italian Marble Tiles",
+      "slug": "italian-marble-tiles",
+      "brand": "StoneArt",
+      "category": "flooring",
+      "subcategory": "Marble",
+      "description": "Exquisite natural Italian marble cut into convenient tile sizes. Brings timeless elegance to premium spaces.",
+      "images": [
+        "https://images.unsplash.com/photo-1581858726788-75bc0f6a952d?w=400"
+      ],
+      "price": 120,
+      "mrp": 150,
+      "discount": 20,
+      "unit": "Sq.ft",
+      "stock": 2000,
+      "rating": 4.6,
+      "reviews": 180,
+      "bulkPrice": 100,
+      "minimumBulkQuantity": 500,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": true,
+      "specifications": [
+        {
+          "key": "Material",
+          "value": "Natural Marble"
+        },
+        {
+          "key": "Thickness",
+          "value": "18mm"
+        }
+      ],
+      "features": [
+        "Premium Finish",
+        "Natural Veining",
+        "Highly Durable"
+      ]
+    },
+    {
+      "id": "prod-32",
+      "name": "Teak Wood Panel Door",
+      "slug": "teak-wood-panel-door",
+      "brand": "WoodCraft",
+      "category": "doors-windows",
+      "subcategory": "Wooden Doors",
+      "description": "Solid teak wood traditional panel door crafted for elegance and supreme longevity. Naturally termite resistant.",
+      "images": [
+        "https://images.unsplash.com/photo-1534349762230-e0cadf78f5da?w=400"
+      ],
+      "price": 18000,
+      "mrp": 22000,
+      "discount": 18,
+      "unit": "Piece",
+      "stock": 50,
+      "rating": 4.5,
+      "reviews": 140,
+      "bulkPrice": 16000,
+      "minimumBulkQuantity": 5,
+      "deliveryAvailable": true,
+      "featured": true,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Material",
+          "value": "Solid Teak"
+        },
+        {
+          "key": "Size",
+          "value": "3x7 ft"
+        }
+      ],
+      "features": [
+        "Hand Crafted",
+        "Termite Resistant",
+        "Weather Treated"
+      ]
+    },
+    {
+      "id": "prod-33",
+      "name": "PVC Bathroom Door",
+      "slug": "pvc-bathroom-door",
+      "brand": "DoorTech",
+      "category": "doors-windows",
+      "subcategory": "PVC Doors",
+      "description": "Waterproof PVC door specially designed for bathrooms and wet areas. Lightweight and maintenance-free.",
+      "images": [
+        "https://images.unsplash.com/photo-1534349762230-e0cadf78f5da?w=400"
+      ],
+      "price": 3500,
+      "mrp": 4200,
+      "discount": 16,
+      "unit": "Piece",
+      "stock": 150,
+      "rating": 4.2,
+      "reviews": 210,
+      "bulkPrice": 3000,
+      "minimumBulkQuantity": 10,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Material",
+          "value": "PVC"
+        },
+        {
+          "key": "Application",
+          "value": "Bathroom"
+        }
+      ],
+      "features": [
+        "100% Waterproof",
+        "No Painting Required",
+        "Termite Proof"
+      ]
+    },
+    {
+      "id": "prod-34",
+      "name": "Aluminium Glass Window",
+      "slug": "aluminium-glass-window",
+      "brand": "Fenesta",
+      "category": "doors-windows",
+      "subcategory": "Glass Windows",
+      "description": "Powder-coated aluminium sliding window with toughened glass. Offers great sound insulation and smooth sliding.",
+      "images": [
+        "https://images.unsplash.com/photo-1534349762230-e0cadf78f5da?w=400"
+      ],
+      "price": 6500,
+      "mrp": 7800,
+      "discount": 16,
+      "unit": "Piece",
+      "stock": 80,
+      "rating": 4.4,
+      "reviews": 160,
+      "bulkPrice": 5800,
+      "minimumBulkQuantity": 5,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Frame",
+          "value": "Aluminium"
+        },
+        {
+          "key": "Glass",
+          "value": "5mm Toughened"
+        }
+      ],
+      "features": [
+        "Smooth Sliding",
+        "Sound Insulation",
+        "Dust Proof"
+      ]
+    },
+    {
+      "id": "prod-35",
+      "name": "Godrej Door Handle",
+      "slug": "godrej-door-handle",
+      "brand": "Godrej",
+      "category": "doors-windows",
+      "subcategory": "Handles",
+      "description": "Premium mortise door handle with lock set. Features a contemporary design and robust security mechanism.",
+      "images": [
+        "https://images.unsplash.com/photo-1534349762230-e0cadf78f5da?w=400"
+      ],
+      "price": 850,
+      "mrp": 1050,
+      "discount": 19,
+      "unit": "Set",
+      "stock": 300,
+      "rating": 4.3,
+      "reviews": 280,
+      "bulkPrice": 750,
+      "minimumBulkQuantity": 20,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Finish",
+          "value": "Satin Steel"
+        },
+        {
+          "key": "Type",
+          "value": "Mortise Handle"
+        }
+      ],
+      "features": [
+        "High Security Cylinder",
+        "Ergonomic Grip",
+        "Corrosion Resistant"
+      ]
+    },
+    {
+      "id": "prod-36",
+      "name": "Yale Digital Door Lock",
+      "slug": "yale-digital-door-lock",
+      "brand": "Yale",
+      "category": "doors-windows",
+      "subcategory": "Locks",
+      "description": "Advanced smart digital door lock with fingerprint, PIN code, and RFID card access. Enhances home security.",
+      "images": [
+        "https://images.unsplash.com/photo-1534349762230-e0cadf78f5da?w=400"
+      ],
+      "price": 12500,
+      "mrp": 15000,
+      "discount": 16,
+      "unit": "Piece",
+      "stock": 40,
+      "rating": 4.6,
+      "reviews": 120,
+      "bulkPrice": 11000,
+      "minimumBulkQuantity": 5,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": true,
+      "specifications": [
+        {
+          "key": "Access",
+          "value": "Biometric/PIN/RFID"
+        },
+        {
+          "key": "Power",
+          "value": "AA Batteries"
+        }
+      ],
+      "features": [
+        "Auto Locking",
+        "Fake PIN Feature",
+        "Low Battery Alarm"
+      ]
+    },
+    {
+      "id": "prod-37",
+      "name": "Asian Paints Royale Interior",
+      "slug": "asian-paints-royale-interior",
+      "brand": "Asian Paints",
+      "category": "paint-finishing",
+      "subcategory": "Interior",
+      "description": "Luxury interior emulsion paint providing a soft sheen finish and stain resistance. Keeps walls looking new.",
+      "images": [
+        "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=400"
+      ],
+      "price": 3200,
+      "mrp": 3800,
+      "discount": 15,
+      "unit": "Litre",
+      "stock": 200,
+      "rating": 4.5,
+      "reviews": 450,
+      "bulkPrice": 2800,
+      "minimumBulkQuantity": 10,
+      "deliveryAvailable": true,
+      "featured": true,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Finish",
+          "value": "Soft Sheen"
+        },
+        {
+          "key": "Washability",
+          "value": "High"
+        }
+      ],
+      "features": [
+        "Teflon Surface Protector",
+        "Anti-Fungal",
+        "Low VOC"
+      ]
+    },
+    {
+      "id": "prod-38",
+      "name": "Berger Weathercoat Exterior",
+      "slug": "berger-weathercoat-exterior",
+      "brand": "Berger",
+      "category": "paint-finishing",
+      "subcategory": "Exterior",
+      "description": "High performance exterior emulsion engineered to withstand extreme weather conditions and resist algal growth.",
+      "images": [
+        "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=400"
+      ],
+      "price": 2800,
+      "mrp": 3400,
+      "discount": 17,
+      "unit": "Litre",
+      "stock": 180,
+      "rating": 4.4,
+      "reviews": 320,
+      "bulkPrice": 2400,
+      "minimumBulkQuantity": 10,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Type",
+          "value": "Exterior Emulsion"
+        },
+        {
+          "key": "Protection",
+          "value": "Weather/Algae"
+        }
+      ],
+      "features": [
+        "Rain Guard",
+        "Color Lock Technology",
+        "Crack Bridging"
+      ]
+    },
+    {
+      "id": "prod-39",
+      "name": "Asian Paints Wall Primer",
+      "slug": "asian-paints-wall-primer",
+      "brand": "Asian Paints",
+      "category": "paint-finishing",
+      "subcategory": "Primer",
+      "description": "Water-based wall primer suitable for both interior and exterior surfaces. Ensures superior adhesion of top coats.",
+      "images": [
+        "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=400"
+      ],
+      "price": 650,
+      "mrp": 780,
+      "discount": 16,
+      "unit": "Litre",
+      "stock": 300,
+      "rating": 4.2,
+      "reviews": 250,
+      "bulkPrice": 550,
+      "minimumBulkQuantity": 20,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Base",
+          "value": "Water Based"
+        },
+        {
+          "key": "Application",
+          "value": "Interior/Exterior"
+        }
+      ],
+      "features": [
+        "Excellent Opacity",
+        "Alkali Resistant",
+        "Quick Drying"
+      ]
+    },
+    {
+      "id": "prod-40",
+      "name": "Birla White Wall Putty",
+      "slug": "birla-white-wall-putty",
+      "brand": "Birla",
+      "category": "paint-finishing",
+      "subcategory": "Putty",
+      "description": "Cement-based wall putty providing a smooth and strong base for paints. Reduces paint consumption.",
+      "images": [
+        "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=400"
+      ],
+      "price": 750,
+      "mrp": 880,
+      "discount": 14,
+      "unit": "Bag",
+      "stock": 250,
+      "rating": 4.3,
+      "reviews": 380,
+      "bulkPrice": 650,
+      "minimumBulkQuantity": 20,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Weight",
+          "value": "40 kg"
+        },
+        {
+          "key": "Base",
+          "value": "White Cement"
+        }
+      ],
+      "features": [
+        "Extra Smooth Finish",
+        "Water Resistant",
+        "Prevents Flaking"
+      ]
+    },
+    {
+      "id": "prod-41",
+      "name": "Purdy Paint Roller Set",
+      "slug": "purdy-paint-roller-set",
+      "brand": "Purdy",
+      "category": "paint-finishing",
+      "subcategory": "Accessories",
+      "description": "Professional grade paint roller set including tray, frame, and micro-fiber sleeves for a lint-free finish.",
+      "images": [
+        "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?w=400"
+      ],
+      "price": 450,
+      "mrp": 550,
+      "discount": 18,
+      "unit": "Set",
+      "stock": 150,
+      "rating": 4.1,
+      "reviews": 120,
+      "bulkPrice": 380,
+      "minimumBulkQuantity": 10,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Material",
+          "value": "Micro-fiber"
+        },
+        {
+          "key": "Size",
+          "value": "9 inch"
+        }
+      ],
+      "features": [
+        "Lint Free",
+        "High Paint Pickup",
+        "Ergonomic Handle"
+      ]
+    },
+    {
+      "id": "prod-42",
+      "name": "GI Nails 2 inch (5kg)",
+      "slug": "gi-nails-2-inch",
+      "brand": "FastnFix",
+      "category": "hardware",
+      "subcategory": "Nails",
+      "description": "Galvanized iron nails engineered for carpentry and general construction work. High tensile strength prevents bending.",
+      "images": [
+        "https://images.unsplash.com/photo-1530982011887-3cc11cc85693?w=400"
+      ],
+      "price": 380,
+      "mrp": 450,
+      "discount": 15,
+      "unit": "Pack",
+      "stock": 400,
+      "rating": 4,
+      "reviews": 180,
+      "bulkPrice": 320,
+      "minimumBulkQuantity": 10,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Material",
+          "value": "Galvanized Iron"
+        },
+        {
+          "key": "Size",
+          "value": "2 inch"
+        }
+      ],
+      "features": [
+        "Rust Resistant",
+        "Sharp Point",
+        "Flat Head"
+      ]
+    },
+    {
+      "id": "prod-43",
+      "name": "SS Screws Assorted (100pc)",
+      "slug": "ss-screws-assorted",
+      "brand": "Fischer",
+      "category": "hardware",
+      "subcategory": "Screws",
+      "description": "Stainless steel self-tapping screws in assorted sizes for diverse applications. Corrosion resistant and highly durable.",
+      "images": [
+        "https://images.unsplash.com/photo-1530982011887-3cc11cc85693?w=400"
+      ],
+      "price": 280,
+      "mrp": 340,
+      "discount": 17,
+      "unit": "Pack",
+      "stock": 350,
+      "rating": 4.2,
+      "reviews": 210,
+      "bulkPrice": 240,
+      "minimumBulkQuantity": 20,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Material",
+          "value": "Stainless Steel"
+        },
+        {
+          "key": "Quantity",
+          "value": "100 pcs"
+        }
+      ],
+      "features": [
+        "Self Tapping",
+        "Deep Threads",
+        "Corrosion Free"
+      ]
+    },
+    {
+      "id": "prod-44",
+      "name": "Hex Bolts M10 (50pc)",
+      "slug": "hex-bolts-m10",
+      "brand": "GKW",
+      "category": "hardware",
+      "subcategory": "Bolts",
+      "description": "High tensile metric hex head bolts with matching nuts. Ideal for heavy duty mechanical and structural fastening.",
+      "images": [
+        "https://images.unsplash.com/photo-1530982011887-3cc11cc85693?w=400"
+      ],
+      "price": 420,
+      "mrp": 500,
+      "discount": 16,
+      "unit": "Pack",
+      "stock": 250,
+      "rating": 4.1,
+      "reviews": 150,
+      "bulkPrice": 360,
+      "minimumBulkQuantity": 10,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Grade",
+          "value": "8.8 High Tensile"
+        },
+        {
+          "key": "Size",
+          "value": "M10x50mm"
+        }
+      ],
+      "features": [
+        "Precision Threads",
+        "Includes Nuts",
+        "Zinc Plated"
+      ]
+    },
+    {
+      "id": "prod-45",
+      "name": "Fevicol Construction Adhesive",
+      "slug": "fevicol-construction-adhesive",
+      "brand": "Pidilite",
+      "category": "hardware",
+      "subcategory": "Adhesives",
+      "description": "Heavy duty multi-purpose construction adhesive for bonding wood, metal, masonry and more. Grabs fast and holds tight.",
+      "images": [
+        "https://images.unsplash.com/photo-1530982011887-3cc11cc85693?w=400"
+      ],
+      "price": 550,
+      "mrp": 650,
+      "discount": 15,
+      "unit": "Kg",
+      "stock": 300,
+      "rating": 4.5,
+      "reviews": 310,
+      "bulkPrice": 480,
+      "minimumBulkQuantity": 10,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Type",
+          "value": "Synthetic Resin"
+        },
+        {
+          "key": "Cure Time",
+          "value": "24 Hours"
+        }
+      ],
+      "features": [
+        "Instant Grab",
+        "Weather Proof",
+        "Paintable"
+      ]
+    },
+    {
+      "id": "prod-46",
+      "name": "GI Binding Wire 20 gauge",
+      "slug": "gi-binding-wire-20-gauge",
+      "brand": "TATA",
+      "category": "hardware",
+      "subcategory": "Fasteners",
+      "description": "Soft and flexible galvanized iron binding wire for securing rebar in reinforced concrete structures.",
+      "images": [
+        "https://images.unsplash.com/photo-1530982011887-3cc11cc85693?w=400"
+      ],
+      "price": 180,
+      "mrp": 220,
+      "discount": 18,
+      "unit": "Kg",
+      "stock": 500,
+      "rating": 4,
+      "reviews": 220,
+      "bulkPrice": 150,
+      "minimumBulkQuantity": 50,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Gauge",
+          "value": "20 SWG"
+        },
+        {
+          "key": "Material",
+          "value": "Mild Steel GI"
+        }
+      ],
+      "features": [
+        "High Flexibility",
+        "Rust Resistant",
+        "Consistent Gauge"
+      ]
+    },
+    {
+      "id": "prod-47",
+      "name": "Stanley Claw Hammer",
+      "slug": "stanley-claw-hammer",
+      "brand": "Stanley",
+      "category": "construction-tools",
+      "subcategory": "Hand Tools",
+      "description": "Drop forged steel claw hammer with a fiberglass handle for shock absorption. Perfect balance and comfortable grip.",
+      "images": [
+        "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=400"
+      ],
+      "price": 650,
+      "mrp": 780,
+      "discount": 16,
+      "unit": "Piece",
+      "stock": 120,
+      "rating": 4.4,
+      "reviews": 280,
+      "bulkPrice": 550,
+      "minimumBulkQuantity": 10,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Weight",
+          "value": "450g (16oz)"
+        },
+        {
+          "key": "Handle",
+          "value": "Fiberglass"
+        }
+      ],
+      "features": [
+        "Shock Absorbent",
+        "Non-Slip Grip",
+        "Anti-Vibration"
+      ]
+    },
+    {
+      "id": "prod-48",
+      "name": "Bosch Impact Drill 13mm",
+      "slug": "bosch-impact-drill-13mm",
+      "brand": "Bosch",
+      "category": "construction-tools",
+      "subcategory": "Power Tools",
+      "description": "Professional grade 600W impact drill for effortless drilling in concrete, wood, and metal. Features variable speed control.",
+      "images": [
+        "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=400"
+      ],
+      "price": 4800,
+      "mrp": 5800,
+      "discount": 17,
+      "unit": "Piece",
+      "stock": 60,
+      "rating": 4.7,
+      "reviews": 420,
+      "bulkPrice": 4200,
+      "minimumBulkQuantity": 5,
+      "deliveryAvailable": true,
+      "featured": true,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Power",
+          "value": "600W"
+        },
+        {
+          "key": "Chuck Size",
+          "value": "13mm"
+        }
+      ],
+      "features": [
+        "Variable Speed",
+        "Forward/Reverse Rotation",
+        "Compact Design"
+      ]
+    },
+    {
+      "id": "prod-49",
+      "name": "Stanley Measuring Tape 5m",
+      "slug": "stanley-measuring-tape-5m",
+      "brand": "Stanley",
+      "category": "construction-tools",
+      "subcategory": "Measuring",
+      "description": "Durable 5-meter measuring tape with a nylon coated blade for maximum durability. Features a positive lock mechanism.",
+      "images": [
+        "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=400"
+      ],
+      "price": 350,
+      "mrp": 420,
+      "discount": 16,
+      "unit": "Piece",
+      "stock": 200,
+      "rating": 4.3,
+      "reviews": 350,
+      "bulkPrice": 300,
+      "minimumBulkQuantity": 20,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Length",
+          "value": "5 meters"
+        },
+        {
+          "key": "Blade Width",
+          "value": "19mm"
+        }
+      ],
+      "features": [
+        "Nylon Coating",
+        "Shock Resistant Case",
+        "True Zero Hook"
+      ]
+    },
+    {
+      "id": "prod-50",
+      "name": "Topman Spirit Level 24 inch",
+      "slug": "topman-spirit-level-24-inch",
+      "brand": "Topman",
+      "category": "construction-tools",
+      "subcategory": "Measuring",
+      "description": "Heavy duty aluminium box profile spirit level with 3 highly visible vials. Ensures precise alignment for all masonry works.",
+      "images": [
+        "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=400"
+      ],
+      "price": 850,
+      "mrp": 1000,
+      "discount": 15,
+      "unit": "Piece",
+      "stock": 100,
+      "rating": 4.2,
+      "reviews": 180,
+      "bulkPrice": 750,
+      "minimumBulkQuantity": 10,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Length",
+          "value": "24 inch"
+        },
+        {
+          "key": "Material",
+          "value": "Aluminium"
+        }
+      ],
+      "features": [
+        "High Accuracy",
+        "Shockproof Vials",
+        "Milled Measuring Surface"
+      ]
+    },
+    {
+      "id": "prod-51",
+      "name": "Masonry Trowel",
+      "slug": "masonry-trowel",
+      "brand": "Taparia",
+      "category": "construction-tools",
+      "subcategory": "Masonry",
+      "description": "High carbon steel masonry trowel with ergonomic wooden handle. Ideal for bricklaying and plastering jobs.",
+      "images": [
+        "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=400"
+      ],
+      "price": 280,
+      "mrp": 350,
+      "discount": 20,
+      "unit": "Piece",
+      "stock": 300,
+      "rating": 4.1,
+      "reviews": 150,
+      "bulkPrice": 220,
+      "minimumBulkQuantity": 20,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Blade Material",
+          "value": "Carbon Steel"
+        },
+        {
+          "key": "Handle",
+          "value": "Wooden"
+        }
+      ],
+      "features": [
+        "Flexible Blade",
+        "Solid Forged Shank",
+        "Perfect Balance"
+      ]
+    },
+    {
+      "id": "prod-52",
+      "name": "Heavy Duty Wheelbarrow",
+      "slug": "heavy-duty-wheelbarrow",
+      "brand": "BuildPro",
+      "category": "construction-tools",
+      "subcategory": "Masonry",
+      "description": "Sturdy steel wheelbarrow designed for transporting concrete, dirt, and heavy materials effortlessly on site.",
+      "images": [
+        "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=400"
+      ],
+      "price": 3500,
+      "mrp": 4200,
+      "discount": 16,
+      "unit": "Piece",
+      "stock": 40,
+      "rating": 4.3,
+      "reviews": 90,
+      "bulkPrice": 3000,
+      "minimumBulkQuantity": 5,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": true,
+      "specifications": [
+        {
+          "key": "Capacity",
+          "value": "65 Litres"
+        },
+        {
+          "key": "Tray Material",
+          "value": "Steel"
+        }
+      ],
+      "features": [
+        "Pneumatic Tyre",
+        "Tubular Steel Frame",
+        "Anti-Rust Coating"
+      ]
+    },
+    {
+      "id": "prod-53",
+      "name": "Cera Wash Basin",
+      "slug": "cera-wash-basin",
+      "brand": "Cera",
+      "category": "bathroom-sanitary",
+      "subcategory": "Wash Basin",
+      "description": "Contemporary ceramic wall-hung wash basin offering a sleek look. Easy to maintain and highly durable.",
+      "images": [
+        "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=400"
+      ],
+      "price": 4500,
+      "mrp": 5500,
+      "discount": 18,
+      "unit": "Piece",
+      "stock": 80,
+      "rating": 4.4,
+      "reviews": 210,
+      "bulkPrice": 3900,
+      "minimumBulkQuantity": 5,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Material",
+          "value": "Ceramic"
+        },
+        {
+          "key": "Mounting",
+          "value": "Wall Hung"
+        }
+      ],
+      "features": [
+        "Stain Resistant",
+        "Glossy Finish",
+        "Compact Design"
+      ]
+    },
+    {
+      "id": "prod-54",
+      "name": "Parryware Western Toilet",
+      "slug": "parryware-western-toilet",
+      "brand": "Parryware",
+      "category": "bathroom-sanitary",
+      "subcategory": "Toilet",
+      "description": "One-piece western closet with an efficient rimless flushing system for superior hygiene and easy cleaning.",
+      "images": [
+        "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=400"
+      ],
+      "price": 9800,
+      "mrp": 12000,
+      "discount": 18,
+      "unit": "Set",
+      "stock": 50,
+      "rating": 4.5,
+      "reviews": 280,
+      "bulkPrice": 8500,
+      "minimumBulkQuantity": 5,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Type",
+          "value": "One Piece"
+        },
+        {
+          "key": "Trap",
+          "value": "S-Trap"
+        }
+      ],
+      "features": [
+        "Rimless Design",
+        "Soft Close Seat Cover",
+        "Dual Flush"
+      ]
+    },
+    {
+      "id": "prod-55",
+      "name": "Grohe Rain Shower Set",
+      "slug": "grohe-rain-shower-set",
+      "brand": "Grohe",
+      "category": "bathroom-sanitary",
+      "subcategory": "Shower",
+      "description": "Premium thermostatic rain shower system providing a luxurious bathing experience. Ensures constant water temperature.",
+      "images": [
+        "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=400"
+      ],
+      "price": 15000,
+      "mrp": 18000,
+      "discount": 16,
+      "unit": "Set",
+      "stock": 30,
+      "rating": 4.7,
+      "reviews": 150,
+      "bulkPrice": 13500,
+      "minimumBulkQuantity": 5,
+      "deliveryAvailable": true,
+      "featured": true,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Finish",
+          "value": "StarLight Chrome"
+        },
+        {
+          "key": "Head Size",
+          "value": "8 inch"
+        }
+      ],
+      "features": [
+        "Thermostatic Control",
+        "Anti-Limescale System",
+        "Water Saving"
+      ]
+    },
+    {
+      "id": "prod-56",
+      "name": "SS Bathroom Accessories Set",
+      "slug": "ss-bathroom-accessories-set",
+      "brand": "Kohler",
+      "category": "bathroom-sanitary",
+      "subcategory": "Accessories",
+      "description": "Complete 5-piece stainless steel bathroom accessory set including towel ring, soap dispenser, and robe hook.",
+      "images": [
+        "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=400"
+      ],
+      "price": 3200,
+      "mrp": 4000,
+      "discount": 20,
+      "unit": "Set",
+      "stock": 100,
+      "rating": 4.3,
+      "reviews": 190,
+      "bulkPrice": 2800,
+      "minimumBulkQuantity": 10,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Material",
+          "value": "Stainless Steel 304"
+        },
+        {
+          "key": "Pieces",
+          "value": "5 Pcs"
+        }
+      ],
+      "features": [
+        "Rust Free",
+        "Concealed Screws",
+        "Modern Design"
+      ]
+    },
+    {
+      "id": "prod-57",
+      "name": "Wooden Medicine Cabinet",
+      "slug": "wooden-medicine-cabinet",
+      "brand": "BuildPro",
+      "category": "bathroom-sanitary",
+      "subcategory": "Accessories",
+      "description": "Elegant moisture-resistant wooden medicine cabinet with mirrored door and adjustable interior shelves.",
+      "images": [
+        "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=400"
+      ],
+      "price": 5500,
+      "mrp": 6800,
+      "discount": 19,
+      "unit": "Piece",
+      "stock": 45,
+      "rating": 4.2,
+      "reviews": 110,
+      "bulkPrice": 4800,
+      "minimumBulkQuantity": 5,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": true,
+      "specifications": [
+        {
+          "key": "Material",
+          "value": "Engineered Wood"
+        },
+        {
+          "key": "Mirror",
+          "value": "Yes"
+        }
+      ],
+      "features": [
+        "Moisture Resistant",
+        "Adjustable Shelves",
+        "Soft Close Hinges"
+      ]
+    },
+    {
+      "id": "prod-58",
+      "name": "Karam Safety Helmet",
+      "slug": "karam-safety-helmet",
+      "brand": "Karam",
+      "category": "safety-equipment",
+      "subcategory": "Helmets",
+      "description": "High impact resistant industrial safety helmet with adjustable ratchet suspension for a comfortable fit.",
+      "images": [
+        "https://images.unsplash.com/photo-1587783852033-0498b958fb44?w=400"
+      ],
+      "price": 350,
+      "mrp": 420,
+      "discount": 16,
+      "unit": "Piece",
+      "stock": 400,
+      "rating": 4.3,
+      "reviews": 350,
+      "bulkPrice": 290,
+      "minimumBulkQuantity": 20,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Material",
+          "value": "HDPE"
+        },
+        {
+          "key": "Standard",
+          "value": "IS 2925"
+        }
+      ],
+      "features": [
+        "Shock Absorption",
+        "Sweatband",
+        "Adjustable Fit"
+      ]
+    },
+    {
+      "id": "prod-59",
+      "name": "Udyogi Safety Gloves",
+      "slug": "udyogi-safety-gloves",
+      "brand": "Udyogi",
+      "category": "safety-equipment",
+      "subcategory": "Gloves",
+      "description": "Heavy duty cotton canvas gloves with leather palms for excellent grip and protection during construction work.",
+      "images": [
+        "https://images.unsplash.com/photo-1587783852033-0498b958fb44?w=400"
+      ],
+      "price": 280,
+      "mrp": 350,
+      "discount": 20,
+      "unit": "Pair",
+      "stock": 500,
+      "rating": 4.1,
+      "reviews": 220,
+      "bulkPrice": 230,
+      "minimumBulkQuantity": 50,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Material",
+          "value": "Cotton/Leather"
+        },
+        {
+          "key": "Size",
+          "value": "Universal"
+        }
+      ],
+      "features": [
+        "Cut Resistant",
+        "Breathable",
+        "Durable"
+      ]
+    },
+    {
+      "id": "prod-60",
+      "name": "Bata Safety Shoes",
+      "slug": "bata-safety-shoes",
+      "brand": "Bata",
+      "category": "safety-equipment",
+      "subcategory": "Shoes",
+      "description": "Industrial safety shoes featuring steel toe caps and anti-skid polyurethane soles for maximum protection.",
+      "images": [
+        "https://images.unsplash.com/photo-1587783852033-0498b958fb44?w=400"
+      ],
+      "price": 2200,
+      "mrp": 2800,
+      "discount": 21,
+      "unit": "Pair",
+      "stock": 150,
+      "rating": 4.4,
+      "reviews": 410,
+      "bulkPrice": 1800,
+      "minimumBulkQuantity": 10,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Upper",
+          "value": "Leather"
+        },
+        {
+          "key": "Toe",
+          "value": "Steel Toe"
+        }
+      ],
+      "features": [
+        "Anti-Skid Sole",
+        "Oil Resistant",
+        "Shock Absorbing Heel"
+      ]
+    },
+    {
+      "id": "prod-61",
+      "name": "3M Safety Goggles",
+      "slug": "3m-safety-goggles",
+      "brand": "3M",
+      "category": "safety-equipment",
+      "subcategory": "Goggles",
+      "description": "Polycarbonate safety goggles offering protection against flying particles, dust, and chemical splashes.",
+      "images": [
+        "https://images.unsplash.com/photo-1587783852033-0498b958fb44?w=400"
+      ],
+      "price": 450,
+      "mrp": 550,
+      "discount": 18,
+      "unit": "Piece",
+      "stock": 200,
+      "rating": 4.5,
+      "reviews": 180,
+      "bulkPrice": 380,
+      "minimumBulkQuantity": 20,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": true,
+      "specifications": [
+        {
+          "key": "Lens",
+          "value": "Clear Polycarbonate"
+        },
+        {
+          "key": "Coating",
+          "value": "Anti-Fog"
+        }
+      ],
+      "features": [
+        "Scratch Resistant",
+        "UV Protection",
+        "Wide Vision"
+      ]
+    },
+    {
+      "id": "prod-62",
+      "name": "Reflective Safety Vest",
+      "slug": "reflective-safety-vest",
+      "brand": "SafetyFirst",
+      "category": "safety-equipment",
+      "subcategory": "Vests",
+      "description": "High visibility neon safety vest with reflective strips ensuring workers are seen even in low light conditions.",
+      "images": [
+        "https://images.unsplash.com/photo-1587783852033-0498b958fb44?w=400"
+      ],
+      "price": 350,
+      "mrp": 420,
+      "discount": 16,
+      "unit": "Piece",
+      "stock": 300,
+      "rating": 4,
+      "reviews": 120,
+      "bulkPrice": 280,
+      "minimumBulkQuantity": 50,
+      "deliveryAvailable": true,
+      "featured": false,
+      "newArrival": false,
+      "specifications": [
+        {
+          "key": "Material",
+          "value": "Polyester Mesh"
+        },
+        {
+          "key": "Tape",
+          "value": "2 inch Reflective"
+        }
+      ],
+      "features": [
+        "High Visibility",
+        "Breathable Fabric",
+        "Front Velcro Closure"
+      ]
+    }
+  ]
+}

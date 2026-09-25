@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useSearchStore } from '@/store/searchStore';
 import { filterProducts } from '@/utils/helpers';
-import { products } from '@/data/products';
+import { products as defaultProducts } from '@/data/products';
+import { catalogService } from '@/services/catalogService';
+import { Product } from '@/types';
 import ProductFilters from '@/components/product/ProductFilters';
 import ProductGrid from '@/components/product/ProductGrid';
 import { Filter, Search } from 'lucide-react';
@@ -13,13 +15,31 @@ const SearchResultsPage: React.FC = () => {
   const queryParam = searchParams.get('q') || '';
   const { setQuery, filters } = useSearchStore();
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [allProductsList, setAllProductsList] = useState<Product[]>(defaultProducts);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
     setQuery(queryParam);
   }, [queryParam, setQuery]);
 
-  const filteredProducts = filterProducts(products, queryParam, filters);
+  useEffect(() => {
+    let mounted = true;
+    setLoading(true);
+    catalogService.getProducts({ page_size: 100 }).then((res) => {
+      if (mounted && res && res.products.length > 0) {
+        setAllProductsList(res.products);
+      }
+      if (mounted) setLoading(false);
+    }).catch(() => {
+      if (mounted) setLoading(false);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const filteredProducts = filterProducts(allProductsList, queryParam, filters);
 
   return (
     <div className="container-custom py-8">
@@ -28,7 +48,7 @@ const SearchResultsPage: React.FC = () => {
           Search Results for "{queryParam}"
         </h1>
         <p className="text-gray-600 mt-2">
-          Found {filteredProducts.length} {filteredProducts.length === 1 ? 'result' : 'results'}
+          {loading ? 'Searching catalog...' : `Found ${filteredProducts.length} ${filteredProducts.length === 1 ? 'result' : 'results'}`}
         </p>
       </div>
 
@@ -49,7 +69,7 @@ const SearchResultsPage: React.FC = () => {
         <aside className={`w-full md:w-1/4 ${showMobileFilters ? 'block' : 'hidden md:block'}`}>
           <div className="sticky top-24">
             <ProductFilters
-              products={products}
+              products={allProductsList}
               currentFilters={filters}
               onFilterChange={useSearchStore.getState().setFilters}
             />

@@ -101,13 +101,19 @@ curl -s http://localhost:8000/api/v1/auth/me \
   -H "Authorization: Bearer <YOUR_ACCESS_TOKEN>"
 ```
 
-### 10. Run Automated Backend Test Suite
+### 10. Seed Catalog Data (Phase 2C)
+Populate the database with all 12 categories and 62 products:
 ```bash
-# Run all auth & RBAC tests
-PYTHONPATH=backend backend/.venv/bin/pytest backend/tests/test_auth.py -v
+PYTHONPATH=backend backend/.venv/bin/python backend/scripts/seed_catalog.py
 ```
 
-### 11. Start Frontend (React + Vite)
+### 11. Run Automated Backend Test Suite
+```bash
+# Run all auth, RBAC, catalog, and inventory tests (55 tests)
+PYTHONPATH=backend backend/.venv/bin/pytest backend/tests/test_auth.py backend/tests/test_catalog.py -v
+```
+
+### 12. Start Frontend (React + Vite)
 From the project root:
 ```bash
 npm run dev
@@ -126,6 +132,16 @@ Frontend runs at: [http://localhost:3000](http://localhost:3000)
 - **Public Registration Guard**: Forces `role = "customer"` to prevent privilege escalation
 - **Declarative Guards**: FastAPI dependencies `require_staff`, `require_admin`, `require_super_admin`, `require_permission(Permission)`
 
+---
+
+## 🏗️ Product Catalog & Inventory Architecture (Phase 2C)
+
+- **Categories**: Self-referential hierarchical taxonomy, URL slugs, image assets, and live product counts (`/api/v1/categories`).
+- **Products**: Complete 62 construction materials catalog with `Numeric(12, 2)` monetary precision, JSON specifications and feature tags, bulk discount pricing, and full-text search / filtering / pagination (`/api/v1/products`).
+- **Inventory**: Central warehouse stock tracking (`quantity`, `reserved_quantity`, `available_quantity`, `low_stock_threshold`), reorder alerts, and staff stock adjustments (`/api/v1/inventory`).
+- **Frontend Bridging & Resilience**: `catalogService` and `apiClient` fetch from backend with zero-layout-shift caching and offline fallback for local UI development.
+
+---
 
 ## 📁 Directory Architecture
 
@@ -137,7 +153,9 @@ backend/
 │   ├── core/
 │   │   ├── __init__.py
 │   │   ├── config.py               # Pydantic Settings configuration
-│   │   └── database.py             # SQLAlchemy 2.x engine & session dependencies
+│   │   ├── database.py             # SQLAlchemy 2.x engine & session dependencies
+│   │   ├── security.py             # Argon2id password hashing & JWT token creation
+│   │   └── permissions.py          # Role definitions & RBAC dependency guards
 │   ├── api/
 │   │   ├── __init__.py
 │   │   └── v1/
@@ -145,19 +163,44 @@ backend/
 │   │       ├── router.py           # Central v1 endpoint aggregator
 │   │       └── endpoints/
 │   │           ├── __init__.py
+│   │           ├── auth.py         # Register, Login, Me, Change Password
+│   │           ├── categories.py   # Category public & admin CRUD
+│   │           ├── products.py     # Product search, filter, pagination & CRUD
+│   │           ├── inventory.py    # Staff inventory & low-stock monitoring
 │   │           └── health.py       # Health & DB probe endpoints
 │   ├── models/
 │   │   ├── __init__.py
-│   │   └── base.py                 # DeclarativeBase & Timestamp mixins
+│   │   ├── base.py                 # DeclarativeBase & Timestamp mixins
+│   │   ├── user.py                 # User model (Argon2id, roles, account types)
+│   │   ├── category.py             # Category model with hierarchy & slug index
+│   │   ├── product.py              # Product model with Numeric(12, 2) & JSON fields
+│   │   └── inventory.py            # Inventory model with stock thresholds
 │   ├── schemas/
 │   │   ├── __init__.py
+│   │   ├── auth.py                 # Pydantic auth schemas
+│   │   ├── category.py             # Category schemas & item responses
+│   │   ├── product.py              # Product schemas, paginated list response
+│   │   ├── inventory.py            # Inventory schemas & update payloads
 │   │   └── health.py               # Pydantic v2 health schemas
-│   └── services/
-│       └── __init__.py             # Business logic layer
+│   ├── services/
+│   │   ├── __init__.py
+│   │   ├── auth_service.py         # Authentication & user management service
+│   │   ├── category_service.py     # Category querying, product counts & CRUD
+│   │   ├── product_service.py      # Product search, filters, pagination & CRUD
+│   │   └── inventory_service.py    # Inventory tracking, thresholds & updates
+│   └── scripts/
+│       ├── seed_data.json          # Seed catalog definitions (12 categories, 62 products)
+│       └── seed_catalog.py         # Idempotent catalog seeder script
 ├── alembic/
 │   ├── versions/                   # Migration script history
+│   │   ├── 0001_create_auth_tables.py
+│   │   └── 0002_create_catalog_tables.py
 │   ├── env.py                      # Alembic runtime environment
 │   └── script.py.mako              # Migration template
+├── tests/
+│   ├── conftest.py                 # Pytest fixtures & SQLite in-memory test DB
+│   ├── test_auth.py                # 20 automated auth & RBAC tests
+│   └── test_catalog.py             # 35 automated catalog & inventory tests
 ├── alembic.ini                     # Alembic configuration
 ├── requirements.txt                # Python dependencies
 ├── .env.example                    # Environment template

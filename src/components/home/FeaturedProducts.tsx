@@ -1,12 +1,17 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import ProductGrid from '@/components/product/ProductGrid';
-import { products } from '@/data/products';
+import { Product } from '@/types';
+import catalogService from '@/services/catalogService';
 import { Link } from 'react-router-dom';
 import Button from '@/components/ui/Button';
 import { ArrowRight } from 'lucide-react';
 
 const FeaturedProducts: React.FC = () => {
-  const featured = products.filter(p => p.featured).slice(0, 8);
+  const [featured, setFeatured] = useState<Product[]>([]);
+
+  useEffect(() => {
+    catalogService.getFeaturedProducts(8).then(setFeatured);
+  }, []);
 
   return (
     <section className="py-14 md:py-20 bg-[#F7F9FB] border-y border-gray-100/80">

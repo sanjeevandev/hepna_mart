@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useSearchStore } from '@/store/searchStore';
-import { filterProducts } from '@/utils/helpers';
-import { products } from '@/data/products';
+import { Product } from '@/types';
+import catalogService from '@/services/catalogService';
 import ProductFilters from '@/components/product/ProductFilters';
 import ProductGrid from '@/components/product/ProductGrid';
 import SectionReveal from '@/components/ui/SectionReveal';
 import ScrollReveal from '@/components/ui/ScrollReveal';
-import { Filter, Grid, List, RotateCcw, Package, Search } from 'lucide-react';
+import { Filter, Grid, List, RotateCcw, Search, Loader2 } from 'lucide-react';
 import Button from '@/components/ui/Button';
 
 const ShopPage: React.FC = () => {
@@ -16,7 +16,12 @@ const ShopPage: React.FC = () => {
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-  // Synchronize URL search params (e.g. /shop?q=cement or /shop?category=cement-concrete)
+  const [products, setProducts] = useState<Product[]>([]);
+  const [totalCount, setTotalCount] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Synchronize URL search params
   useEffect(() => {
     window.scrollTo(0, 0);
     const urlQuery = searchParams.get('q');
@@ -30,13 +35,39 @@ const ShopPage: React.FC = () => {
     }
   }, [searchParams]);
 
-  // Safe product filtering
-  const safeProducts = Array.isArray(products) ? products : [];
-  const filteredProducts = filterProducts(safeProducts, filters, query);
+  // Fetch products from backend via catalogService
+  const loadProducts = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await catalogService.getProducts({
+        search: query || undefined,
+        category: filters.category || undefined,
+        brand: filters.brand || undefined,
+        min_price: filters.minPrice,
+        max_price: filters.maxPrice,
+        in_stock: filters.inStock,
+        sort: filters.sortBy || 'popular',
+        page: 1,
+        page_size: 60,
+      });
+      setProducts(res.products);
+      setTotalCount(res.total);
+    } catch (err: any) {
+      setError(err.message || 'Failed to load products from catalog.');
+    } finally {
+      setLoading(false);
+    }
+  }, [query, filters]);
 
-  const activeFilterCount = Object.keys(filters).filter(
-    (k) => filters[k as keyof typeof filters] !== undefined && filters[k as keyof typeof filters] !== ''
-  ).length + (query ? 1 : 0);
+  useEffect(() => {
+    loadProducts();
+  }, [loadProducts]);
+
+  const activeFilterCount =
+    Object.keys(filters).filter(
+      (k) => filters[k as keyof typeof filters] !== undefined && filters[k as keyof typeof filters] !== ''
+    ).length + (query ? 1 : 0);
 
   return (
     <div className="bg-[#F8FAFC] min-h-screen py-8 sm:py-10">
@@ -56,7 +87,7 @@ const ShopPage: React.FC = () => {
                 Construction Materials Catalog
               </ScrollReveal>
               <p className="text-xs sm:text-sm text-gray-500 mt-1">
-                Showing {filteredProducts.length} of {safeProducts.length} certified supplies
+                Showing {products.length} of {totalCount} certified supplies
                 {query && (
                   <span>
                     {' '}
@@ -121,7 +152,7 @@ const ShopPage: React.FC = () => {
             </Button>
 
             <div className="text-xs font-bold text-gray-600">
-              {filteredProducts.length} Supplies
+              {products.length} Supplies
             </div>
           </div>
 
@@ -129,7 +160,7 @@ const ShopPage: React.FC = () => {
           <aside className={`w-full md:w-1/4 ${showMobileFilters ? 'block' : 'hidden md:block'}`}>
             <div className="sticky top-24">
               <ProductFilters
-                products={safeProducts}
+                products={products}
                 currentFilters={filters}
                 onFilterChange={setFilters}
               />
@@ -139,9 +170,25 @@ const ShopPage: React.FC = () => {
           {/* Main Product Grid Content */}
           <main className="w-full md:w-3/4">
             <SectionReveal variant="product">
-              {filteredProducts.length > 0 ? (
+              {loading ? (
+                <div className="flex flex-col items-center justify-center py-24 bg-white rounded-2xl border border-gray-200 shadow-sm">
+                  <Loader2 className="w-8 h-8 text-accent animate-spin mb-3" />
+                  <p className="text-xs font-bold text-gray-600">Loading certified supplies...</p>
+                </div>
+              ) : error ? (
+                <div className="text-center py-16 bg-white rounded-2xl border border-red-200 shadow-sm p-8 max-w-md mx-auto">
+                  <h3 className="text-base font-bold text-red-600 mb-2">Failed to load catalog</h3>
+                  <p className="text-xs text-gray-500 mb-4">{error}</p>
+                  <button
+                    onClick={loadProducts}
+                    className="px-4 py-2 bg-accent hover:bg-accent-dark text-white rounded-xl text-xs font-bold transition-colors"
+                  >
+                    Retry Connection
+                  </button>
+                </div>
+              ) : products.length > 0 ? (
                 <ProductGrid
-                  products={filteredProducts}
+                  products={products}
                   columns={viewMode === 'list' ? 2 : 3}
                   withGlow={false}
                 />

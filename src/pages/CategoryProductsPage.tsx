@@ -1,29 +1,55 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { categories } from '@/data/categories';
-import { getProductsByCategory } from '@/utils/helpers';
-import { products } from '@/data/products';
+import { Category, Product } from '@/types';
+import catalogService from '@/services/catalogService';
 import ProductGrid from '@/components/product/ProductGrid';
 import ProductFilters from '@/components/product/ProductFilters';
 import SectionReveal from '@/components/ui/SectionReveal';
 import ScrollReveal from '@/components/ui/ScrollReveal';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Loader2 } from 'lucide-react';
 
 const CategoryProductsPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
+  const [category, setCategory] = useState<Category | null>(null);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   
   useEffect(() => {
     window.scrollTo(0, 0);
+    if (!slug) return;
+
+    let isMounted = true;
+    setLoading(true);
+
+    Promise.all([
+      catalogService.getCategoryBySlug(slug),
+      catalogService.getProducts({ category: slug, page_size: 60 }),
+    ]).then(([catData, prodData]) => {
+      if (!isMounted) return;
+      setCategory(catData);
+      setProducts(prodData.products);
+      setLoading(false);
+    });
+
+    return () => {
+      isMounted = false;
+    };
   }, [slug]);
 
-  const category = categories.find(c => c.slug === slug);
-  const categoryProducts = slug ? getProductsByCategory(products, slug) : [];
+  if (loading) {
+    return (
+      <div className="container-custom py-24 flex flex-col items-center justify-center">
+        <Loader2 className="w-8 h-8 text-accent animate-spin mb-3" />
+        <p className="text-xs font-bold text-gray-500">Loading category supplies...</p>
+      </div>
+    );
+  }
 
   if (!category) {
     return (
       <div className="container-custom py-20 text-center">
         <h1 className="text-3xl font-bold mb-4">Category Not Found</h1>
-        <Link to="/categories" className="text-accent hover:underline">
+        <Link to="/categories" className="text-accent hover:underline font-bold">
           Back to all categories
         </Link>
       </div>
@@ -70,16 +96,16 @@ const CategoryProductsPage: React.FC = () => {
       <div className="flex flex-col md:flex-row gap-8">
         <aside className="w-full md:w-1/4">
           <div className="sticky top-24">
-            <ProductFilters />
+            <ProductFilters products={products} />
           </div>
         </aside>
         
         <main className="w-full md:w-3/4">
-          <div className="mb-6 text-gray-600 font-medium">
-            Showing {categoryProducts.length} products in {category.name}
+          <div className="mb-6 text-gray-600 font-medium text-xs sm:text-sm">
+            Showing {products.length} certified products in {category.name}
           </div>
           <SectionReveal variant="product">
-            <ProductGrid products={categoryProducts} />
+            <ProductGrid products={products} />
           </SectionReveal>
         </main>
       </div>

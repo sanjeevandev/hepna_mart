@@ -1,20 +1,55 @@
-import React, { useState, useMemo } from 'react';
-import { Package, Search, Plus, Filter, Tag, CheckCircle2, AlertTriangle } from 'lucide-react';
-import { products } from '@/data/products';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { Package, Search, Plus, Filter, Tag, CheckCircle2, AlertTriangle, RefreshCw } from 'lucide-react';
+import { products as defaultProducts } from '@/data/products';
+import { categories as defaultCategories } from '@/data/categories';
+import { catalogService } from '@/services/catalogService';
+import { Product, Category } from '@/types';
 import { formatPrice } from '@/utils/formatPrice';
 
 const AdminProductsPage: React.FC = () => {
+  const [productsList, setProductsList] = useState<Product[]>(defaultProducts);
+  const [categoriesList, setCategoriesList] = useState<Category[]>(defaultCategories);
+  const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('ALL');
 
-  const categories = useMemo(() => {
-    const set = new Set<string>();
-    products.forEach((p) => set.add(p.category));
-    return Array.from(set);
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [prodsRes, catsRes] = await Promise.all([
+        catalogService.getProducts({ page_size: 100 }),
+        catalogService.getCategories(false),
+      ]);
+      if (prodsRes && prodsRes.products.length > 0) {
+        setProductsList(prodsRes.products);
+      }
+      if (catsRes && catsRes.length > 0) {
+        setCategoriesList(catsRes);
+      }
+    } catch {
+      // Keep defaults
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const uniqueCategories = useMemo(() => {
+    const map = new Map<string, string>();
+    categoriesList.forEach((c) => map.set(c.slug, c.name));
+    productsList.forEach((p) => {
+      if (!map.has(p.category)) {
+        map.set(p.category, p.category.replace(/-/g, ' ').toUpperCase());
+      }
+    });
+    return Array.from(map.entries()).map(([slug, name]) => ({ slug, name }));
+  }, [categoriesList, productsList]);
+
   const filteredProducts = useMemo(() => {
-    let list = [...products];
+    let list = [...productsList];
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       list = list.filter(
@@ -28,7 +63,7 @@ const AdminProductsPage: React.FC = () => {
       list = list.filter((p) => p.category === categoryFilter);
     }
     return list;
-  }, [searchQuery, categoryFilter]);
+  }, [productsList, searchQuery, categoryFilter]);
 
   return (
     <div className="space-y-6">
@@ -40,12 +75,23 @@ const AdminProductsPage: React.FC = () => {
               Product Catalog Management
             </h1>
             <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-200 text-slate-700">
-              {products.length} SKUs
+              {productsList.length} SKUs
             </span>
           </div>
           <p className="text-xs text-slate-500 mt-0.5">
             Manage construction materials, live rates, bulk tiers, and stock availability
           </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={loadData}
+            disabled={loading}
+            className="px-3 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-accent' : 'text-slate-400'}`} />
+            <span>{loading ? 'Refreshing...' : 'Refresh'}</span>
+          </button>
         </div>
       </div>
 
@@ -67,10 +113,10 @@ const AdminProductsPage: React.FC = () => {
           onChange={(e) => setCategoryFilter(e.target.value)}
           className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:border-accent w-full sm:w-auto"
         >
-          <option value="ALL">All Categories ({products.length})</option>
-          {categories.map((c) => (
-            <option key={c} value={c}>
-              {c.replace(/-/g, ' ').toUpperCase()}
+          <option value="ALL">All Categories ({productsList.length})</option>
+          {uniqueCategories.map((c) => (
+            <option key={c.slug} value={c.slug}>
+              {c.name}
             </option>
           ))}
         </select>
