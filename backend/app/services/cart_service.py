@@ -5,6 +5,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.models.cart import Cart, CartItem
 from app.models.product import Product
 from app.models.inventory import Inventory
@@ -103,8 +104,8 @@ class CartService:
             )
 
         subtotal = round(subtotal, 2)
-        tax = round(subtotal * 0.18, 2)
-        delivery_charge = 0.0 if (subtotal > 5000.0 or subtotal == 0.0) else 199.0
+        tax = round(subtotal * settings.GST_RATE, 2)
+        delivery_charge = 0.0 if (subtotal > settings.FREE_DELIVERY_THRESHOLD or subtotal == 0.0) else settings.STANDARD_DELIVERY_FEE
         total = round(subtotal + tax + delivery_charge, 2)
 
         return CartResponse(

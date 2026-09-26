@@ -19,6 +19,11 @@ class Settings(BaseSettings):
     # Database
     DATABASE_URL: Optional[str] = "postgresql://postgres:postgres@localhost:5432/hepna_mart"
 
+    # Cart & Pricing Constants
+    GST_RATE: float = 0.18
+    FREE_DELIVERY_THRESHOLD: float = 5000.0
+    STANDARD_DELIVERY_FEE: float = 199.0
+
     # CORS
     CORS_ORIGINS: Union[List[str], str] = [
         "http://localhost:3000",

@@ -4,6 +4,10 @@ import { Product, CartItem } from '@/types';
 import { apiClient, getAuthToken, BackendCartItem, BackendCartResponse } from '@/lib/api';
 import toast from 'react-hot-toast';
 
+export const GST_RATE = 0.18;
+export const FREE_DELIVERY_THRESHOLD = 5000;
+export const STANDARD_DELIVERY_FEE = 199;
+
 function mapBackendCartToItems(backendItems: BackendCartItem[]): CartItem[] {
   return backendItems.map((bi) => ({
     product: {
@@ -243,12 +247,12 @@ export const useCartStore = create<CartState>()(
         return get().items.reduce((count, item) => count + item.quantity, 0);
       },
       getTax: () => {
-        return Math.round(get().getSubtotal() * 0.18 * 100) / 100;
+        return Math.round(get().getSubtotal() * GST_RATE * 100) / 100;
       },
       getDeliveryCharge: () => {
         const subtotal = get().getSubtotal();
         if (subtotal === 0) return 0;
-        return subtotal > 5000 ? 0 : 199;
+        return subtotal > FREE_DELIVERY_THRESHOLD ? 0 : STANDARD_DELIVERY_FEE;
       },
       getTotal: () => {
         return get().getSubtotal() + get().getTax() + get().getDeliveryCharge();

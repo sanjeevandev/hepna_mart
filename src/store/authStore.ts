@@ -204,8 +204,9 @@ export const useAuthStore = create<AuthState>()(
         removeAuthToken();
         apiClient.auth.logout().catch(() => {});
         set({ currentUser: null, isAuthenticated: false, serverPermissions: [] });
-        // Clear or reset active user cart
+        // Clear or reset active user cart & wishlist
         useCartStore.getState().clearCart().catch(() => {});
+        useWishlistStore.getState().clearWishlist().catch(() => {});
         toast('Signed out successfully');
       },
 
