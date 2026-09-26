@@ -93,6 +93,23 @@ const CheckoutPage: React.FC = () => {
           addOrder(mappedOrder);
           setOrderId(mappedOrder.id);
           await useCartStore.getState().fetchCart();
+
+          // Create payment record
+          try {
+            await apiClient.payments.create({
+              order_id: mappedOrder.id,
+              payment_method: method.toLowerCase(),
+            });
+          } catch {
+            // Non-fatal
+          }
+
+          if (method.toLowerCase() === 'upi') {
+            toast.success('Order placed! Please complete your UPI payment.');
+            navigate(`/payment/${mappedOrder.id}`);
+            return;
+          }
+
           setCurrentStep(4);
           window.scrollTo(0, 0);
           return;

@@ -244,6 +244,10 @@ export type Permission =
   | 'pricing.view'
   | 'pricing.manage'
   | 'reports.view'
+  | 'payments.view'
+  | 'payments.verify'
+  | 'payments.reject'
+  | 'payments.refund'
   | 'settings.manage';
 
 // --- Address & Delivery ---
@@ -433,4 +437,79 @@ export interface ConstructionEstimate {
   priceSnapshotTimestamp: string;
   validityDays: number;
   notes?: string;
+}
+
+// --- Payment Types ---
+
+export type PaymentStatus =
+  | 'pending'
+  | 'awaiting_verification'
+  | 'verified'
+  | 'failed'
+  | 'cancelled'
+  | 'refunded';
+
+export type PaymentMethod = 'upi' | 'cod' | 'card' | 'netbanking';
+
+export interface PaymentEvent {
+  id: string;
+  payment_id: string;
+  event_type: string;
+  old_status?: string | null;
+  new_status: string;
+  provider_event_id?: string | null;
+  metadata?: Record<string, any> | null;
+  created_by_user_id?: string | null;
+  created_at: string;
+}
+
+export interface PaymentOrderSummary {
+  id: string;
+  order_number: string;
+  customer_name: string;
+  customer_email: string;
+  customer_phone?: string;
+  total_amount: number;
+  payment_status: string;
+  status: string;
+}
+
+export interface Payment {
+  id: string;
+  order_id: string;
+  user_id: string;
+  payment_reference?: string;
+  provider_reference?: string;
+  provider: string;
+  payment_method: string;
+  payment_status: PaymentStatus;
+  amount: number;
+  currency: string;
+  failure_reason?: string;
+  verified_by_user_id?: string;
+  verified_at?: string;
+  created_at: string;
+  updated_at: string;
+  order?: PaymentOrderSummary;
+  events?: PaymentEvent[];
+}
+
+export interface PaymentMetrics {
+  pending_verification: number;
+  verified_today: number;
+  failed_payments: number;
+  cod_orders: number;
+  upi_volume: number;
+  refund_pending: number;
+  total_payments: number;
+}
+
+export interface PaymentConfig {
+  upi_id: string;
+  upi_display_name: string;
+  upi_qr_path: string;
+  currency: string;
+  manual_upi_enabled: boolean;
+  cod_enabled: boolean;
+  gateway_enabled: boolean;
 }

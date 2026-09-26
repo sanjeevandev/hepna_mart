@@ -20,6 +20,7 @@ import {
   ShieldCheck,
   Building,
   Tag,
+  CreditCard,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { hasPermission } from '@/utils/rbac';
@@ -79,6 +80,12 @@ const NAV_SECTIONS: NavSection[] = [
         href: '/admin/orders',
         icon: ShoppingCart,
         permission: 'orders.view',
+      },
+      {
+        label: 'Payments',
+        href: '/admin/payments',
+        icon: CreditCard,
+        permission: 'payments.view',
       },
       {
         label: 'Customers',

@@ -10,6 +10,8 @@ from app.api.v1.endpoints import (
     wishlist,
     orders,
     wholesale,
+    payments,
+    admin_payments,
 )
 
 api_router = APIRouter()
@@ -32,6 +34,7 @@ api_router.include_router(inventory.router, tags=["Warehouse & Inventory"])
 api_router.include_router(cart.router, tags=["Customer Cart"])
 api_router.include_router(wishlist.router, tags=["Customer Wishlist"])
 api_router.include_router(orders.router, tags=["Customer Orders & Fulfillment"])
+api_router.include_router(payments.router, tags=["Customer Payments & UPI"])
 
 # Wholesale & RFQ Customer Operations
 api_router.include_router(wholesale.rfq_router, tags=["Customer RFQs & Wholesale Procurement"])
@@ -41,4 +44,5 @@ api_router.include_router(wholesale.quote_router, tags=["Customer Quotations & A
 api_router.include_router(orders.admin_router, tags=["Staff Orders Management"])
 api_router.include_router(wholesale.admin_rfq_router, tags=["Staff RFQ Queue & Procurement"])
 api_router.include_router(wholesale.admin_quote_router, tags=["Staff Quotation Management"])
+api_router.include_router(admin_payments.router, tags=["Staff Payment Management & Verification"])
 

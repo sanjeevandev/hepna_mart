@@ -24,6 +24,15 @@ class Settings(BaseSettings):
     FREE_DELIVERY_THRESHOLD: float = 5000.0
     STANDARD_DELIVERY_FEE: float = 199.0
 
+    # Payment Configuration
+    HEPNA_UPI_ID: str = "hepnamart@upi"
+    HEPNA_UPI_DISPLAY_NAME: str = "HEPNA MART"
+    HEPNA_UPI_QR_PATH: str = "/images/hepna-upi-qr.png"
+    HEPNA_PAYMENT_CURRENCY: str = "INR"
+    HEPNA_MANUAL_UPI_ENABLED: bool = True
+    HEPNA_COD_ENABLED: bool = True
+    HEPNA_PAYMENT_GATEWAY_ENABLED: bool = False
+
     # CORS
     CORS_ORIGINS: Union[List[str], str] = [
         "http://localhost:3000",

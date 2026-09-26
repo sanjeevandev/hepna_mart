@@ -35,6 +35,7 @@ import ProjectBOQPage from '@/pages/ProjectBOQPage';
 import CostCalculatorPage from '@/pages/CostCalculatorPage';
 import EstimatesPage from '@/pages/EstimatesPage';
 import EstimateDetailsPage from '@/pages/EstimateDetailsPage';
+import PaymentPage from '@/pages/PaymentPage';
 
 import AccountSetupPage from '@/pages/AccountSetupPage';
 
@@ -46,6 +47,7 @@ import AdminProductsPage from '@/pages/admin/AdminProductsPage';
 import AdminCategoriesPage from '@/pages/admin/AdminCategoriesPage';
 import AdminInventoryPage from '@/pages/admin/AdminInventoryPage';
 import AdminOrdersPage from '@/pages/admin/AdminOrdersPage';
+import AdminPaymentsPage from '@/pages/admin/AdminPaymentsPage';
 import AdminCustomersPage from '@/pages/admin/AdminCustomersPage';
 import AdminProjectsPage from '@/pages/admin/AdminProjectsPage';
 import AdminBOQsPage from '@/pages/admin/AdminBOQsPage';
@@ -143,6 +145,7 @@ function AppContent() {
             <Route path="/product/:slug" element={<ProductDetailsPage />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/payment/:orderId" element={<PaymentPage />} />
             <Route path="/wishlist" element={<WishlistPage />} />
             <Route path="/orders" element={<OrdersPage />} />
             <Route path="/orders/:orderId" element={<OrderDetailPage />} />
@@ -213,6 +216,16 @@ function AppContent() {
                 <AdminRoute requiredPermission="orders.view">
                   <AdminLayout>
                     <AdminOrdersPage />
+                  </AdminLayout>
+                </AdminRoute>
+              }
+            />
+            <Route
+              path="/admin/payments"
+              element={
+                <AdminRoute requiredPermission="payments.view">
+                  <AdminLayout>
+                    <AdminPaymentsPage />
                   </AdminLayout>
                 </AdminRoute>
               }

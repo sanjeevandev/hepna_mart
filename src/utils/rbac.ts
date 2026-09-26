@@ -34,6 +34,10 @@ export const ALL_PERMISSIONS: Permission[] = [
   'pricing.view',
   'pricing.manage',
   'reports.view',
+  'payments.view',
+  'payments.verify',
+  'payments.reject',
+  'payments.refund',
   'settings.manage',
 ];
 
@@ -66,6 +70,10 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'pricing.view',
     'pricing.manage',
     'reports.view',
+    'payments.view',
+    'payments.verify',
+    'payments.reject',
+    'payments.refund',
     'settings.manage',
   ],
 
@@ -100,6 +108,9 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'orders.cancel',
     'customers.view',
     'reports.view',
+    'payments.view',
+    'payments.verify',
+    'payments.reject',
   ],
 
   support_staff: [
@@ -109,6 +120,7 @@ export const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'orders.view',
     'boq.view',
     'estimates.view',
+    'payments.view',
   ],
 
   customer: [],

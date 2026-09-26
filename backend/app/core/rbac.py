@@ -54,6 +54,12 @@ class Permission(str, Enum):
     # Analytics & Reports
     REPORTS_VIEW = "reports.view"
 
+    # Payments & Reconciliation
+    PAYMENTS_VIEW = "payments.view"
+    PAYMENTS_VERIFY = "payments.verify"
+    PAYMENTS_REJECT = "payments.reject"
+    PAYMENTS_REFUND = "payments.refund"
+
     # System & Staff Administration
     SETTINGS_MANAGE = "settings.manage"
     USERS_MANAGE = "users.manage"
@@ -94,6 +100,10 @@ ROLE_PERMISSIONS: dict[UserRole, Set[Permission]] = {
         Permission.PRICING_VIEW,
         Permission.PRICING_MANAGE,
         Permission.REPORTS_VIEW,
+        Permission.PAYMENTS_VIEW,
+        Permission.PAYMENTS_VERIFY,
+        Permission.PAYMENTS_REJECT,
+        Permission.PAYMENTS_REFUND,
         Permission.SETTINGS_MANAGE,
         Permission.USERS_MANAGE,
     },
@@ -130,6 +140,9 @@ ROLE_PERMISSIONS: dict[UserRole, Set[Permission]] = {
         Permission.ORDERS_CANCEL,
         Permission.CUSTOMERS_VIEW,
         Permission.REPORTS_VIEW,
+        Permission.PAYMENTS_VIEW,
+        Permission.PAYMENTS_VERIFY,
+        Permission.PAYMENTS_REJECT,
     },
 
     UserRole.SUPPORT_STAFF: {
@@ -138,6 +151,7 @@ ROLE_PERMISSIONS: dict[UserRole, Set[Permission]] = {
         Permission.PROJECTS_VIEW,
         Permission.BOQS_VIEW,
         Permission.ESTIMATES_VIEW,
+        Permission.PAYMENTS_VIEW,
     },
 
     UserRole.CUSTOMER: set(),  # Customers have no staff administrative permissions

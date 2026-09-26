@@ -874,6 +874,79 @@ class ApiClient {
     },
   };
 
+  /**
+   * Customer Payments & UPI API Namespace
+   */
+  readonly payments = {
+    getConfig: async (): Promise<ApiResponse<BackendPaymentConfig>> => {
+      return this.get<BackendPaymentConfig>('payments/config');
+    },
+
+    create: async (payload: { order_id: string; payment_method?: string; provider?: string }): Promise<ApiResponse<BackendPayment>> => {
+      return this.post<BackendPayment>('payments/create', payload);
+    },
+
+    get: async (paymentId: string): Promise<ApiResponse<BackendPayment>> => {
+      return this.get<BackendPayment>(`payments/${encodeURIComponent(paymentId)}`);
+    },
+
+    getForOrder: async (orderId: string): Promise<ApiResponse<BackendPayment | null>> => {
+      return this.get<BackendPayment | null>(`payments/order/${encodeURIComponent(orderId)}`);
+    },
+
+    submitUPI: async (paymentId: string, utr_reference: string): Promise<ApiResponse<BackendPayment>> => {
+      return this.post<BackendPayment>(`payments/${encodeURIComponent(paymentId)}/submit-upi`, { utr_reference });
+    },
+
+    cancel: async (paymentId: string): Promise<ApiResponse<BackendPayment>> => {
+      return this.post<BackendPayment>(`payments/${encodeURIComponent(paymentId)}/cancel`);
+    },
+  };
+
+  /**
+   * Staff / Admin Payments & Verification API Namespace
+   */
+  readonly adminPayments = {
+    list: async (params: { page?: number; limit?: number; status?: string; method?: string; search?: string } = {}): Promise<ApiResponse<BackendPaymentListResponse>> => {
+      const query = new URLSearchParams();
+      if (params.page) query.set('page', String(params.page));
+      if (params.limit) query.set('limit', String(params.limit));
+      if (params.status) query.set('status', params.status);
+      if (params.method) query.set('method', params.method);
+      if (params.search) query.set('search', params.search);
+      const qs = query.toString();
+      return this.get<BackendPaymentListResponse>(`admin/payments${qs ? `?${qs}` : ''}`);
+    },
+
+    getMetrics: async (): Promise<ApiResponse<BackendPaymentMetrics>> => {
+      return this.get<BackendPaymentMetrics>('admin/payments/metrics');
+    },
+
+    getReconciliation: async (): Promise<ApiResponse<any[]>> => {
+      return this.get<any[]>('admin/payments/reconciliation');
+    },
+
+    reconcile: async (paymentId: string): Promise<ApiResponse<any>> => {
+      return this.post<any>(`admin/payments/${encodeURIComponent(paymentId)}/reconcile`);
+    },
+
+    get: async (paymentId: string): Promise<ApiResponse<BackendPayment>> => {
+      return this.get<BackendPayment>(`admin/payments/${encodeURIComponent(paymentId)}`);
+    },
+
+    verify: async (paymentId: string, notes?: string): Promise<ApiResponse<BackendPayment>> => {
+      return this.post<BackendPayment>(`admin/payments/${encodeURIComponent(paymentId)}/verify`, { notes });
+    },
+
+    reject: async (paymentId: string, reason: string): Promise<ApiResponse<BackendPayment>> => {
+      return this.post<BackendPayment>(`admin/payments/${encodeURIComponent(paymentId)}/reject`, { reason });
+    },
+
+    refund: async (paymentId: string, reason: string, amount?: number): Promise<ApiResponse<BackendPayment>> => {
+      return this.post<BackendPayment>(`admin/payments/${encodeURIComponent(paymentId)}/refund`, { reason, amount });
+    },
+  };
+
   patch<T = any>(endpoint: string, body?: any, headers?: Record<string, string>) {
     return this.request<T>(endpoint, {
       method: 'PATCH',
@@ -1057,6 +1130,77 @@ export interface AcceptQuoteResponse {
   message: string;
   quote: BackendQuote;
   order: BackendOrder;
+}
+
+// Payment Types
+export interface BackendPaymentEvent {
+  id: string;
+  payment_id: string;
+  event_type: string;
+  old_status?: string | null;
+  new_status: string;
+  provider_event_id?: string | null;
+  metadata?: Record<string, any> | null;
+  created_by_user_id?: string | null;
+  created_at: string;
+}
+
+export interface BackendPaymentOrderSummary {
+  id: string;
+  order_number: string;
+  customer_name: string;
+  customer_email: string;
+  customer_phone?: string;
+  total_amount: number;
+  payment_status: string;
+  status: string;
+}
+
+export interface BackendPayment {
+  id: string;
+  order_id: string;
+  user_id: string;
+  payment_reference?: string;
+  provider_reference?: string;
+  provider: string;
+  payment_method: string;
+  payment_status: string;
+  amount: number;
+  currency: string;
+  failure_reason?: string;
+  verified_by_user_id?: string;
+  verified_at?: string;
+  created_at: string;
+  updated_at: string;
+  order?: BackendPaymentOrderSummary;
+  events?: BackendPaymentEvent[];
+}
+
+export interface BackendPaymentMetrics {
+  pending_verification: number;
+  verified_today: number;
+  failed_payments: number;
+  cod_orders: number;
+  upi_volume: number;
+  refund_pending: number;
+  total_payments: number;
+}
+
+export interface BackendPaymentConfig {
+  upi_id: string;
+  upi_display_name: string;
+  upi_qr_path: string;
+  currency: string;
+  manual_upi_enabled: boolean;
+  cod_enabled: boolean;
+  gateway_enabled: boolean;
+}
+
+export interface BackendPaymentListResponse {
+  payments: BackendPayment[];
+  total: number;
+  page: number;
+  limit: number;
 }
 
 export const apiClient = new ApiClient(API_BASE_URL);

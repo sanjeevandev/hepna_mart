@@ -347,6 +347,42 @@ const OrderDetailPage: React.FC = () => {
 
           {/* RIGHT COLUMN (4/12): Construction Site Card + Project Link + Support */}
           <div className="lg:col-span-4 space-y-6">
+            {/* Payment Status & Details Card */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-3.5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <CreditCard className="w-4 h-4 text-accent" />
+                  <h4 className="font-heading font-bold text-xs uppercase tracking-wider text-[#071A2B]">
+                    Payment Status
+                  </h4>
+                </div>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+                  {order.paymentMethod || 'UPI'}
+                </span>
+              </div>
+
+              <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100 flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block">Status</span>
+                  <span className="text-xs font-bold capitalize text-slate-800">
+                    {order.payment_status || 'Pending'}
+                  </span>
+                </div>
+                <div className="text-right">
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block">Payable</span>
+                  <span className="text-xs font-black text-accent font-heading">
+                    {formatPrice(order.total)}
+                  </span>
+                </div>
+              </div>
+
+              <Link to={`/payment/${order.id}`}>
+                <Button variant="primary" size="sm" fullWidth className="text-xs font-bold mt-1">
+                  View Payment & Verification Details
+                </Button>
+              </Link>
+            </div>
+
             {/* Construction Site Delivery Card */}
             <SiteDeliveryCard
               address={order.deliveryAddress}

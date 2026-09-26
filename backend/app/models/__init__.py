@@ -22,6 +22,12 @@ from app.models.wholesale import (
     RFQStatus,
     QuoteStatus,
 )
+from app.models.payment import (
+    Payment,
+    PaymentEvent,
+    PaymentProvider,
+    PaymentEventType,
+)
 
 __all__ = [
     "Base",
@@ -49,6 +55,10 @@ __all__ = [
     "QuoteItem",
     "RFQStatus",
     "QuoteStatus",
+    "Payment",
+    "PaymentEvent",
+    "PaymentProvider",
+    "PaymentEventType",
 ]
 
 
