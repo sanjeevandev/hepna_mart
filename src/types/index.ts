@@ -57,7 +57,11 @@ export interface Category {
 export interface CartItem {
   product: Product;
   quantity: number;
+  priceAtAddition?: number;
+  hasPriceChanged?: boolean;
+  priceChangeAmount?: number;
 }
+
 
 // --- Project & BOQ Types ---
 

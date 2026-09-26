@@ -9,12 +9,14 @@ import ScrollReveal from '@/components/ui/ScrollReveal';
 import { Heart, Loader2 } from 'lucide-react';
 
 const WishlistPage: React.FC = () => {
-  const { items } = useWishlistStore();
+  const { items, fetchWishlist } = useWishlistStore();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
     window.scrollTo(0, 0);
+    fetchWishlist().catch(() => {});
+    
     let isMounted = true;
     catalogService.getProducts({ limit: 100 })
       .then((res) => {
@@ -50,7 +52,12 @@ const WishlistPage: React.FC = () => {
         </ScrollReveal>
       </SectionReveal>
 
-      {wishlistedProducts.length === 0 ? (
+      {loading ? (
+        <div className="text-center py-20 bg-white rounded-xl shadow-sm border border-gray-100 flex flex-col items-center justify-center">
+          <Loader2 className="w-8 h-8 text-accent animate-spin mb-3" />
+          <p className="text-sm font-semibold text-gray-500">Loading your saved materials...</p>
+        </div>
+      ) : wishlistedProducts.length === 0 ? (
         <SectionReveal>
           <div className="text-center py-20 bg-white rounded-xl shadow-sm border border-gray-100">
             <div className="flex justify-center mb-6">

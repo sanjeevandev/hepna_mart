@@ -29,6 +29,20 @@ from app.schemas.inventory import (
     InventoryResponse,
     InventoryListItem,
 )
+from app.schemas.cart import (
+    CartItemProductSummary,
+    CartItemResponse,
+    CartResponse,
+    AddCartItemRequest,
+    UpdateCartItemRequest,
+    MergeCartItemRequest,
+    MergeCartRequest,
+)
+from app.schemas.wishlist import (
+    WishlistItemResponse,
+    WishlistResponse,
+    MergeWishlistRequest,
+)
 
 __all__ = [
     "HealthResponse",
@@ -55,5 +69,16 @@ __all__ = [
     "InventoryUpdate",
     "InventoryResponse",
     "InventoryListItem",
+    "CartItemProductSummary",
+    "CartItemResponse",
+    "CartResponse",
+    "AddCartItemRequest",
+    "UpdateCartItemRequest",
+    "MergeCartItemRequest",
+    "MergeCartRequest",
+    "WishlistItemResponse",
+    "WishlistResponse",
+    "MergeWishlistRequest",
 ]
+
 

@@ -4,25 +4,29 @@ import { useCartStore } from '@/store/cartStore';
 import CartItem from '@/components/cart/CartItem';
 import OrderSummary from '@/components/cart/OrderSummary';
 import QuotationModal from '@/components/cart/QuotationModal';
-import { ShoppingCart, FileText, ArrowRight } from 'lucide-react';
+import { ShoppingCart, FileText, ArrowRight, AlertTriangle, Loader2 } from 'lucide-react';
 
 const CartPage: React.FC = () => {
-  const { items, getItemCount } = useCartStore();
+  const { items, getItemCount, fetchCart, hasPriceChanges, isLoading } = useCartStore();
   const count = getItemCount();
   const [isQuoteOpen, setIsQuoteOpen] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    fetchCart().catch(() => {});
   }, []);
 
   return (
     <div className="container-custom py-10 sm:py-12">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-4 border-b border-gray-100">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-heading font-black text-[#071A2B]">
-            Shopping Cart
-          </h1>
-          <p className="text-xs sm:text-sm text-gray-500">
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl sm:text-3xl font-heading font-black text-[#071A2B]">
+              Shopping Cart
+            </h1>
+            {isLoading && <Loader2 className="w-5 h-5 text-accent animate-spin" />}
+          </div>
+          <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
             {count} {count === 1 ? 'item' : 'items'} in your active material list
           </p>
         </div>
@@ -38,6 +42,19 @@ const CartPage: React.FC = () => {
           </button>
         )}
       </div>
+
+      {/* Global Price Change Notification Banner */}
+      {hasPriceChanges && (
+        <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-3 text-amber-900 text-xs sm:text-sm animate-in fade-in">
+          <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+          <div>
+            <h4 className="font-bold">Catalog Price Update Notice</h4>
+            <p className="text-amber-800 mt-0.5">
+              One or more item prices in your cart have been updated to match current live factory rates. The current selling price is applied to your order total.
+            </p>
+          </div>
+        </div>
+      )}
 
       {items.length === 0 ? (
         <div className="text-center py-20 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">

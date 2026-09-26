@@ -9,7 +9,10 @@ import {
   RegisterPayload,
   BackendUserResponse,
 } from '@/lib/api';
+import { useCartStore } from '@/store/cartStore';
+import { useWishlistStore } from '@/store/wishlistStore';
 import toast from 'react-hot-toast';
+
 
 /**
  * =========================================================================
@@ -201,6 +204,8 @@ export const useAuthStore = create<AuthState>()(
         removeAuthToken();
         apiClient.auth.logout().catch(() => {});
         set({ currentUser: null, isAuthenticated: false, serverPermissions: [] });
+        // Clear or reset active user cart
+        useCartStore.getState().clearCart().catch(() => {});
         toast('Signed out successfully');
       },
 
@@ -282,6 +287,11 @@ export const useAuthStore = create<AuthState>()(
               isAuthenticated: true,
               serverPermissions: permissions,
             });
+
+            // Safe merge guest cart & wishlist into backend
+            useCartStore.getState().mergeGuestCart().catch(() => {});
+            useWishlistStore.getState().mergeGuestWishlist().catch(() => {});
+
             toast.success(`Welcome back, ${userProfile.name}!`);
             return true;
           }
@@ -302,6 +312,11 @@ export const useAuthStore = create<AuthState>()(
               isAuthenticated: true,
               serverPermissions: [],
             });
+
+            // Safe merge guest cart & wishlist into backend
+            useCartStore.getState().mergeGuestCart().catch(() => {});
+            useWishlistStore.getState().mergeGuestWishlist().catch(() => {});
+
             toast.success(`Welcome to HEPNA MART, ${userProfile.name}!`);
             return true;
           }
@@ -322,6 +337,9 @@ export const useAuthStore = create<AuthState>()(
               isAuthenticated: true,
               serverPermissions: res.data.permissions || [],
             });
+            // Fetch synced cart & wishlist
+            useCartStore.getState().fetchCart().catch(() => {});
+            useWishlistStore.getState().fetchWishlist().catch(() => {});
           }
         } catch {
           // Token invalid or expired

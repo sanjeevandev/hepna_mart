@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.v1.endpoints import health, auth, admin_test, categories, products, inventory
+from app.api.v1.endpoints import health, auth, admin_test, categories, products, inventory, cart, wishlist
 
 api_router = APIRouter()
 
@@ -16,6 +16,11 @@ api_router.include_router(admin_test.router, prefix="/admin", tags=["Staff Admin
 api_router.include_router(categories.router, tags=["Categories & Taxonomy"])
 api_router.include_router(products.router, tags=["Products Catalog"])
 api_router.include_router(inventory.router, tags=["Warehouse & Inventory"])
+
+# Customer Shopping Experience
+api_router.include_router(cart.router, tags=["Customer Cart"])
+api_router.include_router(wishlist.router, tags=["Customer Wishlist"])
+
 
 # =========================================================================
 # FUTURE DOMAIN ROUTE REGISTRATIONS (Subphases 2D+)

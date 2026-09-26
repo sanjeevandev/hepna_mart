@@ -299,6 +299,63 @@ export interface UpdateInventoryPayload {
   location?: string;
 }
 
+export interface BackendCartItemProductSummary {
+  id: string;
+  name: string;
+  slug: string;
+  brand: string;
+  price: number;
+  mrp: number;
+  discount: number;
+  unit: string;
+  images: string[];
+  stock: number;
+  is_active: boolean;
+}
+
+export interface BackendCartItem {
+  id: string;
+  cart_id: string;
+  product_id: string;
+  quantity: number;
+  price_at_addition: number;
+  current_price: number;
+  has_price_changed: boolean;
+  price_change_amount: number;
+  subtotal: number;
+  product: BackendCartItemProductSummary;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BackendCartResponse {
+  id: string;
+  user_id: string;
+  items: BackendCartItem[];
+  total_items: number;
+  subtotal: number;
+  tax: number;
+  delivery_charge: number;
+  total: number;
+  has_price_changes: boolean;
+}
+
+export interface BackendWishlistItem {
+  id: string;
+  wishlist_id: string;
+  product_id: string;
+  product: BackendCartItemProductSummary;
+  created_at: string;
+}
+
+export interface BackendWishlistResponse {
+  id: string;
+  user_id: string;
+  items: BackendWishlistItem[];
+  total_items: number;
+  product_ids: string[];
+}
+
 class ApiClient {
   private baseUrl: string;
 
@@ -526,6 +583,64 @@ class ApiClient {
       return this.put<BackendInventory>(`inventory/${encodeURIComponent(productId)}`, payload);
     },
   };
+
+  /**
+   * Cart API Namespace
+   */
+  readonly cart = {
+    get: async (): Promise<ApiResponse<BackendCartResponse>> => {
+      return this.get<BackendCartResponse>('cart');
+    },
+
+    addItem: async (productId: string, quantity: number = 1): Promise<ApiResponse<BackendCartResponse>> => {
+      return this.post<BackendCartResponse>('cart/items', { product_id: productId, quantity });
+    },
+
+    updateQuantity: async (productId: string, quantity: number): Promise<ApiResponse<BackendCartResponse>> => {
+      return this.patch<BackendCartResponse>(`cart/items/${encodeURIComponent(productId)}`, { quantity });
+    },
+
+    removeItem: async (productId: string): Promise<ApiResponse<BackendCartResponse>> => {
+      return this.delete<BackendCartResponse>(`cart/items/${encodeURIComponent(productId)}`);
+    },
+
+    clear: async (): Promise<ApiResponse<BackendCartResponse>> => {
+      return this.delete<BackendCartResponse>('cart');
+    },
+
+    merge: async (items: { product_id: string; quantity: number }[]): Promise<ApiResponse<BackendCartResponse>> => {
+      return this.post<BackendCartResponse>('cart/merge', { items });
+    },
+  };
+
+  /**
+   * Wishlist API Namespace
+   */
+  readonly wishlist = {
+    get: async (): Promise<ApiResponse<BackendWishlistResponse>> => {
+      return this.get<BackendWishlistResponse>('wishlist');
+    },
+
+    addItem: async (productId: string): Promise<ApiResponse<BackendWishlistResponse>> => {
+      return this.post<BackendWishlistResponse>(`wishlist/${encodeURIComponent(productId)}`);
+    },
+
+    removeItem: async (productId: string): Promise<ApiResponse<BackendWishlistResponse>> => {
+      return this.delete<BackendWishlistResponse>(`wishlist/${encodeURIComponent(productId)}`);
+    },
+
+    merge: async (productIds: string[]): Promise<ApiResponse<BackendWishlistResponse>> => {
+      return this.post<BackendWishlistResponse>('wishlist/merge', { product_ids: productIds });
+    },
+  };
+
+  patch<T = any>(endpoint: string, body?: any, headers?: Record<string, string>) {
+    return this.request<T>(endpoint, {
+      method: 'PATCH',
+      body: body ? JSON.stringify(body) : undefined,
+      headers,
+    });
+  }
 
   /**
    * Probes the backend health endpoint.
