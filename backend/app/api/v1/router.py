@@ -1,5 +1,15 @@
 from fastapi import APIRouter
-from app.api.v1.endpoints import health, auth, admin_test, categories, products, inventory, cart, wishlist
+from app.api.v1.endpoints import (
+    health,
+    auth,
+    admin_test,
+    categories,
+    products,
+    inventory,
+    cart,
+    wishlist,
+    orders,
+)
 
 api_router = APIRouter()
 
@@ -20,16 +30,8 @@ api_router.include_router(inventory.router, tags=["Warehouse & Inventory"])
 # Customer Shopping Experience
 api_router.include_router(cart.router, tags=["Customer Cart"])
 api_router.include_router(wishlist.router, tags=["Customer Wishlist"])
+api_router.include_router(orders.router, tags=["Customer Orders & Fulfillment"])
 
-
-# =========================================================================
-# FUTURE DOMAIN ROUTE REGISTRATIONS (Subphases 2D+)
-# =========================================================================
-# api_router.include_router(orders.router, prefix="/orders", tags=["Orders & Site Delivery"])
-# api_router.include_router(customers.router, prefix="/customers", tags=["Customer Directory"])
-# api_router.include_router(projects.router, prefix="/projects", tags=["Construction Projects"])
-# api_router.include_router(boqs.router, prefix="/boqs", tags=["BOQ 2.0 Schedules"])
-# api_router.include_router(estimates.router, prefix="/estimates", tags=["Cost Calculator Estimates"])
-# api_router.include_router(quotes.router, prefix="/quotes", tags=["Wholesale Quotations"])
-# api_router.include_router(suppliers.router, prefix="/suppliers", tags=["Suppliers & Mills"])
+# Staff Administration Operations
+api_router.include_router(orders.admin_router, tags=["Staff Orders Management"])
 

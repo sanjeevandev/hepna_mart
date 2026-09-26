@@ -27,9 +27,9 @@ import SectionReveal from '@/components/ui/SectionReveal';
 const OrderDetailPage: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
-  const { getOrder, cancelOrder, reorderItems } = useOrderStore();
+  const { getOrder, fetchOrderById, cancelOrder, reorderItems } = useOrderStore();
 
-  const [order, setOrder] = useState(orderId ? getOrder(orderId) : undefined);
+  const [order, setOrder] = useState<Order | undefined>(orderId ? getOrder(orderId) : undefined);
   const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
   const [isQuotationOpen, setIsQuotationOpen] = useState(false);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
@@ -38,24 +38,31 @@ const OrderDetailPage: React.FC = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
     if (orderId) {
-      setOrder(getOrder(orderId));
+      // First check local state
+      const existing = getOrder(orderId);
+      if (existing) setOrder(existing);
+      // Then fetch latest from server
+      fetchOrderById(orderId).then((fetched) => {
+        if (fetched) setOrder(fetched);
+      });
     }
-  }, [orderId, getOrder]);
+  }, [orderId, getOrder, fetchOrderById]);
 
   // Handle Order Cancellation
-  const handleConfirmCancel = () => {
+  const handleConfirmCancel = async () => {
     if (!order) return;
-    const success = cancelOrder(order.id, cancelReason);
+    const success = await cancelOrder(order.id, cancelReason);
     if (success) {
       setIsCancelModalOpen(false);
-      setOrder(getOrder(order.id));
+      const updated = getOrder(order.id);
+      if (updated) setOrder(updated);
     }
   };
 
   // Handle Reorder
-  const handleReorder = () => {
+  const handleReorder = async () => {
     if (!order) return;
-    const res = reorderItems(order.id);
+    const res = await reorderItems(order.id);
     if (res.added > 0) {
       navigate('/cart');
     }

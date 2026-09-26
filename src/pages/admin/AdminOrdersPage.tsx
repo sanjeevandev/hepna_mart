@@ -1,16 +1,72 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Search, Filter, Eye, Truck, CheckCircle2, Clock, AlertTriangle } from 'lucide-react';
-import { useOrderStore } from '@/store/orderStore';
+import { Search, Loader2 } from 'lucide-react';
+import { useOrderStore, mapBackendOrderToOrder } from '@/store/orderStore';
+import { apiClient, getAuthToken } from '@/lib/api';
 import { formatPrice } from '@/utils/formatPrice';
-import { OrderStatus } from '@/types';
+import { OrderStatus, Order } from '@/types';
+import toast from 'react-hot-toast';
 
 const AdminOrdersPage: React.FC = () => {
-  const { orders, updateOrderStatus } = useOrderStore();
+  const { orders: localOrders, updateOrderStatus } = useOrderStore();
+  const [adminOrders, setAdminOrders] = useState<Order[]>(localOrders);
+  const [loading, setLoading] = useState<boolean>(false);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
 
-  const filteredOrders = orders.filter((o) => {
+  const fetchAdminOrders = async () => {
+    const token = getAuthToken();
+    if (!token) {
+      setAdminOrders(localOrders);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const res = await apiClient.adminOrders.list({
+        status: statusFilter !== 'ALL' ? statusFilter : undefined,
+        search: search.trim() || undefined,
+      });
+
+      if (res.data && res.data.orders) {
+        const mapped = res.data.orders.map(mapBackendOrderToOrder);
+        setAdminOrders(mapped);
+      }
+    } catch (err: any) {
+      console.warn('[AdminOrders] Fetch failed, using local orders store:', err);
+      setAdminOrders(localOrders);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAdminOrders();
+  }, [statusFilter]);
+
+  // Debounced search trigger
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchAdminOrders();
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const handleStatusChange = async (orderId: string, newStatus: OrderStatus) => {
+    try {
+      await updateOrderStatus(
+        orderId,
+        newStatus,
+        `Status updated to ${newStatus} via Admin Console`
+      );
+      // Refresh list
+      await fetchAdminOrders();
+    } catch (err: any) {
+      toast.error(err.message || 'Status update failed');
+    }
+  };
+
+  const displayOrders = adminOrders.filter((o) => {
     const matchesSearch =
       o.id.toLowerCase().includes(search.toLowerCase()) ||
       o.deliveryAddress?.siteName?.toLowerCase().includes(search.toLowerCase()) ||
@@ -52,19 +108,25 @@ const AdminOrdersPage: React.FC = () => {
           onChange={(e) => setStatusFilter(e.target.value)}
           className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:border-accent"
         >
-          <option value="ALL">All Order Statuses ({orders.length})</option>
+          <option value="ALL">All Order Statuses ({displayOrders.length})</option>
           <option value="confirmed">Confirmed</option>
           <option value="processing">Processing</option>
           <option value="packed">Packed</option>
           <option value="shipped">Shipped</option>
           <option value="out-for-delivery">Out For Delivery</option>
           <option value="delivered">Delivered</option>
+          <option value="cancelled">Cancelled</option>
         </select>
       </div>
 
       {/* Orders Table */}
       <div className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-xs">
-        {filteredOrders.length === 0 ? (
+        {loading ? (
+          <div className="py-12 text-center text-slate-400 text-xs flex items-center justify-center gap-2">
+            <Loader2 className="w-4 h-4 animate-spin text-accent" />
+            <span>Loading orders from fulfillment depot...</span>
+          </div>
+        ) : displayOrders.length === 0 ? (
           <div className="py-12 text-center text-slate-400 text-xs">
             No orders match the current filter criteria.
           </div>
@@ -82,7 +144,7 @@ const AdminOrdersPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {filteredOrders.map((order) => (
+                {displayOrders.map((order) => (
                   <tr key={order.id} className="hover:bg-slate-50/70 transition-colors">
                     <td className="py-3.5 px-4">
                       <Link
@@ -118,11 +180,7 @@ const AdminOrdersPage: React.FC = () => {
                       <select
                         value={order.status}
                         onChange={(e) =>
-                          updateOrderStatus(
-                            order.id,
-                            e.target.value as OrderStatus,
-                            `Status updated to ${e.target.value} via Admin Console`
-                          )
+                          handleStatusChange(order.id, e.target.value as OrderStatus)
                         }
                         className="px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-semibold text-slate-700 focus:outline-none focus:border-accent"
                       >
@@ -132,6 +190,7 @@ const AdminOrdersPage: React.FC = () => {
                         <option value="shipped">Shipped</option>
                         <option value="out-for-delivery">Out for Delivery</option>
                         <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
                       </select>
                     </td>
                   </tr>

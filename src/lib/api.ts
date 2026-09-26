@@ -348,12 +348,96 @@ export interface BackendWishlistItem {
   created_at: string;
 }
 
-export interface BackendWishlistResponse {
+export interface BackendOrderItem {
+  id: string;
+  order_id: string;
+  product_id: string | null;
+  product_name: string;
+  product_sku: string | null;
+  product_image: string | null;
+  brand: string | null;
+  unit: string | null;
+  quantity: number;
+  unit_price: number;
+  mrp: number;
+  discount_amount: number;
+  tax_amount: number;
+  subtotal: number;
+  total: number;
+  created_at: string;
+}
+
+export interface BackendOrderStatusHistory {
+  id: string;
+  old_status: string | null;
+  new_status: string;
+  title: string;
+  description: string | null;
+  note: string | null;
+  completed: boolean;
+  active: boolean;
+  created_at: string;
+}
+
+export interface BackendOrder {
   id: string;
   user_id: string;
-  items: BackendWishlistItem[];
-  total_items: number;
-  product_ids: string[];
+  order_number: string;
+  status: string;
+  payment_status: string;
+  payment_method: string;
+  subtotal: number;
+  tax_amount: number;
+  delivery_charge: number;
+  discount_amount: number;
+  total_amount: number;
+  currency: string;
+  customer_name: string;
+  customer_email: string;
+  customer_phone: string;
+  notes: string | null;
+  cancellation_reason: string | null;
+  cancelled_at: string | null;
+  estimated_delivery: string | null;
+  delivery_window: string | null;
+  project_id: string | null;
+  project_name: string | null;
+  quotation_id: string | null;
+  delivery_address: any;
+  items: BackendOrderItem[];
+  status_history: BackendOrderStatusHistory[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BackendOrderListResponse {
+  orders: BackendOrder[];
+  total_count: number;
+}
+
+export interface CheckoutPayload {
+  items?: { product_id: string; quantity: number }[];
+  delivery_address: any;
+  payment_method: string;
+  customer_name?: string;
+  customer_email?: string;
+  customer_phone?: string;
+  project_id?: string;
+  project_name?: string;
+  notes?: string;
+}
+
+export interface OrderStatusUpdatePayload {
+  status: string;
+  title?: string;
+  description?: string;
+  note?: string;
+}
+
+export interface ReorderResponseData {
+  added_count: number;
+  unavailable_items: string[];
+  message: string;
 }
 
 class ApiClient {
@@ -631,6 +715,54 @@ class ApiClient {
 
     merge: async (productIds: string[]): Promise<ApiResponse<BackendWishlistResponse>> => {
       return this.post<BackendWishlistResponse>('wishlist/merge', { product_ids: productIds });
+    },
+  };
+
+  /**
+   * Orders API Namespace
+   */
+  readonly orders = {
+    checkout: async (payload: CheckoutPayload): Promise<ApiResponse<BackendOrder>> => {
+      return this.post<BackendOrder>('orders/checkout', payload);
+    },
+
+    list: async (skip: number = 0, limit: number = 50): Promise<ApiResponse<BackendOrderListResponse>> => {
+      return this.get<BackendOrderListResponse>(`orders?skip=${skip}&limit=${limit}`);
+    },
+
+    get: async (orderId: string): Promise<ApiResponse<BackendOrder>> => {
+      return this.get<BackendOrder>(`orders/${encodeURIComponent(orderId)}`);
+    },
+
+    cancel: async (orderId: string, reason: string): Promise<ApiResponse<BackendOrder>> => {
+      return this.post<BackendOrder>(`orders/${encodeURIComponent(orderId)}/cancel`, { reason });
+    },
+
+    reorder: async (orderId: string): Promise<ApiResponse<ReorderResponseData>> => {
+      return this.post<ReorderResponseData>(`orders/${encodeURIComponent(orderId)}/reorder`);
+    },
+  };
+
+  /**
+   * Staff / Admin Orders API Namespace
+   */
+  readonly adminOrders = {
+    list: async (params: { status?: string; search?: string; skip?: number; limit?: number } = {}): Promise<ApiResponse<BackendOrderListResponse>> => {
+      const query = new URLSearchParams();
+      if (params.status && params.status !== 'ALL') query.set('status', params.status);
+      if (params.search) query.set('search', params.search);
+      if (params.skip !== undefined) query.set('skip', String(params.skip));
+      if (params.limit !== undefined) query.set('limit', String(params.limit));
+      const qs = query.toString();
+      return this.get<BackendOrderListResponse>(`admin/orders${qs ? `?${qs}` : ''}`);
+    },
+
+    get: async (orderId: string): Promise<ApiResponse<BackendOrder>> => {
+      return this.get<BackendOrder>(`admin/orders/${encodeURIComponent(orderId)}`);
+    },
+
+    updateStatus: async (orderId: string, payload: OrderStatusUpdatePayload): Promise<ApiResponse<BackendOrder>> => {
+      return this.patch<BackendOrder>(`admin/orders/${encodeURIComponent(orderId)}/status`, payload);
     },
   };
 

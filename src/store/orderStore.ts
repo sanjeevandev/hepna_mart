@@ -1,20 +1,108 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Order, OrderStatus, OrderStatusHistoryItem } from '@/types';
+import { Order, OrderStatus, OrderStatusHistoryItem, CartItem } from '@/types';
 import { products } from '@/data/products';
 import { useCartStore } from './cartStore';
+import { apiClient, getAuthToken, BackendOrder } from '@/lib/api';
 import toast from 'react-hot-toast';
+
+export function mapBackendOrderToOrder(bo: BackendOrder): Order {
+  const mappedItems: CartItem[] = (bo.items || []).map((item) => ({
+    product: {
+      id: item.product_id || item.id,
+      name: item.product_name,
+      slug: item.product_sku || '',
+      brand: item.brand || 'HEPNA',
+      category: '',
+      subcategory: '',
+      description: '',
+      images: item.product_image ? [item.product_image] : ['https://placehold.co/400?text=HEPNA'],
+      price: Number(item.unit_price),
+      mrp: Number(item.mrp),
+      discount: Number(item.discount_amount),
+      unit: item.unit || 'unit',
+      stock: 100,
+      rating: 4.5,
+      reviews: 10,
+      deliveryAvailable: true,
+      featured: false,
+      newArrival: false,
+    },
+    quantity: item.quantity,
+    priceAtAddition: Number(item.unit_price),
+  }));
+
+  const mappedHistory: OrderStatusHistoryItem[] = (bo.status_history || []).map((h) => ({
+    status: h.new_status as OrderStatus,
+    title: h.title,
+    description: h.description || '',
+    timestamp: new Date(h.created_at).toLocaleString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    }),
+    completed: h.completed,
+    active: h.active,
+  }));
+
+  const addr = bo.delivery_address || {};
+
+  return {
+    id: bo.order_number || bo.id,
+    items: mappedItems,
+    subtotal: Number(bo.subtotal),
+    discount: Number(bo.discount_amount || 0),
+    deliveryCharge: Number(bo.delivery_charge || 0),
+    tax: Number(bo.tax_amount || 0),
+    total: Number(bo.total_amount),
+    status: bo.status as OrderStatus,
+    date: bo.created_at,
+    estimatedDelivery: bo.estimated_delivery || '',
+    deliveryWindow: bo.delivery_window || '10:00 AM – 02:00 PM',
+    projectId: bo.project_id || undefined,
+    projectName: bo.project_name || addr.site_name || undefined,
+    quotationId: bo.quotation_id || undefined,
+    paymentMethod: bo.payment_method === 'cod' ? 'Cash on Site Offloading (COD)' : 'Online Payment (Verified)',
+    cancellationReason: bo.cancellation_reason || undefined,
+    cancelledAt: bo.cancelled_at || undefined,
+    deliveryAddress: {
+      id: addr.id || 'addr-snapshot',
+      fullName: addr.full_name || bo.customer_name,
+      phone: addr.phone || bo.customer_phone,
+      addressLine1: addr.address_line1 || '',
+      addressLine2: addr.address_line2 || '',
+      city: addr.city || '',
+      state: addr.state || 'Maharashtra',
+      pincode: addr.pincode || '',
+      isConstructionSite: addr.is_construction_site ?? true,
+      siteName: addr.site_name || '',
+      siteType: addr.site_type || '',
+      deliveryPreference: addr.delivery_preference || '',
+      requiredDeliveryDate: addr.required_delivery_date || '',
+      siteContactPerson: addr.site_contact_person || '',
+      sitePhone: addr.site_phone || '',
+      deliveryInstructions: addr.delivery_instructions || '',
+    },
+    statusHistory: mappedHistory,
+  };
+}
 
 interface OrderState {
   orders: Order[];
+  isLoading: boolean;
+
+  fetchOrders: () => Promise<Order[]>;
+  fetchOrderById: (orderId: string) => Promise<Order | undefined>;
   addOrder: (order: Order) => void;
   getOrder: (orderId: string) => Order | undefined;
-  cancelOrder: (orderId: string, reason: string) => boolean;
-  updateOrderStatus: (orderId: string, status: OrderStatus, note?: string) => void;
-  reorderItems: (orderId: string) => { added: number; unavailable: number };
+  cancelOrder: (orderId: string, reason: string) => Promise<boolean>;
+  updateOrderStatus: (orderId: string, status: OrderStatus, note?: string) => Promise<void>;
+  reorderItems: (orderId: string) => Promise<{ added: number; unavailable: number }>;
 }
 
-// Deterministic seed orders for demonstration and persistent exploration
+// Deterministic seed orders for demonstration and persistent offline exploration
 const getProductById = (id: string) => {
   return products.find((p) => p.id === id) || products[0];
 };
@@ -27,11 +115,11 @@ const defaultSeedOrders: Order[] = [
       { product: getProductById('prod-6'), quantity: 2000 },
       { product: getProductById('prod-16'), quantity: 15 },
     ],
-    subtotal: 390 * 60 + 9 * 2000 + 480 * 15, // 23400 + 18000 + 7200 = 48600
+    subtotal: 390 * 60 + 9 * 2000 + 480 * 15,
     discount: 0,
     deliveryCharge: 0,
-    tax: 48600 * 0.18, // 8748
-    total: 48600 + 48600 * 0.18, // 57348
+    tax: 48600 * 0.18,
+    total: 48600 + 48600 * 0.18,
     status: 'out-for-delivery',
     date: '2026-09-24T14:30:00.000Z',
     estimatedDelivery: '2026-09-25',
@@ -110,11 +198,11 @@ const defaultSeedOrders: Order[] = [
       { product: getProductById('prod-21'), quantity: 4 },
       { product: getProductById('prod-46'), quantity: 2 },
     ],
-    subtotal: 1250 * 8 + 3200 * 4 + 8500 * 2, // 10000 + 12800 + 17000 = 39800
+    subtotal: 1250 * 8 + 3200 * 4 + 8500 * 2,
     discount: 0,
     deliveryCharge: 0,
-    tax: 39800 * 0.18, // 7164
-    total: 39800 + 7164, // 46964
+    tax: 39800 * 0.18,
+    total: 39800 + 7164,
     status: 'processing',
     date: '2026-09-25T07:15:00.000Z',
     estimatedDelivery: '2026-09-27',
@@ -187,11 +275,11 @@ const defaultSeedOrders: Order[] = [
       { product: getProductById('prod-36'), quantity: 6 },
       { product: getProductById('prod-37'), quantity: 4 },
     ],
-    subtotal: 2450 * 6 + 1850 * 4, // 14700 + 7400 = 22100
+    subtotal: 2450 * 6 + 1850 * 4,
     discount: 0,
     deliveryCharge: 0,
-    tax: 22100 * 0.18, // 3978
-    total: 22100 + 3978, // 26078
+    tax: 22100 * 0.18,
+    total: 22100 + 3978,
     status: 'delivered',
     date: '2026-09-20T11:00:00.000Z',
     estimatedDelivery: '2026-09-22',
@@ -260,56 +348,52 @@ const defaultSeedOrders: Order[] = [
       },
     ],
   },
-  {
-    id: 'HM-10154',
-    items: [{ product: getProductById('prod-2'), quantity: 30 }],
-    subtotal: 370 * 30, // 11100
-    discount: 0,
-    deliveryCharge: 0,
-    tax: 11100 * 0.18, // 1998
-    total: 11100 + 1998, // 13098
-    status: 'cancelled',
-    date: '2026-09-18T09:20:00.000Z',
-    estimatedDelivery: '2026-09-20',
-    paymentMethod: 'Cash on Delivery (COD)',
-    cancellationReason: 'Construction schedule postponed by project architect.',
-    cancelledAt: '2026-09-18T14:10:00.000Z',
-    deliveryAddress: {
-      id: 'addr-seed-4',
-      fullName: 'Kiran Desai',
-      phone: '+91 97654 32109',
-      addressLine1: 'Survey No 18, Near Baner Hills',
-      city: 'Pune',
-      state: 'Maharashtra',
-      pincode: '411045',
-      isConstructionSite: true,
-      siteName: 'Desai Bungalow Project',
-      siteType: 'Residential',
-    },
-    statusHistory: [
-      {
-        status: 'confirmed',
-        title: 'Order Placed',
-        description: 'Order registered via web portal.',
-        timestamp: '18 Sep 2026, 09:20 AM',
-        completed: true,
-      },
-      {
-        status: 'cancelled',
-        title: 'Order Cancelled',
-        description: 'Cancelled by customer: Construction schedule postponed.',
-        timestamp: '18 Sep 2026, 02:10 PM',
-        completed: true,
-        active: true,
-      },
-    ],
-  },
 ];
 
 export const useOrderStore = create<OrderState>()(
   persist(
     (set, get) => ({
       orders: defaultSeedOrders,
+      isLoading: false,
+
+      fetchOrders: async () => {
+        const token = getAuthToken();
+        if (!token) return get().orders;
+
+        try {
+          set({ isLoading: true });
+          const res = await apiClient.orders.list();
+          if (res.data && res.data.orders) {
+            const mappedOrders = res.data.orders.map(mapBackendOrderToOrder);
+            set({ orders: mappedOrders, isLoading: false });
+            return mappedOrders;
+          }
+        } catch (err) {
+          console.warn('[orderStore] Could not fetch backend orders, using local storage fallback.', err);
+        } finally {
+          set({ isLoading: false });
+        }
+        return get().orders;
+      },
+
+      fetchOrderById: async (orderId: string) => {
+        const token = getAuthToken();
+        if (token) {
+          try {
+            const res = await apiClient.orders.get(orderId);
+            if (res.data) {
+              const mapped = mapBackendOrderToOrder(res.data);
+              set((state) => ({
+                orders: [mapped, ...state.orders.filter((o) => o.id !== mapped.id)],
+              }));
+              return mapped;
+            }
+          } catch (err) {
+            console.warn(`[orderStore] Backend lookup failed for ${orderId}, using local match.`, err);
+          }
+        }
+        return get().getOrder(orderId);
+      },
 
       addOrder: (order: Order) => {
         set((state) => ({
@@ -322,11 +406,31 @@ export const useOrderStore = create<OrderState>()(
         return get().orders.find(
           (o) =>
             o.id.toLowerCase() === orderId.toLowerCase() ||
-            o.id.replace(/^(ORD-|HM-)/i, '').toLowerCase() === orderId.replace(/^(ORD-|HM-)/i, '').toLowerCase()
+            o.id.replace(/^(ORD-|HM-|HEP-)/i, '').toLowerCase() ===
+              orderId.replace(/^(ORD-|HM-|HEP-)/i, '').toLowerCase()
         );
       },
 
-      cancelOrder: (orderId: string, reason: string) => {
+      cancelOrder: async (orderId: string, reason: string) => {
+        const token = getAuthToken();
+        if (token) {
+          try {
+            const res = await apiClient.orders.cancel(orderId, reason);
+            if (res.data) {
+              const mapped = mapBackendOrderToOrder(res.data);
+              set((state) => ({
+                orders: state.orders.map((o) => (o.id === mapped.id ? mapped : o)),
+              }));
+              toast.success(`Order #${mapped.id} has been cancelled.`);
+              return true;
+            }
+          } catch (err: any) {
+            toast.error(err.message || 'Could not cancel order.');
+            return false;
+          }
+        }
+
+        // Offline / Local fallback
         const order = get().getOrder(orderId);
         if (!order) {
           toast.error('Order not found');
@@ -376,7 +480,25 @@ export const useOrderStore = create<OrderState>()(
         return true;
       },
 
-      updateOrderStatus: (orderId: string, status: OrderStatus, note?: string) => {
+      updateOrderStatus: async (orderId: string, status: OrderStatus, note?: string) => {
+        const token = getAuthToken();
+        if (token) {
+          try {
+            const res = await apiClient.adminOrders.updateStatus(orderId, { status, note });
+            if (res.data) {
+              const mapped = mapBackendOrderToOrder(res.data);
+              set((state) => ({
+                orders: state.orders.map((o) => (o.id === mapped.id ? mapped : o)),
+              }));
+              toast.success(`Order #${mapped.id} status updated to ${status}`);
+              return;
+            }
+          } catch (err: any) {
+            toast.error(err.message || 'Failed to update order status');
+          }
+        }
+
+        // Local fallback
         set((state) => ({
           orders: state.orders.map((o) =>
             o.id === orderId ? { ...o, status } : o
@@ -384,7 +506,28 @@ export const useOrderStore = create<OrderState>()(
         }));
       },
 
-      reorderItems: (orderId: string) => {
+      reorderItems: async (orderId: string) => {
+        const token = getAuthToken();
+        if (token) {
+          try {
+            const res = await apiClient.orders.reorder(orderId);
+            if (res.data) {
+              await useCartStore.getState().fetchCart();
+              if (res.data.added_count > 0 && res.data.unavailable_items.length === 0) {
+                toast.success(res.data.message || `Added ${res.data.added_count} materials to your cart!`);
+              } else if (res.data.added_count > 0 && res.data.unavailable_items.length > 0) {
+                toast(`Added ${res.data.added_count} items. (${res.data.unavailable_items.length} items unavailable)`, { icon: '⚠️' });
+              } else {
+                toast.error('The items in this order are currently out of stock.');
+              }
+              return { added: res.data.added_count, unavailable: res.data.unavailable_items.length };
+            }
+          } catch (err: any) {
+            console.warn('[orderStore] Backend reorder failed, falling back to local reorder.', err);
+          }
+        }
+
+        // Offline / Local reorder fallback
         const order = get().getOrder(orderId);
         if (!order || !order.items || order.items.length === 0) {
           toast.error('No items found in this order');
@@ -396,7 +539,6 @@ export const useOrderStore = create<OrderState>()(
         let unavailableCount = 0;
 
         order.items.forEach((item) => {
-          // Look up current product from catalog to ensure latest stock and price
           const currentProduct = products.find((p) => p.id === item.product.id);
           if (currentProduct && currentProduct.stock && currentProduct.stock > 0) {
             addToCart(currentProduct, item.quantity);

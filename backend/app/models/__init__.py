@@ -5,6 +5,14 @@ from app.models.product import Product
 from app.models.inventory import Inventory
 from app.models.cart import Cart, CartItem
 from app.models.wishlist import Wishlist, WishlistItem
+from app.models.order import (
+    Order,
+    OrderItem,
+    OrderStatusHistory,
+    OrderStatus,
+    PaymentStatus,
+    PaymentMethod,
+)
 
 __all__ = [
     "Base",
@@ -19,6 +27,12 @@ __all__ = [
     "CartItem",
     "Wishlist",
     "WishlistItem",
+    "Order",
+    "OrderItem",
+    "OrderStatusHistory",
+    "OrderStatus",
+    "PaymentStatus",
+    "PaymentMethod",
 ]
 
 

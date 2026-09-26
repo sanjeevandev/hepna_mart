@@ -25,13 +25,14 @@ type FilterTab = 'all' | 'active' | 'delivered' | 'cancelled';
 
 const OrdersPage: React.FC = () => {
   const navigate = useNavigate();
-  const { orders, reorderItems } = useOrderStore();
+  const { orders, fetchOrders, reorderItems, isLoading } = useOrderStore();
   const [activeTab, setActiveTab] = useState<FilterTab>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, []);
+    fetchOrders();
+  }, [fetchOrders]);
 
   // Filter calculations
   const activeOrdersCount = useMemo(() => {
