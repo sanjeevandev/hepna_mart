@@ -766,6 +766,114 @@ class ApiClient {
     },
   };
 
+  /**
+   * Wholesale RFQs API Namespace
+   */
+  readonly rfqs = {
+    create: async (payload: CreateRFQPayload): Promise<ApiResponse<BackendRFQ>> => {
+      return this.post<BackendRFQ>('rfqs', payload);
+    },
+
+    list: async (params: { page?: number; pageSize?: number; status?: string } = {}): Promise<ApiResponse<BackendRFQListResponse>> => {
+      const query = new URLSearchParams();
+      if (params.page) query.set('page', String(params.page));
+      if (params.pageSize) query.set('page_size', String(params.pageSize));
+      if (params.status) query.set('status', params.status);
+      const qs = query.toString();
+      return this.get<BackendRFQListResponse>(`rfqs${qs ? `?${qs}` : ''}`);
+    },
+
+    get: async (rfqId: string): Promise<ApiResponse<BackendRFQ>> => {
+      return this.get<BackendRFQ>(`rfqs/${encodeURIComponent(rfqId)}`);
+    },
+
+    submit: async (rfqId: string): Promise<ApiResponse<BackendRFQ>> => {
+      return this.post<BackendRFQ>(`rfqs/${encodeURIComponent(rfqId)}/submit`);
+    },
+
+    cancel: async (rfqId: string, reason?: string): Promise<ApiResponse<BackendRFQ>> => {
+      const qs = reason ? `?reason=${encodeURIComponent(reason)}` : '';
+      return this.post<BackendRFQ>(`rfqs/${encodeURIComponent(rfqId)}/cancel${qs}`);
+    },
+
+    requestRevision: async (rfqId: string, payload: RFQRevisionPayload): Promise<ApiResponse<BackendRFQ>> => {
+      return this.post<BackendRFQ>(`rfqs/${encodeURIComponent(rfqId)}/request-revision`, payload);
+    },
+
+    listQuotes: async (rfqId: string): Promise<ApiResponse<BackendQuote[]>> => {
+      return this.get<BackendQuote[]>(`rfqs/${encodeURIComponent(rfqId)}/quotes`);
+    },
+  };
+
+  /**
+   * Customer Quotes API Namespace
+   */
+  readonly quotes = {
+    get: async (quoteId: string): Promise<ApiResponse<BackendQuote>> => {
+      return this.get<BackendQuote>(`quotes/${encodeURIComponent(quoteId)}`);
+    },
+
+    accept: async (quoteId: string, params: { paymentMethod?: string; notes?: string } = {}): Promise<ApiResponse<AcceptQuoteResponse>> => {
+      const query = new URLSearchParams();
+      if (params.paymentMethod) query.set('payment_method', params.paymentMethod);
+      if (params.notes) query.set('notes', params.notes);
+      const qs = query.toString();
+      return this.post<AcceptQuoteResponse>(`quotes/${encodeURIComponent(quoteId)}/accept${qs ? `?${qs}` : ''}`);
+    },
+
+    reject: async (quoteId: string, reason?: string): Promise<ApiResponse<BackendQuote>> => {
+      return this.post<BackendQuote>(`quotes/${encodeURIComponent(quoteId)}/reject`, { reason });
+    },
+  };
+
+  /**
+   * Staff / Admin Wholesale API Namespace
+   */
+  readonly adminRfqs = {
+    list: async (params: { page?: number; pageSize?: number; status?: string; search?: string } = {}): Promise<ApiResponse<BackendRFQListResponse>> => {
+      const query = new URLSearchParams();
+      if (params.page) query.set('page', String(params.page));
+      if (params.pageSize) query.set('page_size', String(params.pageSize));
+      if (params.status) query.set('status', params.status);
+      if (params.search) query.set('search', params.search);
+      const qs = query.toString();
+      return this.get<BackendRFQListResponse>(`admin/rfqs${qs ? `?${qs}` : ''}`);
+    },
+
+    get: async (rfqId: string): Promise<ApiResponse<BackendRFQ>> => {
+      return this.get<BackendRFQ>(`admin/rfqs/${encodeURIComponent(rfqId)}`);
+    },
+
+    updateStatus: async (rfqId: string, payload: { status: string; notes?: string }): Promise<ApiResponse<BackendRFQ>> => {
+      return this.patch<BackendRFQ>(`admin/rfqs/${encodeURIComponent(rfqId)}/status`, payload);
+    },
+
+    createQuote: async (rfqId: string, payload: CreateQuotePayload): Promise<ApiResponse<BackendQuote>> => {
+      return this.post<BackendQuote>(`admin/rfqs/${encodeURIComponent(rfqId)}/quotes`, payload);
+    },
+  };
+
+  /**
+   * Staff / Admin Quotations API Namespace
+   */
+  readonly adminQuotes = {
+    update: async (quoteId: string, payload: UpdateQuotePayload): Promise<ApiResponse<BackendQuote>> => {
+      return this.patch<BackendQuote>(`admin/quotes/${encodeURIComponent(quoteId)}`, payload);
+    },
+
+    send: async (quoteId: string): Promise<ApiResponse<BackendQuote>> => {
+      return this.post<BackendQuote>(`admin/quotes/${encodeURIComponent(quoteId)}/send`);
+    },
+
+    revise: async (quoteId: string, payload: CreateQuotePayload): Promise<ApiResponse<BackendQuote>> => {
+      return this.post<BackendQuote>(`admin/quotes/${encodeURIComponent(quoteId)}/revise`, payload);
+    },
+
+    expire: async (quoteId: string): Promise<ApiResponse<BackendQuote>> => {
+      return this.post<BackendQuote>(`admin/quotes/${encodeURIComponent(quoteId)}/expire`);
+    },
+  };
+
   patch<T = any>(endpoint: string, body?: any, headers?: Record<string, string>) {
     return this.request<T>(endpoint, {
       method: 'PATCH',
@@ -789,6 +897,166 @@ class ApiClient {
       return { isHealthy: false };
     }
   }
+}
+
+// Wholesale Types
+export interface BackendRFQItem {
+  id: string;
+  rfq_id: string;
+  product_id?: string | null;
+  product_name: string;
+  product_sku?: string | null;
+  brand?: string | null;
+  unit?: string | null;
+  requested_quantity: number;
+  target_unit_price?: number | null;
+  notes?: string | null;
+  created_at: string;
+}
+
+export interface BackendRFQStatusHistory {
+  id: string;
+  rfq_id: string;
+  old_status?: string | null;
+  new_status: string;
+  changed_by_user_id?: string | null;
+  title: string;
+  description?: string | null;
+  created_at: string;
+}
+
+export interface BackendQuoteItem {
+  id: string;
+  quote_id: string;
+  rfq_item_id?: string | null;
+  product_id?: string | null;
+  product_name: string;
+  product_sku?: string | null;
+  brand?: string | null;
+  unit?: string | null;
+  requested_quantity: number;
+  quoted_quantity: number;
+  catalog_unit_price_at_quote: number;
+  quoted_unit_price: number;
+  discount_amount: number;
+  tax_amount: number;
+  line_subtotal: number;
+  line_total: number;
+}
+
+export interface BackendQuote {
+  id: string;
+  quote_number: string;
+  rfq_id: string;
+  version: number;
+  status: string;
+  subtotal: number;
+  discount_amount: number;
+  tax_amount: number;
+  delivery_charge: number;
+  total: number;
+  valid_until?: string | null;
+  customer_notes?: string | null;
+  procurement_notes?: string | null;
+  created_by_user_id?: string | null;
+  items: BackendQuoteItem[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BackendRFQ {
+  id: string;
+  rfq_number: string;
+  user_id: string;
+  project_id?: string | null;
+  project_name?: string | null;
+  project_type?: string | null;
+  required_by_date?: string | null;
+  delivery_address: any;
+  gstin?: string | null;
+  notes?: string | null;
+  status: string;
+  submitted_at?: string | null;
+  created_at: string;
+  updated_at: string;
+  items: BackendRFQItem[];
+  status_history: BackendRFQStatusHistory[];
+  quotes: BackendQuote[];
+  latest_quote?: BackendQuote | null;
+}
+
+export interface BackendRFQListResponse {
+  items: BackendRFQ[];
+  total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
+}
+
+export interface CreateRFQItemPayload {
+  product_id?: string;
+  product_name: string;
+  product_sku?: string;
+  brand?: string;
+  unit?: string;
+  requested_quantity: number;
+  target_unit_price?: number;
+  notes?: string;
+}
+
+export interface CreateRFQPayload {
+  project_id?: string;
+  project_name?: string;
+  project_type?: string;
+  required_by_date?: string;
+  delivery_address: any;
+  gstin?: string;
+  notes?: string;
+  items: CreateRFQItemPayload[];
+  submit_now?: boolean;
+}
+
+export interface RFQRevisionPayload {
+  notes: string;
+  items?: CreateRFQItemPayload[];
+}
+
+export interface CreateQuoteItemPayload {
+  rfq_item_id?: string;
+  product_id?: string;
+  product_name?: string;
+  product_sku?: string;
+  brand?: string;
+  unit?: string;
+  requested_quantity: number;
+  quoted_quantity: number;
+  quoted_unit_price: number;
+  discount_amount?: number;
+  tax_amount?: number;
+}
+
+export interface CreateQuotePayload {
+  items: CreateQuoteItemPayload[];
+  delivery_charge?: number;
+  discount_amount?: number;
+  valid_until?: string;
+  customer_notes?: string;
+  procurement_notes?: string;
+  send_now?: boolean;
+}
+
+export interface UpdateQuotePayload {
+  delivery_charge?: number;
+  discount_amount?: number;
+  valid_until?: string;
+  customer_notes?: string;
+  procurement_notes?: string;
+}
+
+export interface AcceptQuoteResponse {
+  message: string;
+  quote: BackendQuote;
+  order: BackendOrder;
 }
 
 export const apiClient = new ApiClient(API_BASE_URL);

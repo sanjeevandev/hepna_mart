@@ -13,6 +13,15 @@ from app.models.order import (
     PaymentStatus,
     PaymentMethod,
 )
+from app.models.wholesale import (
+    RFQ,
+    RFQItem,
+    RFQStatusHistory,
+    Quote,
+    QuoteItem,
+    RFQStatus,
+    QuoteStatus,
+)
 
 __all__ = [
     "Base",
@@ -33,6 +42,13 @@ __all__ = [
     "OrderStatus",
     "PaymentStatus",
     "PaymentMethod",
+    "RFQ",
+    "RFQItem",
+    "RFQStatusHistory",
+    "Quote",
+    "QuoteItem",
+    "RFQStatus",
+    "QuoteStatus",
 ]
 
 

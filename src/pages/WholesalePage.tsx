@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import { Building, TrendingDown, Clock, ShieldCheck, Plus, Trash2, HardHat, FileText, CheckCircle2, Truck, PhoneCall, Mail, Calculator } from 'lucide-react';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { Building, TrendingDown, Clock, ShieldCheck, Plus, Trash2, HardHat, FileText, CheckCircle2, Truck, PhoneCall, Mail, Calculator, Loader2, ArrowRight } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import ScrollReveal from '@/components/ui/ScrollReveal';
 import toast from 'react-hot-toast';
+import { useAuthStore } from '@/store/authStore';
+import { wholesaleService } from '@/services/wholesaleService';
 
 interface ProjectQuoteItem {
   id: number;
@@ -26,6 +28,8 @@ const COMMON_UNITS = [
 
 const WholesalePage: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { currentUser, isAuthenticated } = useAuthStore();
   const stateData = location.state as {
     prefillProjectName?: string;
     prefillCity?: string;
@@ -37,14 +41,24 @@ const WholesalePage: React.FC = () => {
   }, []);
 
   const [projectName, setProjectName] = useState(stateData?.prefillProjectName || '');
-  const [companyName, setCompanyName] = useState('');
-  const [contactName, setContactName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
+  const [companyName, setCompanyName] = useState(currentUser?.companyName || '');
+  const [contactName, setContactName] = useState(currentUser?.name || '');
+  const [email, setEmail] = useState(currentUser?.email || '');
+  const [phone, setPhone] = useState(currentUser?.phone || '');
   const [siteLocation, setSiteLocation] = useState(stateData?.prefillCity || '');
   const [requiredDate, setRequiredDate] = useState('');
   const [projectStage, setProjectStage] = useState('Foundation & Structure');
   const [additionalNotes, setAdditionalNotes] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (currentUser) {
+      if (!companyName && currentUser.companyName) setCompanyName(currentUser.companyName);
+      if (!contactName && currentUser.name) setContactName(currentUser.name);
+      if (!email && currentUser.email) setEmail(currentUser.email);
+      if (!phone && currentUser.phone) setPhone(currentUser.phone);
+    }
+  }, [currentUser]);
 
   const [items, setItems] = useState<ProjectQuoteItem[]>(
     stateData?.prefillMaterials && stateData.prefillMaterials.length > 0
@@ -79,21 +93,60 @@ const WholesalePage: React.FC = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success(
-      `Project Quote Request for "${projectName || companyName}" submitted! Our institutional sales engineer will contact you within 4 hours.`,
-      { duration: 5000 }
-    );
-    setItems([{ id: 1, material: '', quantity: '', unit: 'Bags (50kg)' }]);
-    setProjectName('');
-    setCompanyName('');
-    setContactName('');
-    setEmail('');
-    setPhone('');
-    setSiteLocation('');
-    setRequiredDate('');
-    setAdditionalNotes('');
+
+    if (!items.length || items.some((it) => !it.material.trim() || !it.quantity.trim())) {
+      toast.error('Please specify material and quantity for all items.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const payloadItems = items.map((it) => ({
+        product_name: it.material.trim(),
+        unit: it.unit,
+        requested_quantity: parseFloat(it.quantity) || 1,
+        notes: '',
+      }));
+
+      const createdRfq = await wholesaleService.createRFQ({
+        project_name: projectName.trim() || companyName.trim() || 'Institutional Project',
+        project_type: projectStage,
+        required_by_date: requiredDate || undefined,
+        delivery_address: {
+          address_line1: siteLocation.trim() || 'Site Address',
+          city: siteLocation.trim() || 'City',
+          state: 'Maharashtra',
+          pincode: '411001',
+          contact_name: contactName.trim(),
+          contact_phone: phone.trim(),
+          company_name: companyName.trim(),
+        },
+        notes: [
+          additionalNotes.trim(),
+          companyName.trim() ? `Company: ${companyName.trim()}` : '',
+          email.trim() ? `Email: ${email.trim()}` : '',
+          phone.trim() ? `Phone: ${phone.trim()}` : '',
+        ]
+          .filter(Boolean)
+          .join(' | '),
+        items: payloadItems,
+        submit_now: true,
+      });
+
+      toast.success(
+        `Project RFQ ${createdRfq.rfq_number} submitted! Our sales team is reviewing your requirements.`,
+        { duration: 5000 }
+      );
+
+      navigate(`/rfqs/${createdRfq.id}`);
+    } catch (err: any) {
+      console.error('Failed to submit RFQ:', err);
+      toast.error(err.message || 'Failed to submit quote request. Please make sure you are logged in.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -102,9 +155,21 @@ const WholesalePage: React.FC = () => {
       <div className="bg-[#071A2B] text-white py-16 md:py-24 relative overflow-hidden border-b border-white/10">
         <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#E87A2D_1px,transparent_1px)] [background-size:24px_24px]"></div>
         <div className="container-custom relative z-10 text-center max-w-4xl mx-auto px-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/20 border border-accent/40 text-accent-light text-xs font-bold uppercase tracking-wider mb-6">
-            <HardHat className="w-4 h-4 text-accent" />
-            <span>Institutional & Contractor Procurement</span>
+          <div className="flex flex-wrap items-center justify-center gap-3 mb-6">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/20 border border-accent/40 text-accent-light text-xs font-bold uppercase tracking-wider">
+              <HardHat className="w-4 h-4 text-accent" />
+              <span>Institutional & Contractor Procurement</span>
+            </div>
+            {isAuthenticated && (
+              <Link
+                to="/rfqs"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white text-xs font-semibold transition-all backdrop-blur-sm"
+              >
+                <FileText className="w-3.5 h-3.5 text-accent" />
+                <span>My RFQs & Quotations</span>
+                <ArrowRight className="w-3 h-3 text-accent" />
+              </Link>
+            )}
           </div>
 
           <ScrollReveal
@@ -394,8 +459,21 @@ const WholesalePage: React.FC = () => {
                   </div>
                 </div>
 
-                <Button type="submit" variant="primary" size="lg" className="w-full py-4 text-base font-bold shadow-lg shadow-accent/20">
-                  Submit Project Quote Request
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="lg"
+                  disabled={isSubmitting}
+                  className="w-full py-4 text-base font-bold shadow-lg shadow-accent/20 flex items-center justify-center gap-2"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>Submitting Request to Procurement Desk...</span>
+                    </>
+                  ) : (
+                    <span>Submit Project Quote Request</span>
+                  )}
                 </Button>
               </form>
             </div>

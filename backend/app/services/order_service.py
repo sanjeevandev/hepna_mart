@@ -299,6 +299,167 @@ class OrderService:
         logger.info(f"Successfully created order {order.order_number} for user {user.id} with {len(order.items)} items.")
         return order
 
+    def create_order_from_quote(
+        self,
+        db: Session,
+        quote: Any,
+        user: User,
+        payment_method: str = "online",
+        notes: Optional[str] = None,
+        delivery_address_override: Optional[Dict[str, Any]] = None,
+    ) -> Order:
+        """
+        Creates a real PostgreSQL Order directly from an accepted Quote:
+        1. Row locks inventory for all items in the quote (`SELECT ... FOR UPDATE`).
+        2. Validates available inventory >= quoted_quantity.
+        3. Creates Order preserving agreed quote financials, RFQ project name, delivery address.
+        4. Creates OrderItem records with agreed quote rates.
+        5. Decrements warehouse stock atomically.
+        6. Creates initial OrderStatusHistory entry.
+        """
+        rfq = quote.rfq
+        if not quote.items:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Quote has no line items to order.",
+            )
+
+        # 1. Row locking and stock validation
+        order_items_data = []
+        for q_item in quote.items:
+            qty = q_item.quoted_quantity
+            if qty <= 0:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Invalid quoted quantity {qty} for item {q_item.product_name}.",
+                )
+
+            inv = None
+            if q_item.product_id:
+                inv = db.scalar(
+                    select(Inventory)
+                    .where(Inventory.product_id == q_item.product_id)
+                    .with_for_update()
+                )
+
+                if not inv or inv.available_quantity < qty:
+                    available = inv.available_quantity if inv else 0
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=(
+                            f"Insufficient inventory to fulfill quote for '{q_item.product_name}'. "
+                            f"Quoted: {qty}, Available in depot: {available}."
+                        ),
+                    )
+
+            product = None
+            if q_item.product_id:
+                product = db.scalar(select(Product).where(Product.id == q_item.product_id))
+
+            unit_price = Decimal(str(q_item.quoted_unit_price))
+            mrp = Decimal(str(q_item.catalog_unit_price_at_quote))
+            line_subtotal = Decimal(str(q_item.line_subtotal))
+            discount_amount = Decimal(str(q_item.discount_amount))
+            tax_amount = Decimal(str(q_item.tax_amount))
+            line_total = Decimal(str(q_item.line_total))
+
+            order_items_data.append({
+                "product_id": q_item.product_id,
+                "product_name": q_item.product_name,
+                "product_sku": q_item.product_sku or (product.slug if product else None),
+                "product_image": product.images[0] if (product and product.images) else None,
+                "brand": q_item.brand or (product.brand if product else None),
+                "unit": q_item.unit or (product.unit if product else "Piece"),
+                "quantity": qty,
+                "unit_price": unit_price,
+                "mrp": mrp,
+                "discount_amount": discount_amount,
+                "tax_amount": tax_amount,
+                "subtotal": line_subtotal,
+                "total": line_total,
+                "inv_ref": inv,
+            })
+
+        # 2. Customer & Delivery snapshot
+        delivery_addr = delivery_address_override or (rfq.delivery_address if rfq else {})
+        customer_name = (
+            delivery_addr.get("full_name")
+            or f"{user.first_name} {user.last_name}".strip()
+            or user.email
+        )
+        customer_email = user.email
+        customer_phone = delivery_addr.get("phone") or getattr(user, "phone", None) or ""
+
+        order_number = self.generate_order_number()
+
+        payment_method_raw = (payment_method or "online").lower()
+        if "cod" in payment_method_raw or "cash" in payment_method_raw:
+            payment_status_val = PaymentStatus.PENDING.value
+            payment_method_val = PaymentMethod.COD.value
+        else:
+            payment_status_val = PaymentStatus.PENDING.value
+            payment_method_val = PaymentMethod.ONLINE.value
+
+        est_delivery = rfq.required_by_date if rfq else None
+        if not est_delivery:
+            est_delivery = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+        # 3. Create Order instance
+        order = Order(
+            user_id=user.id,
+            order_number=order_number,
+            status=OrderStatus.CONFIRMED.value,
+            payment_status=payment_status_val,
+            payment_method=payment_method_val,
+            subtotal=Decimal(str(quote.subtotal)),
+            tax_amount=Decimal(str(quote.tax_amount)),
+            delivery_charge=Decimal(str(quote.delivery_charge)),
+            discount_amount=Decimal(str(quote.discount_amount)),
+            total_amount=Decimal(str(quote.total)),
+            currency="INR",
+            customer_name=customer_name,
+            customer_email=customer_email,
+            customer_phone=customer_phone,
+            notes=notes or (rfq.notes if rfq else None),
+            estimated_delivery=est_delivery,
+            delivery_window="10:00 AM – 02:00 PM",
+            project_id=rfq.project_id if rfq else None,
+            project_name=rfq.project_name if rfq else None,
+            quotation_id=quote.quote_number,
+            delivery_address=delivery_addr,
+        )
+        db.add(order)
+        db.flush()
+
+        # 4. Create OrderItems & Decrement Inventory
+        for item_data in order_items_data:
+            inv = item_data.pop("inv_ref")
+            order_item = OrderItem(
+                order_id=order.id,
+                **item_data,
+            )
+            db.add(order_item)
+
+            if inv:
+                inv.quantity -= item_data["quantity"]
+
+        # 5. Status history entry
+        status_history = OrderStatusHistory(
+            order_id=order.id,
+            old_status=None,
+            new_status=OrderStatus.CONFIRMED.value,
+            changed_by_user_id=user.id,
+            title="Order Confirmed from Wholesale Quotation",
+            description=f"Institutional order confirmed from accepted Quotation #{quote.quote_number} (RFQ #{rfq.rfq_number if rfq else 'N/A'}).",
+            completed=True,
+            active=True,
+        )
+        db.add(status_history)
+
+        db.flush()
+        logger.info(f"Successfully created wholesale order {order.order_number} from quote {quote.quote_number} for user {user.id}.")
+        return order
+
     def get_order(
         self,
         db: Session,

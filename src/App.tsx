@@ -20,6 +20,9 @@ import OrdersPage from '@/pages/OrdersPage';
 import OrderDetailPage from '@/pages/OrderDetailPage';
 import AccountPage from '@/pages/AccountPage';
 import WholesalePage from '@/pages/WholesalePage';
+import RFQListPage from '@/pages/RFQListPage';
+import RFQDetailPage from '@/pages/RFQDetailPage';
+import QuoteDetailPage from '@/pages/QuoteDetailPage';
 import ConstructionToolsPage from '@/pages/ConstructionToolsPage';
 import OffersPage from '@/pages/OffersPage';
 import AboutPage from '@/pages/AboutPage';
@@ -147,6 +150,9 @@ function AppContent() {
             <Route path="/account" element={<AccountPage />} />
             <Route path="/account/setup" element={<AccountSetupPage />} />
             <Route path="/wholesale" element={<WholesalePage />} />
+            <Route path="/rfqs" element={<RFQListPage />} />
+            <Route path="/rfqs/:rfqId" element={<RFQDetailPage />} />
+            <Route path="/quotes/:quoteId" element={<QuoteDetailPage />} />
             <Route path="/tools" element={<ConstructionToolsPage />} />
             <Route path="/offers" element={<OffersPage />} />
             <Route path="/about" element={<AboutPage />} />

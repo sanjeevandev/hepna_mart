@@ -83,6 +83,7 @@ const AccountPage: React.FC = () => {
 
   const tabs = [
     { id: 'profile', label: 'My Profile', icon: User },
+    { id: 'rfqs', label: 'Project RFQs & Quotes', icon: FileText },
     { id: 'projects', label: 'Projects & BOQs', icon: HardHat, badge: projects.length },
     { id: 'orders', label: 'My Orders', icon: Package, badge: orders.length },
     { id: 'estimates', label: 'Saved Estimates', icon: Calculator, badge: estimates.length },
@@ -244,7 +245,13 @@ const AccountPage: React.FC = () => {
                 return (
                   <button
                     key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
+                    onClick={() => {
+                      if (tab.id === 'rfqs') {
+                        navigate('/rfqs');
+                      } else {
+                        setActiveTab(tab.id);
+                      }
+                    }}
                     className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-left ${
                       isActive
                         ? 'bg-[#071A2B] text-white shadow-xs'
