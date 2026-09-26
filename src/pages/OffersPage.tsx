@@ -9,6 +9,7 @@ import { Tag } from 'lucide-react';
 
 const OffersPage: React.FC = () => {
   const [newArrivals, setNewArrivals] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -16,11 +17,19 @@ const OffersPage: React.FC = () => {
     catalogService.getProducts({ limit: 4, sort: 'newest' })
       .then((res) => {
         if (isMounted) {
-          setNewArrivals(res.items);
+          const prods = Array.isArray(res?.products) 
+            ? res.products 
+            : (Array.isArray(res?.items) ? res.items : []);
+          setNewArrivals(prods);
+          setLoading(false);
         }
       })
       .catch((err) => {
         console.error('Failed to load new arrivals:', err);
+        if (isMounted) {
+          setNewArrivals([]);
+          setLoading(false);
+        }
       });
     return () => {
       isMounted = false;

@@ -15,7 +15,10 @@ const ConstructionToolsPage: React.FC = () => {
     catalogService.getProducts({ limit: 100 })
       .then((res) => {
         if (isMounted) {
-          const filtered = res.items.filter(
+          const prods = Array.isArray(res?.products)
+            ? res.products
+            : (Array.isArray(res?.items) ? res.items : []);
+          const filtered = prods.filter(
             p => p.category === 'construction-tools' || p.category === 'safety-equipment'
           );
           setTools(filtered);

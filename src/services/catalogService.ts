@@ -114,6 +114,7 @@ export const catalogService = {
    */
   async getProducts(params: ProductQueryParams = {}): Promise<{
     products: Product[];
+    items: Product[];
     total: number;
     totalPages: number;
     page: number;
@@ -122,8 +123,10 @@ export const catalogService = {
     try {
       const res = await apiClient.products.list(params);
       if (res.data && Array.isArray(res.data.items)) {
+        const mappedProducts = res.data.items.map(transformBackendProductToFrontend);
         return {
-          products: res.data.items.map(transformBackendProductToFrontend),
+          products: mappedProducts,
+          items: mappedProducts,
           total: res.data.total,
           totalPages: res.data.total_pages,
           page: res.data.page,

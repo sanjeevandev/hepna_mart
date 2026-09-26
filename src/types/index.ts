@@ -358,6 +358,7 @@ export interface Offer {
   description: string;
   discount: number;
   discountType: 'percentage' | 'flat';
+  discountPercent?: number;
   type: 'deal' | 'combo' | 'bulk' | 'limited' | 'new';
   products: string[];
   validUntil: string;
