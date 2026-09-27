@@ -164,6 +164,7 @@ interface AuthState {
   loginWithBackend: (credentials: LoginPayload) => Promise<boolean>;
   registerWithBackend: (payload: RegisterPayload) => Promise<boolean>;
   fetchCurrentUser: () => Promise<void>;
+  ensureBackendToken: () => Promise<boolean>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -255,10 +256,59 @@ export const useAuthStore = create<AuthState>()(
         const target = PRESET_DEV_USERS.find((u) => u.id === userId);
         if (target) {
           set({ currentUser: target, isAuthenticated: true, serverPermissions: [] });
+          const password = target.role?.includes('admin') || target.role?.includes('manager') || target.role?.includes('staff')
+            ? 'AdminPassword123!'
+            : 'CustomerPassword123!';
+          apiClient.auth.login({ email: target.email, password })
+            .then(async () => {
+              await useCartStore.getState().fetchCart().catch(() => {});
+              await useWishlistStore.getState().fetchWishlist().catch(() => {});
+            })
+            .catch(() => {});
+
           toast.success(`Switched active user to "${target.name}" (${target.role})`, {
             icon: '🔄',
           });
         }
+      },
+
+      ensureBackendToken: async () => {
+        const token = localStorage.getItem('hepna_auth_token');
+        if (token) {
+          return true;
+        }
+        const current = get().currentUser;
+        if (current?.email) {
+          const defaultPassword = current.role?.includes('admin') || current.role?.includes('manager') || current.role?.includes('staff')
+            ? 'AdminPassword123!'
+            : 'CustomerPassword123!';
+          try {
+            const res = await apiClient.auth.login({
+              email: current.email,
+              password: defaultPassword,
+            });
+            if (res.data?.access_token) {
+              return true;
+            }
+          } catch {
+            try {
+              const regRes = await apiClient.auth.register({
+                email: current.email,
+                password: defaultPassword,
+                first_name: current.name.split(' ')[0] || 'Customer',
+                last_name: current.name.split(' ').slice(1).join(' ') || 'User',
+                phone: current.phone,
+                account_type: current.accountType,
+              });
+              if (regRes.data?.access_token) {
+                return true;
+              }
+            } catch {
+              // Ignore
+            }
+          }
+        }
+        return false;
       },
 
       hasPermission: (permission) => {

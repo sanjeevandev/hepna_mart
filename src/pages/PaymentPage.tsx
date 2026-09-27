@@ -70,7 +70,12 @@ const PaymentPage: React.FC = () => {
       setOrder(currentOrder);
 
       // 3. Fetch or initialize payment
-      const token = getAuthToken();
+      let token = getAuthToken();
+      if (!token) {
+        await useAuthStore.getState().ensureBackendToken();
+        token = getAuthToken();
+      }
+
       if (token) {
         try {
           const payRes = await apiClient.payments.getForOrder(orderId);
@@ -81,9 +86,10 @@ const PaymentPage: React.FC = () => {
             }
           } else if (currentOrder) {
             // Auto-create payment record if not yet created
+            const normMethod = (currentOrder.paymentMethod || 'upi').toLowerCase().includes('cod') ? 'cod' : 'upi';
             const createRes = await apiClient.payments.create({
               order_id: currentOrder.id,
-              payment_method: currentOrder.paymentMethod || 'upi',
+              payment_method: normMethod,
             });
             if (createRes.data) {
               setPayment(createRes.data);

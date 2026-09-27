@@ -41,7 +41,9 @@ class PaymentService:
         Creates or returns an active payment record for an order.
         Amount is authoritative from order.total_amount.
         """
-        order = db.scalar(select(Order).where(Order.id == order_id))
+        order = db.scalar(
+            select(Order).where(or_(Order.id == order_id, Order.order_number == order_id))
+        )
         if not order:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -57,7 +59,7 @@ class PaymentService:
         # Check existing payments for this order
         existing_payment = db.scalar(
             select(Payment)
-            .where(Payment.order_id == order_id)
+            .where(Payment.order_id == order.id)
             .order_by(desc(Payment.created_at))
         )
 
@@ -126,7 +128,9 @@ class PaymentService:
     @staticmethod
     def get_order_payment(db: Session, user_id: str, order_id: str) -> Optional[Payment]:
         """Retrieves customer payment for a specific order."""
-        order = db.scalar(select(Order).where(Order.id == order_id))
+        order = db.scalar(
+            select(Order).where(or_(Order.id == order_id, Order.order_number == order_id))
+        )
         if not order:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -141,7 +145,7 @@ class PaymentService:
         payment = db.scalar(
             select(Payment)
             .options(joinedload(Payment.order), joinedload(Payment.events))
-            .where(Payment.order_id == order_id)
+            .where(Payment.order_id == order.id)
             .order_by(desc(Payment.created_at))
         )
         return payment

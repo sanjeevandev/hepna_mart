@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useCartStore } from '@/store/cartStore';
 import { useOrderStore, mapBackendOrderToOrder } from '@/store/orderStore';
 import { useProjectStore } from '@/store/projectStore';
+import { useAuthStore } from '@/store/authStore';
 import { apiClient, getAuthToken } from '@/lib/api';
 import CheckoutSteps, { DEFAULT_CHECKOUT_STEPS } from '@/components/checkout/CheckoutSteps';
 import AddressForm from '@/components/checkout/AddressForm';
@@ -44,6 +45,7 @@ const CheckoutPage: React.FC = () => {
   };
 
   const handlePaymentSubmit = async (method: string) => {
+    if (isSubmitting) return;
     setPaymentMethod(method);
     setIsSubmitting(true);
 
@@ -55,139 +57,119 @@ const CheckoutPage: React.FC = () => {
       address?.requiredDeliveryDate ||
       new Date(Date.now() + 86400000 * 2).toISOString().split('T')[0];
 
-    const token = getAuthToken();
-
-    // 1. Try real PostgreSQL FastAPI Backend Checkout
-    if (token) {
-      try {
-        const payload = {
-          delivery_address: {
-            full_name: address?.fullName || 'Customer',
-            phone: address?.phone || '+91 98765 43210',
-            address_line1: address?.addressLine1 || '',
-            address_line2: address?.addressLine2 || '',
-            city: address?.city || 'Pune',
-            district: address?.city || 'Pune',
-            state: address?.state || 'Maharashtra',
-            pincode: address?.pincode || '411001',
-            is_construction_site: address?.isConstructionSite ?? true,
-            site_name: address?.siteName || '',
-            site_type: address?.siteType || '',
-            delivery_preference: address?.deliveryPreference || deliveryMethod,
-            required_delivery_date: estDeliveryDate,
-            site_contact_person: address?.siteContactPerson || '',
-            site_phone: address?.sitePhone || '',
-            delivery_instructions: address?.deliveryInstructions || '',
-          },
-          payment_method: method.toLowerCase(),
-          project_id: currentProject?.id,
-          project_name: address?.siteName || currentProject?.name,
-          notes: address?.deliveryInstructions || '',
-        };
-
-        const res = await apiClient.orders.checkout(payload);
-        if (res.data) {
-          const mappedOrder = mapBackendOrderToOrder(res.data);
-          addOrder(mappedOrder);
-          setOrderId(mappedOrder.id);
-          await useCartStore.getState().fetchCart();
-
-          // Create payment record
-          try {
-            await apiClient.payments.create({
-              order_id: mappedOrder.id,
-              payment_method: method.toLowerCase(),
-            });
-          } catch {
-            // Non-fatal
-          }
-
-          if (method.toLowerCase() === 'upi') {
-            toast.success('Order placed! Please complete your UPI payment.');
-            navigate(`/payment/${mappedOrder.id}`);
-            return;
-          }
-
-          setCurrentStep(4);
-          window.scrollTo(0, 0);
-          return;
-        }
-      } catch (err: any) {
-        console.error('[Checkout] Backend checkout error:', err);
-        toast.error(err.message || 'Failed to place order on server. Please check inventory stock.');
-        setIsSubmitting(false);
-        return;
-      } finally {
-        setIsSubmitting(false);
-      }
-    }
-
-    // 2. Offline / Guest local checkout simulation
     try {
-      const subtotal = getSubtotal();
-      const tax = getTax();
-      const deliveryCharge = getDeliveryCharge();
-      const total = getTotal();
+      // 1. Ensure backend authentication token
+      let token = getAuthToken();
+      if (!token) {
+        await useAuthStore.getState().ensureBackendToken();
+        token = getAuthToken();
+      }
 
-      const newOrderId = `HEP-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.floor(100000 + Math.random() * 900000)}`;
+      if (!token) {
+        const guestEmail = address?.phone
+          ? `customer_${address.phone.replace(/[^0-9]/g, '')}@hepnamart.com`
+          : `guest_${Date.now()}@hepnamart.com`;
+        const guestPass = 'CustomerPassword123!';
 
-      const methodLabels: Record<string, string> = {
-        card: 'Credit / Debit Card (Verified)',
-        upi: 'UPI Instant Transfer (Verified)',
-        netbanking: 'Net Banking (RTGS/NEFT)',
-        cod: 'Cash on Site Offloading (COD)',
-      };
+        const loggedIn = await useAuthStore.getState().loginWithBackend({ email: guestEmail, password: guestPass });
+        if (!loggedIn) {
+          await useAuthStore.getState().registerWithBackend({
+            email: guestEmail,
+            password: guestPass,
+            first_name: address?.fullName?.split(' ')[0] || 'Customer',
+            last_name: address?.fullName?.split(' ').slice(1).join(' ') || 'User',
+            phone: address?.phone || '+91 98765 43210',
+            account_type: 'individual',
+          });
+        }
+        token = getAuthToken();
+      }
 
-      const newOrder: Order = {
-        id: newOrderId,
-        items: [...items],
-        subtotal,
-        discount: 0,
-        deliveryCharge,
-        tax,
-        total,
-        status: 'confirmed',
-        date: new Date().toISOString(),
-        estimatedDelivery: estDeliveryDate,
-        deliveryWindow: '10:00 AM – 02:00 PM',
-        projectId: currentProject?.id,
-        projectName: address?.siteName || currentProject?.name,
-        paymentMethod: methodLabels[method] || 'Online Payment',
-        deliveryAddress: address || {
-          id: 'addr-' + Date.now(),
-          fullName: 'Patil Infrastructure',
-          phone: '+91 98765 43210',
-          addressLine1: 'Plot 104, Industrial Area Phase 1',
-          city: 'Pune',
-          state: 'Maharashtra',
-          pincode: '411045',
-          isConstructionSite: true,
-          siteType: 'Residential Project',
-          deliveryPreference: 'Standard Commercial Vehicle',
+      if (!token) {
+        throw new Error('Authentication session could not be established. Please try logging in.');
+      }
+
+      // 2. Synchronize current cart items to backend cart
+      const cartItems = useCartStore.getState().items;
+      if (cartItems.length > 0) {
+        try {
+          await apiClient.cart.merge(
+            cartItems.map((ci) => ({ product_id: ci.product.id, quantity: ci.quantity }))
+          );
+        } catch (syncErr) {
+          console.warn('Cart sync warning before checkout:', syncErr);
+        }
+      }
+
+      // 3. Build authoritative checkout payload
+      const payload = {
+        delivery_address: {
+          full_name: address?.fullName || 'Customer',
+          phone: address?.phone || '+91 98765 43210',
+          address_line1: address?.addressLine1 || 'Main Site Road',
+          address_line2: address?.addressLine2 || '',
+          city: address?.city || 'Pune',
+          district: address?.city || 'Pune',
+          state: address?.state || 'Maharashtra',
+          pincode: address?.pincode || '411001',
+          is_construction_site: address?.isConstructionSite ?? true,
+          site_name: address?.siteName || '',
+          site_type: address?.siteType || '',
+          delivery_preference: address?.deliveryPreference || deliveryMethod,
+          required_delivery_date: estDeliveryDate,
+          site_contact_person: address?.siteContactPerson || '',
+          site_phone: address?.sitePhone || '',
+          delivery_instructions: address?.deliveryInstructions || '',
         },
-        statusHistory: [
-          {
-            status: 'confirmed',
-            title: 'Order Confirmed',
-            description: 'Payment authorized and material allocation confirmed with fulfillment depot.',
-            timestamp: new Date().toLocaleString('en-IN', {
-              day: '2-digit',
-              month: 'short',
-              year: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit',
-            }),
-            completed: true,
-            active: true,
-          },
-        ],
+        payment_method: method.toLowerCase(),
+        project_id: currentProject?.id,
+        project_name: address?.siteName || currentProject?.name,
+        notes: address?.deliveryInstructions || '',
       };
 
-      addOrder(newOrder);
-      setOrderId(newOrderId);
+      // 4. Call real PostgreSQL checkout
+      const res = await apiClient.orders.checkout(payload);
+      if (!res.data) {
+        throw new Error('Failed to create order on server.');
+      }
+
+      const backendOrder = res.data;
+      const mappedOrder = mapBackendOrderToOrder(backendOrder);
+      addOrder(mappedOrder);
+      setOrderId(backendOrder.id);
       await clearCart();
-      setCurrentStep(4);
-      window.scrollTo(0, 0);
+      await useCartStore.getState().fetchCart().catch(() => {});
+
+      // 5. Create authoritative Payment record in PostgreSQL
+      try {
+        await apiClient.payments.create({
+          order_id: backendOrder.id,
+          payment_method: method.toLowerCase(),
+        });
+      } catch (payErr: any) {
+        console.warn('Payment record creation note:', payErr);
+      }
+
+      // 6. Navigation handling based on payment method
+      const normMethod = method.toLowerCase().trim();
+      if (normMethod === 'upi' || normMethod === 'online' || normMethod === 'card' || normMethod === 'netbanking') {
+        toast.success('Order created! Please complete your payment.');
+        navigate(`/payment/${backendOrder.id}`);
+        return;
+      }
+
+      if (normMethod === 'cod') {
+        toast.success('Order placed with Cash on Delivery!');
+        setCurrentStep(4);
+        window.scrollTo(0, 0);
+        return;
+      }
+
+      navigate(`/payment/${backendOrder.id}`);
+      return;
+    } catch (err: any) {
+      console.error('[Checkout] Checkout error:', err);
+      toast.error(err.message || 'Failed to place order. Please check inventory stock.');
     } finally {
       setIsSubmitting(false);
     }

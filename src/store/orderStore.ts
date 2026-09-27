@@ -95,7 +95,7 @@ interface OrderState {
 
   fetchOrders: () => Promise<Order[]>;
   fetchOrderById: (orderId: string) => Promise<Order | undefined>;
-  addOrder: (order: Order) => void;
+  addOrder: (order: Order, showToast?: boolean) => void;
   getOrder: (orderId: string) => Order | undefined;
   cancelOrder: (orderId: string, reason: string) => Promise<boolean>;
   updateOrderStatus: (orderId: string, status: OrderStatus, note?: string) => Promise<void>;
@@ -395,11 +395,13 @@ export const useOrderStore = create<OrderState>()(
         return get().getOrder(orderId);
       },
 
-      addOrder: (order: Order) => {
+      addOrder: (order: Order, showToast: boolean = false) => {
         set((state) => ({
-          orders: [order, ...state.orders],
+          orders: [order, ...state.orders.filter((o) => o.id !== order.id)],
         }));
-        toast.success(`Order #${order.id} confirmed successfully!`);
+        if (showToast) {
+          toast.success(`Order #${order.id} placed successfully!`);
+        }
       },
 
       getOrder: (orderId: string) => {

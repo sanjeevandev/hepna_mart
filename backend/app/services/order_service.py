@@ -229,6 +229,9 @@ class OrderService:
         if "cod" in payment_method_raw or "cash" in payment_method_raw:
             payment_status_val = PaymentStatus.PENDING.value
             payment_method_val = PaymentMethod.COD.value
+        elif "upi" in payment_method_raw:
+            payment_status_val = PaymentStatus.PENDING.value
+            payment_method_val = PaymentMethod.UPI.value
         else:
             payment_status_val = PaymentStatus.PENDING.value
             payment_method_val = PaymentMethod.ONLINE.value
