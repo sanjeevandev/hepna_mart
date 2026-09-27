@@ -44,4 +44,7 @@ ENV/
 .pytest_cache/
 .coverage
 *.sqlite3
+backend/backups/
+*.sql.gz
+
 

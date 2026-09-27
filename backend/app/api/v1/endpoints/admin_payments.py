@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.rbac import Permission
+from app.core.audit import log_audit_event, AuditEventType
 from app.api.dependencies import require_permission, get_current_active_user
 from app.models.user import User
 from app.schemas.payment import (
@@ -95,6 +96,14 @@ def reconcile_single_payment(
             admin_user_id=current_user.id,
             payment_id=payment_id,
         )
+        log_audit_event(
+            event_type=AuditEventType.PAYMENT_RECONCILED,
+            target_type="payment",
+            target_id=payment_id,
+            actor_id=current_user.id,
+            actor_role=current_user.role.value,
+            details={"reconciliation_result": result},
+        )
         return result
     except ValueError as e:
         raise HTTPException(
@@ -136,6 +145,18 @@ def verify_payment(
         payment_id=payment_id,
         notes=notes,
     )
+    log_audit_event(
+        event_type=AuditEventType.PAYMENT_VERIFIED,
+        target_type="payment",
+        target_id=payment.id,
+        actor_id=current_user.id,
+        actor_role=current_user.role.value,
+        details={
+            "order_id": payment.order_id,
+            "status": payment.payment_status,
+            "notes": notes,
+        },
+    )
     return payment
 
 
@@ -155,6 +176,18 @@ def reject_payment(
         admin_user_id=current_user.id,
         payment_id=payment_id,
         reason=payload.reason,
+    )
+    log_audit_event(
+        event_type=AuditEventType.PAYMENT_REJECTED,
+        target_type="payment",
+        target_id=payment.id,
+        actor_id=current_user.id,
+        actor_role=current_user.role.value,
+        details={
+            "order_id": payment.order_id,
+            "status": payment.payment_status,
+            "reason": payload.reason,
+        },
     )
     return payment
 
@@ -177,4 +210,17 @@ def create_refund(
         reason=payload.reason,
         amount=payload.amount,
     )
+    log_audit_event(
+        event_type=AuditEventType.PAYMENT_REFUNDED,
+        target_type="payment",
+        target_id=payment.id,
+        actor_id=current_user.id,
+        actor_role=current_user.role.value,
+        details={
+            "order_id": payment.order_id,
+            "reason": payload.reason,
+            "amount": payload.amount or float(payment.amount),
+        },
+    )
     return payment
+

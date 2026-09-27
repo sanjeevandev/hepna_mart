@@ -33,6 +33,18 @@ class Settings(BaseSettings):
     HEPNA_COD_ENABLED: bool = True
     HEPNA_PAYMENT_GATEWAY_ENABLED: bool = False
 
+    # Security Hardening & Rate Limiting
+    RATE_LIMITING_ENABLED: bool = True
+    RATE_LIMIT_LOGIN_MAX_REQUESTS: int = 10
+    RATE_LIMIT_LOGIN_WINDOW_SECONDS: int = 60
+    RATE_LIMIT_REGISTER_MAX_REQUESTS: int = 5
+    RATE_LIMIT_REGISTER_WINDOW_SECONDS: int = 60
+    RATE_LIMIT_PAYMENTS_MAX_REQUESTS: int = 20
+    RATE_LIMIT_PAYMENTS_WINDOW_SECONDS: int = 60
+    RATE_LIMIT_DEFAULT_MAX_REQUESTS: int = 120
+    RATE_LIMIT_DEFAULT_WINDOW_SECONDS: int = 60
+    MAX_REQUEST_SIZE_BYTES: int = 2 * 1024 * 1024  # 2MB maximum payload size
+
     # CORS
     CORS_ORIGINS: Union[List[str], str] = [
         "http://localhost:3000",
@@ -61,6 +73,19 @@ class Settings(BaseSettings):
             "http://127.0.0.1:3003",
         ]
 
+    def validate_production_settings(self) -> None:
+        """
+        Validates critical configuration keys in production environment.
+        Raises ValueError if unsafe development defaults are retained in production.
+        """
+        if self.ENVIRONMENT.lower() == "production":
+            if self.DEBUG:
+                raise ValueError("SECURITY RISK: DEBUG must be set to False in production mode.")
+            if "insecure" in self.SECRET_KEY or len(self.SECRET_KEY) < 32:
+                raise ValueError("SECURITY RISK: SECRET_KEY must be a cryptographically strong secret with at least 32 characters in production.")
+            if self.ENABLE_DEV_SEED_USERS:
+                raise ValueError("SECURITY RISK: ENABLE_DEV_SEED_USERS must be False in production mode.")
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
@@ -70,3 +95,4 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+

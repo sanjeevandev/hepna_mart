@@ -5,6 +5,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.core.config import settings
+from app.core.middleware import (
+    CorrelationIdMiddleware,
+    SecurityHeadersMiddleware,
+    PayloadSizeLimitMiddleware,
+    register_exception_handlers,
+)
 from app.api.v1.router import api_router
 
 # Configure logging
@@ -21,6 +27,11 @@ async def lifespan(app: FastAPI):
     Lifecycle manager for application startup and shutdown events.
     """
     logger.info("Initializing %s v%s in [%s] mode...", settings.PROJECT_NAME, settings.VERSION, settings.ENVIRONMENT)
+    try:
+        settings.validate_production_settings()
+    except ValueError as exc:
+        logger.critical("Production configuration validation failed: %s", exc)
+        raise exc
     logger.info("CORS Allowed Origins: %s", settings.CORS_ORIGINS)
     yield
     logger.info("Shutting down %s...", settings.PROJECT_NAME)
@@ -36,7 +47,16 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Set up CORS middleware
+# 1. Correlation ID Middleware (outermost for tracking all requests)
+app.add_middleware(CorrelationIdMiddleware)
+
+# 2. Defensive Security Headers Middleware
+app.add_middleware(SecurityHeadersMiddleware)
+
+# 3. Payload Size Limit Guard (2MB maximum)
+app.add_middleware(PayloadSizeLimitMiddleware)
+
+# 4. Set up CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
@@ -44,6 +64,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Register global exception handlers for sanitization and correlation ID attachment
+register_exception_handlers(app)
 
 # Register API v1 Router
 app.include_router(api_router, prefix=settings.API_V1_STR)
@@ -60,3 +83,4 @@ def root():
             "health": f"{settings.API_V1_STR}/health",
         }
     )
+

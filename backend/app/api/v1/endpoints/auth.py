@@ -8,6 +8,8 @@ from app.core.config import settings
 from app.core.database import get_db
 from app.core.security import create_access_token
 from app.core.rbac import get_role_permissions
+from app.core.rate_limiter import RateLimitGuard
+from app.core.audit import log_audit_event, AuditEventType
 from app.api.dependencies import get_current_active_user
 from app.models.user import User
 from app.schemas.auth import (
@@ -23,6 +25,19 @@ from app.services.auth_service import AuthService
 logger = logging.getLogger("hepna.api.auth")
 router = APIRouter()
 
+# Rate limiters
+login_rate_guard = RateLimitGuard(
+    max_requests=settings.RATE_LIMIT_LOGIN_MAX_REQUESTS,
+    window_seconds=settings.RATE_LIMIT_LOGIN_WINDOW_SECONDS,
+    key_prefix="auth:login",
+)
+
+register_rate_guard = RateLimitGuard(
+    max_requests=settings.RATE_LIMIT_REGISTER_MAX_REQUESTS,
+    window_seconds=settings.RATE_LIMIT_REGISTER_WINDOW_SECONDS,
+    key_prefix="auth:register",
+)
+
 
 @router.post(
     "/register",
@@ -34,10 +49,18 @@ router = APIRouter()
 def register(
     req: RegisterRequest,
     db: Session = Depends(get_db),
+    _rate_limit: None = Depends(register_rate_guard),
 ) -> TokenResponse:
     try:
         user = AuthService.register_customer(db, req)
     except ValueError as err:
+        log_audit_event(
+            event_type=AuditEventType.AUTH_LOGIN_FAILURE,
+            target_type="user",
+            target_id=req.email,
+            action_status="REJECTED",
+            details={"email": req.email, "error": str(err)},
+        )
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(err),
@@ -50,6 +73,15 @@ def register(
         role=user.role.value,
         account_type=user.account_type.value,
         expires_delta=expires_delta,
+    )
+
+    log_audit_event(
+        event_type=AuditEventType.AUTH_REGISTER_SUCCESS,
+        target_type="user",
+        target_id=user.id,
+        actor_id=user.id,
+        actor_role=user.role.value,
+        details={"email": user.email, "account_type": user.account_type.value},
     )
 
     return TokenResponse(
@@ -70,9 +102,17 @@ def register(
 def login(
     req: LoginRequest,
     db: Session = Depends(get_db),
+    _rate_limit: None = Depends(login_rate_guard),
 ) -> TokenResponse:
     user = AuthService.authenticate_user(db, req.email, req.password)
     if not user:
+        log_audit_event(
+            event_type=AuditEventType.AUTH_LOGIN_FAILURE,
+            target_type="user",
+            target_id=req.email,
+            action_status="FAILURE",
+            details={"email": req.email, "reason": "invalid_credentials"},
+        )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password.",
@@ -85,6 +125,15 @@ def login(
         role=user.role.value,
         account_type=user.account_type.value,
         expires_delta=expires_delta,
+    )
+
+    log_audit_event(
+        event_type=AuditEventType.AUTH_LOGIN_SUCCESS,
+        target_type="user",
+        target_id=user.id,
+        actor_id=user.id,
+        actor_role=user.role.value,
+        details={"email": user.email, "role": user.role.value},
     )
 
     return TokenResponse(
@@ -132,10 +181,28 @@ def change_password(
     )
 
     if not success:
+        log_audit_event(
+            event_type=AuditEventType.AUTH_PASSWORD_CHANGE,
+            target_type="user",
+            target_id=current_user.id,
+            actor_id=current_user.id,
+            actor_role=current_user.role.value,
+            action_status="FAILURE",
+            details={"reason": "invalid_current_password"},
+        )
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Current password is incorrect.",
         )
+
+    log_audit_event(
+        event_type=AuditEventType.AUTH_PASSWORD_CHANGE,
+        target_type="user",
+        target_id=current_user.id,
+        actor_id=current_user.id,
+        actor_role=current_user.role.value,
+        action_status="SUCCESS",
+    )
 
     return {"status": "ok", "message": "Password changed successfully."}
 
@@ -147,6 +214,12 @@ def change_password(
     description="Acknowledges client session termination. The frontend client discards its stored JWT access token.",
 )
 def logout() -> dict[str, str]:
+    log_audit_event(
+        event_type=AuditEventType.AUTH_LOGOUT,
+        target_type="session",
+        target_id="client_session",
+        action_status="SUCCESS",
+    )
     return {
         "status": "ok",
         "message": "Client session terminated successfully.",
@@ -168,3 +241,4 @@ def seed_dev_users(db: Session = Depends(get_db)) -> dict[str, Any]:
 
     count = AuthService.seed_dev_users_if_enabled(db)
     return {"status": "ok", "seeded_users_count": count}
+

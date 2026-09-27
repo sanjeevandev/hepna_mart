@@ -3,8 +3,11 @@ from typing import Dict, Any, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.core.database import get_db
 from app.core.payment_config import payment_config
+from app.core.rate_limiter import RateLimitGuard
+from app.core.audit import log_audit_event, AuditEventType
 from app.api.dependencies import get_current_active_user
 from app.models.user import User
 from app.models.payment import Payment
@@ -18,6 +21,12 @@ from app.services.payment_service import payment_service
 
 logger = logging.getLogger("hepna.api.payments")
 router = APIRouter(prefix="/payments", tags=["payments"])
+
+upi_submit_rate_guard = RateLimitGuard(
+    max_requests=settings.RATE_LIMIT_PAYMENTS_MAX_REQUESTS,
+    window_seconds=settings.RATE_LIMIT_PAYMENTS_WINDOW_SECONDS,
+    key_prefix="payments:submit_upi",
+)
 
 
 @router.get("/config", response_model=PaymentConfigResponse)
@@ -44,6 +53,18 @@ def create_payment(
         order_id=payload.order_id,
         payment_method=payload.payment_method,
         provider_name=payload.provider,
+    )
+    log_audit_event(
+        event_type=AuditEventType.PAYMENT_INITIATED,
+        target_type="payment",
+        target_id=payment.id,
+        actor_id=current_user.id,
+        actor_role=current_user.role.value,
+        details={
+            "order_id": payload.order_id,
+            "method": payload.payment_method,
+            "amount": float(payment.amount),
+        },
     )
     return payment
 
@@ -81,6 +102,7 @@ def submit_upi_reference(
     payload: SubmitUPIRequest,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db),
+    _rate_limit: None = Depends(upi_submit_rate_guard),
 ):
     """
     Customer submits UPI UTR/Transaction reference ID.
@@ -91,6 +113,18 @@ def submit_upi_reference(
         user_id=current_user.id,
         payment_id=payment_id,
         utr_reference=payload.utr_reference,
+    )
+    log_audit_event(
+        event_type=AuditEventType.PAYMENT_UPI_SUBMITTED,
+        target_type="payment",
+        target_id=payment.id,
+        actor_id=current_user.id,
+        actor_role=current_user.role.value,
+        details={
+            "utr_reference": payload.utr_reference,
+            "order_id": payment.order_id,
+            "amount": float(payment.amount),
+        },
     )
     return payment
 
@@ -109,6 +143,14 @@ def cancel_payment(
         user_id=current_user.id,
         payment_id=payment_id,
     )
+    log_audit_event(
+        event_type=AuditEventType.PAYMENT_CANCELLED,
+        target_type="payment",
+        target_id=payment.id,
+        actor_id=current_user.id,
+        actor_role=current_user.role.value,
+        details={"order_id": payment.order_id},
+    )
     return payment
 
 
@@ -126,3 +168,4 @@ def handle_provider_webhook(
         status_code=status.HTTP_501_NOT_IMPLEMENTED,
         detail=f"Automated gateway webhook processing for provider '{provider}' is currently disabled. Manual verification is active.",
     )
+

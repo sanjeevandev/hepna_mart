@@ -6,6 +6,7 @@ from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import StaticPool
 
 from app.core.database import get_db
+from app.core.rate_limiter import rate_limiter
 from app.models.base import Base
 from app.main import app
 
@@ -37,8 +38,10 @@ def db_session() -> Generator[Session, None, None]:
 @pytest.fixture(scope="function")
 def client(db_session: Session) -> Generator[TestClient, None, None]:
     """
-    FastAPI TestClient with overridden get_db dependency.
+    FastAPI TestClient with overridden get_db dependency and fresh rate limiter state.
     """
+    rate_limiter.reset()
+
     def override_get_db():
         try:
             yield db_session
@@ -49,3 +52,5 @@ def client(db_session: Session) -> Generator[TestClient, None, None]:
     with TestClient(app) as test_client:
         yield test_client
     app.dependency_overrides.clear()
+    rate_limiter.reset()
+
