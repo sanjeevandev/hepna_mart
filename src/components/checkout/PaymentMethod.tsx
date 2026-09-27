@@ -1,19 +1,43 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Button from '@/components/ui/Button';
-import { Smartphone, CreditCard, Building, Wallet } from 'lucide-react';
+import { Smartphone, CreditCard, Building, Wallet, ArrowLeft } from 'lucide-react';
 
 interface PaymentMethodProps {
-  onSelect: (method: string) => void;
+  onSelect?: (method: string) => void;
+  onNext?: (method: string) => void;
+  onBack?: () => void;
   selected?: string;
+  defaultMethod?: string;
 }
 
-const PaymentMethod: React.FC<PaymentMethodProps> = ({ onSelect, selected }) => {
+const PaymentMethod: React.FC<PaymentMethodProps> = ({ 
+  onSelect, 
+  onNext, 
+  onBack, 
+  selected, 
+  defaultMethod = 'card' 
+}) => {
+  const [currentSelected, setCurrentSelected] = useState<string>(selected || defaultMethod);
+
   const methods = [
-    { id: 'upi', title: 'UPI', desc: 'Google Pay, PhonePe, Paytm', icon: Smartphone },
+    { id: 'upi', title: 'UPI', desc: 'Google Pay, PhonePe, Paytm (Instant Verification)', icon: Smartphone },
     { id: 'card', title: 'Credit/Debit Card', desc: 'Visa, Mastercard, RuPay', icon: CreditCard },
-    { id: 'netbanking', title: 'Net Banking', desc: 'All major Indian banks supported', icon: Building },
+    { id: 'netbanking', title: 'Net Banking', desc: 'All major Indian banks supported (RTGS/NEFT)', icon: Building },
     { id: 'cod', title: 'Cash on Delivery', desc: 'Pay when you receive the order (Available for orders under ₹50,000)', icon: Wallet },
   ];
+
+  const handleSelect = (id: string) => {
+    setCurrentSelected(id);
+    onSelect?.(id);
+  };
+
+  const handleContinue = () => {
+    if (onNext) {
+      onNext(currentSelected);
+    } else if (onSelect) {
+      onSelect(currentSelected);
+    }
+  };
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -21,14 +45,14 @@ const PaymentMethod: React.FC<PaymentMethodProps> = ({ onSelect, selected }) => 
       
       <div className="space-y-4 mb-8">
         {methods.map((method) => {
-          const isSelected = selected === method.id;
+          const isSelected = currentSelected === method.id;
           return (
             <label 
               key={method.id} 
               className={`flex items-start gap-4 p-4 rounded-lg border-2 cursor-pointer transition-colors ${
                 isSelected ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-primary/30'
               }`}
-              onClick={() => onSelect(method.id)}
+              onClick={() => handleSelect(method.id)}
             >
               <div className="pt-1">
                 <input 
@@ -36,7 +60,7 @@ const PaymentMethod: React.FC<PaymentMethodProps> = ({ onSelect, selected }) => 
                   name="paymentMethod" 
                   value={method.id} 
                   checked={isSelected} 
-                  onChange={() => {}} 
+                  onChange={() => handleSelect(method.id)} 
                   className="w-5 h-5 text-primary focus:ring-primary"
                 />
               </div>
@@ -52,12 +76,22 @@ const PaymentMethod: React.FC<PaymentMethodProps> = ({ onSelect, selected }) => 
         })}
       </div>
 
-      <div className="flex justify-end">
+      <div className="flex items-center justify-between pt-2">
+        {onBack ? (
+          <button
+            type="button"
+            onClick={onBack}
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-gray-600 hover:text-primary-dark hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Delivery
+          </button>
+        ) : <div />}
         <Button 
           variant="primary" 
           size="lg" 
-          disabled={!selected}
-          onClick={() => onSelect(selected || methods[0].id)}
+          disabled={!currentSelected}
+          onClick={handleContinue}
           className="px-8"
         >
           Place Order
@@ -68,3 +102,4 @@ const PaymentMethod: React.FC<PaymentMethodProps> = ({ onSelect, selected }) => 
 };
 
 export default PaymentMethod;
+

@@ -1,18 +1,42 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Button from '@/components/ui/Button';
-import { Truck, Zap, HardHat } from 'lucide-react';
+import { Truck, Zap, HardHat, ArrowLeft } from 'lucide-react';
 
 interface DeliveryMethodProps {
-  onSelect: (method: string) => void;
+  onSelect?: (method: string) => void;
+  onNext?: (method: string) => void;
+  onBack?: () => void;
   selected?: string;
+  defaultMethod?: string;
 }
 
-const DeliveryMethod: React.FC<DeliveryMethodProps> = ({ onSelect, selected }) => {
+const DeliveryMethod: React.FC<DeliveryMethodProps> = ({ 
+  onSelect, 
+  onNext, 
+  onBack, 
+  selected, 
+  defaultMethod = 'standard' 
+}) => {
+  const [currentSelected, setCurrentSelected] = useState<string>(selected || defaultMethod);
+
   const methods = [
     { id: 'standard', title: 'Standard Delivery', desc: '5-7 business days', price: 'Free above ₹5,000', icon: Truck },
     { id: 'express', title: 'Express Delivery', desc: '2-3 business days', price: '₹499', icon: Zap },
     { id: 'site', title: 'Construction Site Delivery', desc: '3-5 business days. Includes proper unloading coordination.', price: '₹299', icon: HardHat },
   ];
+
+  const handleSelect = (id: string) => {
+    setCurrentSelected(id);
+    onSelect?.(id);
+  };
+
+  const handleContinue = () => {
+    if (onNext) {
+      onNext(currentSelected);
+    } else if (onSelect) {
+      onSelect(currentSelected);
+    }
+  };
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -20,14 +44,14 @@ const DeliveryMethod: React.FC<DeliveryMethodProps> = ({ onSelect, selected }) =
       
       <div className="space-y-4 mb-8">
         {methods.map((method) => {
-          const isSelected = selected === method.id;
+          const isSelected = currentSelected === method.id;
           return (
             <label 
               key={method.id} 
               className={`flex items-start gap-4 p-4 rounded-lg border-2 cursor-pointer transition-colors ${
                 isSelected ? 'border-accent bg-accent/5' : 'border-gray-200 hover:border-accent/30'
               }`}
-              onClick={() => onSelect(method.id)}
+              onClick={() => handleSelect(method.id)}
             >
               <div className="pt-1">
                 <input 
@@ -35,7 +59,7 @@ const DeliveryMethod: React.FC<DeliveryMethodProps> = ({ onSelect, selected }) =
                   name="deliveryMethod" 
                   value={method.id} 
                   checked={isSelected} 
-                  onChange={() => {}} 
+                  onChange={() => handleSelect(method.id)} 
                   className="w-5 h-5 text-accent focus:ring-accent"
                 />
               </div>
@@ -54,12 +78,22 @@ const DeliveryMethod: React.FC<DeliveryMethodProps> = ({ onSelect, selected }) =
         })}
       </div>
 
-      <div className="flex justify-end">
+      <div className="flex items-center justify-between pt-2">
+        {onBack ? (
+          <button
+            type="button"
+            onClick={onBack}
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-gray-600 hover:text-primary-dark hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Address
+          </button>
+        ) : <div />}
         <Button 
           variant="primary" 
           size="lg" 
-          disabled={!selected}
-          onClick={() => onSelect(selected || methods[0].id)}
+          disabled={!currentSelected}
+          onClick={handleContinue}
         >
           Continue to Payment
         </Button>
@@ -69,3 +103,4 @@ const DeliveryMethod: React.FC<DeliveryMethodProps> = ({ onSelect, selected }) =
 };
 
 export default DeliveryMethod;
+

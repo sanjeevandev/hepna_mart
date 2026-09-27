@@ -30,19 +30,19 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const compared = isInCompare(product.id);
   const inStock = product.stock && product.stock > 0;
 
-  const handleAddToCart = (e: React.MouseEvent) => {
+  const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (!inStock) return;
-    addToCart(product, quantity);
+    await addToCart(product, quantity);
     toast.success(`Added ${quantity} × ${product.name} to cart!`);
   };
 
-  const handleBuyNow = (e: React.MouseEvent) => {
+  const handleBuyNow = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (!inStock) return;
-    addToCart(product, quantity);
+    await addToCart(product, quantity);
     navigate('/checkout');
   };
 

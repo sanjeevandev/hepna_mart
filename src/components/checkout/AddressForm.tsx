@@ -6,26 +6,28 @@ import { DeliveryAddress } from '@/types';
 interface AddressFormProps {
   onSubmit: (address: DeliveryAddress) => void;
   initialAddress?: Partial<DeliveryAddress>;
+  defaultAddress?: Partial<DeliveryAddress> | null;
 }
 
-const AddressForm: React.FC<AddressFormProps> = ({ onSubmit, initialAddress }) => {
+const AddressForm: React.FC<AddressFormProps> = ({ onSubmit, initialAddress, defaultAddress }) => {
+  const init = initialAddress || defaultAddress || {};
   const [formData, setFormData] = useState<DeliveryAddress>({
-    id: initialAddress?.id || 'addr-' + Date.now(),
-    fullName: initialAddress?.fullName || '',
-    phone: initialAddress?.phone || '',
-    addressLine1: initialAddress?.addressLine1 || '',
-    addressLine2: initialAddress?.addressLine2 || '',
-    city: initialAddress?.city || '',
-    state: initialAddress?.state || 'Maharashtra',
-    pincode: initialAddress?.pincode || '',
-    isConstructionSite: initialAddress?.isConstructionSite ?? true,
-    siteName: initialAddress?.siteName || '',
-    siteType: initialAddress?.siteType || 'Residential (House / Villa)',
-    deliveryPreference: initialAddress?.deliveryPreference || 'Standard Commercial Truck',
-    requiredDeliveryDate: initialAddress?.requiredDeliveryDate || new Date(Date.now() + 86400000 * 2).toISOString().split('T')[0],
-    siteContactPerson: initialAddress?.siteContactPerson || '',
-    sitePhone: initialAddress?.sitePhone || '',
-    deliveryInstructions: initialAddress?.deliveryInstructions || '',
+    id: init.id || 'addr-' + Date.now(),
+    fullName: init.fullName || '',
+    phone: init.phone || '',
+    addressLine1: init.addressLine1 || '',
+    addressLine2: init.addressLine2 || '',
+    city: init.city || '',
+    state: init.state || 'Maharashtra',
+    pincode: init.pincode || '',
+    isConstructionSite: init.isConstructionSite ?? true,
+    siteName: init.siteName || '',
+    siteType: init.siteType || 'Residential (House / Villa)',
+    deliveryPreference: init.deliveryPreference || 'Standard Commercial Truck',
+    requiredDeliveryDate: init.requiredDeliveryDate || new Date(Date.now() + 86400000 * 2).toISOString().split('T')[0],
+    siteContactPerson: init.siteContactPerson || '',
+    sitePhone: init.sitePhone || '',
+    deliveryInstructions: init.deliveryInstructions || '',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {

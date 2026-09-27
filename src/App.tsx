@@ -6,6 +6,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import PageTransition from '@/components/ui/PageTransition';
 import ProductCompareBar from '@/components/product/ProductCompareBar';
+import ErrorBoundary from '@/components/common/ErrorBoundary';
 
 // Pages
 import HomePage from '@/pages/HomePage';
@@ -334,9 +335,11 @@ function AppContent() {
 
 function App() {
   return (
-    <SmoothScrollProvider>
-      <AppContent />
-    </SmoothScrollProvider>
+    <ErrorBoundary>
+      <SmoothScrollProvider>
+        <AppContent />
+      </SmoothScrollProvider>
+    </ErrorBoundary>
   );
 }
 

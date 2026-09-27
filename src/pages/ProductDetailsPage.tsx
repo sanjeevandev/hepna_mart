@@ -103,15 +103,15 @@ const ProductDetailsPage: React.FC = () => {
   const compared = isInCompare(product.id);
   const inStock = product.stock && product.stock > 0;
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!inStock) return;
-    addToCart(product, quantity);
+    await addToCart(product, quantity);
     toast.success(`Added ${quantity} × ${product.name} to cart!`);
   };
 
-  const handleBuyNow = () => {
+  const handleBuyNow = async () => {
     if (!inStock) return;
-    addToCart(product, quantity);
+    await addToCart(product, quantity);
     navigate('/checkout');
   };
 

@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useCartStore } from '@/store/cartStore';
 import { useOrderStore, mapBackendOrderToOrder } from '@/store/orderStore';
 import { useProjectStore } from '@/store/projectStore';
 import { apiClient, getAuthToken } from '@/lib/api';
-import CheckoutSteps from '@/components/checkout/CheckoutSteps';
+import CheckoutSteps, { DEFAULT_CHECKOUT_STEPS } from '@/components/checkout/CheckoutSteps';
 import AddressForm from '@/components/checkout/AddressForm';
 import DeliveryMethod from '@/components/checkout/DeliveryMethod';
 import PaymentMethod from '@/components/checkout/PaymentMethod';
 import OrderConfirmation from '@/components/checkout/OrderConfirmation';
 import OrderSummary from '@/components/cart/OrderSummary';
 import { DeliveryAddress, Order } from '@/types';
+import { ShoppingBag, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const CheckoutPage: React.FC = () => {
@@ -28,10 +29,7 @@ const CheckoutPage: React.FC = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    if (items.length === 0 && currentStep !== 4) {
-      navigate('/cart');
-    }
-  }, [items.length, currentStep, navigate]);
+  }, []);
 
   const handleAddressSubmit = (addr: DeliveryAddress) => {
     setAddress(addr);
@@ -195,6 +193,35 @@ const CheckoutPage: React.FC = () => {
     }
   };
 
+  if (items.length === 0 && currentStep !== 4) {
+    return (
+      <div className="container-custom py-20 text-center max-w-md mx-auto">
+        <div className="w-16 h-16 bg-orange-50 text-accent rounded-full flex items-center justify-center mx-auto mb-4 border border-orange-100">
+          <ShoppingBag className="w-8 h-8 text-accent" />
+        </div>
+        <h2 className="text-2xl font-heading font-bold text-primary-dark mb-2">Your Cart is Empty</h2>
+        <p className="text-sm text-gray-500 mb-6">
+          You do not have any materials in your cart to proceed with checkout.
+        </p>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <Link
+            to="/shop"
+            className="w-full sm:w-auto px-6 py-2.5 bg-accent hover:bg-accent-dark text-white rounded-xl text-sm font-bold transition-colors shadow-sm"
+          >
+            Browse Materials
+          </Link>
+          <Link
+            to="/cart"
+            className="w-full sm:w-auto px-6 py-2.5 border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-xl text-sm font-semibold transition-colors flex items-center justify-center gap-1.5"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            View Cart
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   if (currentStep === 4) {
     return (
       <div className="container-custom py-12 max-w-4xl">
@@ -206,7 +233,7 @@ const CheckoutPage: React.FC = () => {
   return (
     <div className="container-custom py-12">
       <div className="max-w-4xl mx-auto mb-12">
-        <CheckoutSteps currentStep={currentStep} />
+        <CheckoutSteps currentStep={currentStep} steps={DEFAULT_CHECKOUT_STEPS} />
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8">

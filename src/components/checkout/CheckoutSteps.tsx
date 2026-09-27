@@ -1,12 +1,20 @@
 import React from 'react';
 import { Check } from 'lucide-react';
 
+export const DEFAULT_CHECKOUT_STEPS = ['Delivery Address', 'Delivery Method', 'Payment'];
+
 interface CheckoutStepsProps {
   currentStep: number;
-  steps: string[];
+  steps?: string[];
 }
 
-const CheckoutSteps: React.FC<CheckoutStepsProps> = ({ currentStep, steps }) => {
+const CheckoutSteps: React.FC<CheckoutStepsProps> = ({ currentStep, steps = DEFAULT_CHECKOUT_STEPS }) => {
+  const stepsList = steps && steps.length > 0 ? steps : DEFAULT_CHECKOUT_STEPS;
+  const totalSteps = stepsList.length;
+  const progressPercent = totalSteps > 1 
+    ? Math.min(100, Math.max(0, ((currentStep - 1) / (totalSteps - 1)) * 100)) 
+    : 100;
+
   return (
     <div className="w-full py-6">
       <div className="flex items-center justify-between relative">
@@ -15,10 +23,10 @@ const CheckoutSteps: React.FC<CheckoutStepsProps> = ({ currentStep, steps }) => 
         {/* Active Line */}
         <div 
           className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-accent z-0 transition-all duration-500 hidden sm:block" 
-          style={{ width: `${((currentStep - 1) / (steps.length - 1)) * 100}%` }}
+          style={{ width: `${progressPercent}%` }}
         ></div>
 
-        {steps.map((step, index) => {
+        {stepsList.map((step, index) => {
           const stepNumber = index + 1;
           const isCompleted = stepNumber < currentStep;
           const isActive = stepNumber === currentStep;
@@ -51,3 +59,4 @@ const CheckoutSteps: React.FC<CheckoutStepsProps> = ({ currentStep, steps }) => 
 };
 
 export default CheckoutSteps;
+
