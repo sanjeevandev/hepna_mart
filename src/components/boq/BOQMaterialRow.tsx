@@ -36,6 +36,10 @@ export interface BOQItemComputed extends ProjectMaterialItem {
 interface BOQMaterialRowProps {
   item: BOQItemComputed;
   index: number;
+  canEditBase?: boolean;
+  canEditPurchased?: boolean;
+  canEditNotes?: boolean;
+  canDelete?: boolean;
   onUpdateBaseQty: (qty: number) => void;
   onUpdateUnit: (unit: string) => void;
   onUpdatePurchasedQty: (qty: number) => void;
@@ -64,6 +68,10 @@ const WASTAGE_OPTIONS = [0, 3, 5, 8, 10, 15];
 export const BOQMaterialRow: React.FC<BOQMaterialRowProps> = ({
   item,
   index,
+  canEditBase = true,
+  canEditPurchased = true,
+  canEditNotes = true,
+  canDelete = true,
   onUpdateBaseQty,
   onUpdateUnit,
   onUpdatePurchasedQty,
@@ -118,18 +126,28 @@ export const BOQMaterialRow: React.FC<BOQMaterialRowProps> = ({
               </span>
 
               {item.notes && !isEditingNotes && (
-                <button
-                  type="button"
-                  onClick={() => setIsEditingNotes(true)}
-                  className="text-[10px] text-blue-600 hover:underline flex items-center gap-0.5 max-w-[140px] truncate"
-                  title={item.notes}
-                >
-                  <FileText className="w-3 h-3 shrink-0" />
-                  <span className="truncate">{item.notes}</span>
-                </button>
+                canEditNotes ? (
+                  <button
+                    type="button"
+                    onClick={() => setIsEditingNotes(true)}
+                    className="text-[10px] text-blue-600 hover:underline flex items-center gap-0.5 max-w-[140px] truncate"
+                    title={item.notes}
+                  >
+                    <FileText className="w-3 h-3 shrink-0" />
+                    <span className="truncate">{item.notes}</span>
+                  </button>
+                ) : (
+                  <span
+                    className="text-[10px] text-slate-600 flex items-center gap-0.5 max-w-[140px] truncate"
+                    title={item.notes}
+                  >
+                    <FileText className="w-3 h-3 shrink-0 text-slate-400" />
+                    <span className="truncate">{item.notes}</span>
+                  </span>
+                )
               )}
 
-              {!item.notes && !isEditingNotes && (
+              {!item.notes && !isEditingNotes && canEditNotes && (
                 <button
                   type="button"
                   onClick={() => setIsEditingNotes(true)}
@@ -169,57 +187,76 @@ export const BOQMaterialRow: React.FC<BOQMaterialRowProps> = ({
       {/* Base Required Quantity & Unit */}
       <td className="py-4 px-3 text-center">
         <div className="inline-flex flex-col items-center">
-          <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-white shadow-xs">
-            <button
-              type="button"
-              onClick={() => onUpdateBaseQty(Math.max(1, item.quantity - 1))}
-              className="px-2 py-1 bg-slate-50 hover:bg-slate-100 text-slate-600 font-bold"
-            >
-              -
-            </button>
-            <input
-              type="number"
-              min={1}
-              value={item.quantity}
-              onChange={(e) => onUpdateBaseQty(Math.max(1, parseInt(e.target.value) || 1))}
-              className="w-12 text-center py-1 text-xs font-bold text-slate-900 focus:outline-none"
-            />
-            <button
-              type="button"
-              onClick={() => onUpdateBaseQty(item.quantity + 1)}
-              className="px-2 py-1 bg-slate-50 hover:bg-slate-100 text-slate-600 font-bold"
-            >
-              +
-            </button>
-          </div>
-          <select
-            value={item.unit}
-            onChange={(e) => onUpdateUnit(e.target.value)}
-            className="mt-1 text-[11px] font-semibold text-slate-600 bg-transparent border-0 focus:outline-none cursor-pointer"
-          >
-            {COMMON_UNITS.map((u) => (
-              <option key={u} value={u}>
-                {u}
-              </option>
-            ))}
-          </select>
+          {canEditBase ? (
+            <>
+              <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-white shadow-xs">
+                <button
+                  type="button"
+                  onClick={() => onUpdateBaseQty(Math.max(1, item.quantity - 1))}
+                  className="px-2 py-1 bg-slate-50 hover:bg-slate-100 text-slate-600 font-bold"
+                >
+                  -
+                </button>
+                <input
+                  type="number"
+                  min={1}
+                  value={item.quantity}
+                  onChange={(e) => onUpdateBaseQty(Math.max(1, parseInt(e.target.value) || 1))}
+                  className="w-12 text-center py-1 text-xs font-bold text-slate-900 focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => onUpdateBaseQty(item.quantity + 1)}
+                  className="px-2 py-1 bg-slate-50 hover:bg-slate-100 text-slate-600 font-bold"
+                >
+                  +
+                </button>
+              </div>
+              <select
+                value={item.unit}
+                onChange={(e) => onUpdateUnit(e.target.value)}
+                className="mt-1 text-[11px] font-semibold text-slate-600 bg-transparent border-0 focus:outline-none cursor-pointer"
+              >
+                {COMMON_UNITS.map((u) => (
+                  <option key={u} value={u}>
+                    {u}
+                  </option>
+                ))}
+              </select>
+            </>
+          ) : (
+            <>
+              <span className="font-extrabold text-slate-900 text-xs px-2.5 py-1 bg-slate-100 rounded-lg border border-slate-200">
+                {item.quantity}
+              </span>
+              <span className="mt-1 text-[11px] font-semibold text-slate-600">
+                {item.unit}
+              </span>
+            </>
+          )}
         </div>
       </td>
 
       {/* Wastage Allowance % */}
       <td className="py-4 px-3 text-center">
         <div className="inline-flex flex-col items-center">
-          <select
-            value={item.wastagePercent || 0}
-            onChange={(e) => onUpdateWastagePercent(parseInt(e.target.value) || 0)}
-            className="px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 focus:outline-none focus:border-accent"
-          >
-            {WASTAGE_OPTIONS.map((pct) => (
-              <option key={pct} value={pct}>
-                +{pct}%
-              </option>
-            ))}
-          </select>
+          {canEditBase ? (
+            <select
+              value={item.wastagePercent || 0}
+              onChange={(e) => onUpdateWastagePercent(parseInt(e.target.value) || 0)}
+              className="px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 focus:outline-none focus:border-accent"
+            >
+              {WASTAGE_OPTIONS.map((pct) => (
+                <option key={pct} value={pct}>
+                  +{pct}%
+                </option>
+              ))}
+            </select>
+          ) : (
+            <span className="px-2 py-1 bg-slate-100 border border-slate-200 rounded-lg text-xs font-bold text-slate-700">
+              +{item.wastagePercent || 0}%
+            </span>
+          )}
           <span className="text-[10px] text-slate-400 mt-1 font-medium">
             ={item.effectiveRequiredQty} {item.unit}
           </span>
@@ -229,29 +266,35 @@ export const BOQMaterialRow: React.FC<BOQMaterialRowProps> = ({
       {/* Purchased Quantity Stepper */}
       <td className="py-4 px-3 text-center">
         <div className="inline-flex flex-col items-center">
-          <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-white shadow-xs">
-            <button
-              type="button"
-              onClick={() => onUpdatePurchasedQty(Math.max(0, (item.purchasedQuantity || 0) - 1))}
-              className="px-2 py-1 bg-slate-50 hover:bg-slate-100 text-slate-600 font-bold"
-            >
-              -
-            </button>
-            <input
-              type="number"
-              min={0}
-              value={item.purchasedQuantity || 0}
-              onChange={(e) => onUpdatePurchasedQty(Math.max(0, parseInt(e.target.value) || 0))}
-              className="w-12 text-center py-1 text-xs font-bold text-slate-900 focus:outline-none"
-            />
-            <button
-              type="button"
-              onClick={() => onUpdatePurchasedQty((item.purchasedQuantity || 0) + 1)}
-              className="px-2 py-1 bg-slate-50 hover:bg-slate-100 text-slate-600 font-bold"
-            >
-              +
-            </button>
-          </div>
+          {canEditPurchased ? (
+            <div className="flex items-center border border-slate-200 rounded-lg overflow-hidden bg-white shadow-xs">
+              <button
+                type="button"
+                onClick={() => onUpdatePurchasedQty(Math.max(0, (item.purchasedQuantity || 0) - 1))}
+                className="px-2 py-1 bg-slate-50 hover:bg-slate-100 text-slate-600 font-bold"
+              >
+                -
+              </button>
+              <input
+                type="number"
+                min={0}
+                value={item.purchasedQuantity || 0}
+                onChange={(e) => onUpdatePurchasedQty(Math.max(0, parseInt(e.target.value) || 0))}
+                className="w-12 text-center py-1 text-xs font-bold text-slate-900 focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => onUpdatePurchasedQty((item.purchasedQuantity || 0) + 1)}
+                className="px-2 py-1 bg-slate-50 hover:bg-slate-100 text-slate-600 font-bold"
+              >
+                +
+              </button>
+            </div>
+          ) : (
+            <span className="font-extrabold text-slate-900 text-xs px-2.5 py-1 bg-slate-100 rounded-lg border border-slate-200">
+              {item.purchasedQuantity || 0}
+            </span>
+          )}
           {/* Item mini progress bar */}
           <div className="w-16 bg-slate-100 h-1.5 rounded-full overflow-hidden mt-1.5">
             <div
@@ -375,14 +418,16 @@ export const BOQMaterialRow: React.FC<BOQMaterialRowProps> = ({
           </button>
 
           {/* Remove from BOQ */}
-          <button
-            type="button"
-            onClick={onRemove}
-            className="p-2 text-slate-300 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
-            title="Remove from project BOQ"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
+          {canDelete && (
+            <button
+              type="button"
+              onClick={onRemove}
+              className="p-2 text-slate-300 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors"
+              title="Remove from project BOQ"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </td>
     </tr>

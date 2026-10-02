@@ -7,6 +7,10 @@ import { BOQMaterialCard } from './BOQMaterialCard';
 interface BOQCategoryGroupProps {
   groupTitle: string;
   items: BOQItemComputed[];
+  canEditBase?: boolean;
+  canEditPurchased?: boolean;
+  canEditNotes?: boolean;
+  canDelete?: boolean;
   onUpdateBaseQty: (productId: string, qty: number) => void;
   onUpdateUnit: (productId: string, unit: string) => void;
   onUpdatePurchasedQty: (productId: string, qty: number) => void;
@@ -20,6 +24,10 @@ interface BOQCategoryGroupProps {
 export const BOQCategoryGroup: React.FC<BOQCategoryGroupProps> = ({
   groupTitle,
   items,
+  canEditBase = true,
+  canEditPurchased = true,
+  canEditNotes = true,
+  canDelete = true,
   onUpdateBaseQty,
   onUpdateUnit,
   onUpdatePurchasedQty,
@@ -111,6 +119,10 @@ export const BOQCategoryGroup: React.FC<BOQCategoryGroupProps> = ({
                     key={it.productId}
                     item={it}
                     index={idx}
+                    canEditBase={canEditBase}
+                    canEditPurchased={canEditPurchased}
+                    canEditNotes={canEditNotes}
+                    canDelete={canDelete}
                     onUpdateBaseQty={(qty) => onUpdateBaseQty(it.productId, qty)}
                     onUpdateUnit={(u) => onUpdateUnit(it.productId, u)}
                     onUpdatePurchasedQty={(qty) => onUpdatePurchasedQty(it.productId, qty)}
@@ -131,6 +143,10 @@ export const BOQCategoryGroup: React.FC<BOQCategoryGroupProps> = ({
                 key={it.productId}
                 item={it}
                 index={idx}
+                canEditBase={canEditBase}
+                canEditPurchased={canEditPurchased}
+                canEditNotes={canEditNotes}
+                canDelete={canDelete}
                 onUpdateBaseQty={(qty) => onUpdateBaseQty(it.productId, qty)}
                 onUpdateUnit={(u) => onUpdateUnit(it.productId, u)}
                 onUpdatePurchasedQty={(qty) => onUpdatePurchasedQty(it.productId, qty)}

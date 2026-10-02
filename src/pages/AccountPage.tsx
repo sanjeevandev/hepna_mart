@@ -25,7 +25,20 @@ import {
   Clock,
   Truck,
   ArrowRight,
+  AlertCircle,
+  Mail,
+  UserPlus,
+  Send,
+  Copy,
+  Check,
+  Key,
+  RefreshCw,
+  AlertTriangle,
+  UserCheck,
+  ChevronDown,
+  UserX,
 } from 'lucide-react';
+import { OrgRole } from '@/types';
 import { useAuthStore, PRESET_DEV_USERS } from '@/store/authStore';
 import { useProjectStore } from '@/store/projectStore';
 import { useOrderStore } from '@/store/orderStore';
@@ -33,7 +46,17 @@ import { useEstimateStore } from '@/store/estimateStore';
 import { useSiteStore } from '@/store/siteStore';
 import { useBusinessStore } from '@/store/businessStore';
 import { formatPrice } from '@/utils/formatPrice';
-import { getRoleLabel, getRoleBadgeColor, getAccountTypeLabel } from '@/utils/rbac';
+import {
+  getRoleLabel,
+  getRoleBadgeColor,
+  getAccountTypeLabel,
+  getOrgRoleLabel,
+  getOrgRoleBadgeColor,
+  canManageOrg,
+  canInviteOrgMembers,
+  canUpdateOrgMemberRole,
+  canRemoveOrgMember,
+} from '@/utils/rbac';
 import Button from '@/components/ui/Button';
 import toast from 'react-hot-toast';
 
@@ -44,13 +67,100 @@ const AccountPage: React.FC = () => {
   const { orders } = useOrderStore();
   const { estimates } = useEstimateStore();
   const { sites, deleteSite, setDefaultSite } = useSiteStore();
-  const { businessProfile, contractorProfile, teamMembers } = useBusinessStore();
+  const {
+    businessProfile,
+    contractorProfile,
+    teamMembers,
+    fetchProfiles,
+    updateBusinessProfile,
+    updateContractorProfile,
+    isLoading: isProfileLoading,
+    organizations,
+    activeOrganization,
+    members,
+    invitations,
+    isOrgLoading,
+    setActiveOrganization,
+    createOrganization,
+    updateOrganization,
+    fetchMembers,
+    fetchInvitations,
+    inviteMember,
+    updateMemberRole,
+    removeMember,
+    revokeInvitation,
+    acceptInvitation,
+  } = useBusinessStore();
 
   const [activeTab, setActiveTab] = useState<string>('profile');
   const [isEditingProfile, setIsEditingProfile] = useState<boolean>(false);
   const [editName, setEditName] = useState(currentUser?.name || '');
   const [editEmail, setEditEmail] = useState(currentUser?.email || '');
   const [editPhone, setEditPhone] = useState(currentUser?.phone || '');
+
+  // Business Profile Form State
+  const [isEditingBiz, setIsEditingBiz] = useState<boolean>(false);
+  const [bizName, setBizName] = useState(businessProfile?.businessName || '');
+  const [bizType, setBizType] = useState(businessProfile?.businessType || 'Private Limited Company');
+  const [bizGstin, setBizGstin] = useState(businessProfile?.gstin || '');
+  const [bizPan, setBizPan] = useState(businessProfile?.pan || '');
+  const [bizAddress, setBizAddress] = useState(businessProfile?.registeredAddress || '');
+  const [bizCity, setBizCity] = useState(businessProfile?.city || '');
+  const [bizState, setBizState] = useState(businessProfile?.state || '');
+  const [bizPincode, setBizPincode] = useState(businessProfile?.pincode || '');
+  const [bizContactPerson, setBizContactPerson] = useState(businessProfile?.contactPerson || '');
+  const [bizContactPhone, setBizContactPhone] = useState(businessProfile?.contactPhone || '');
+  const [bizContactEmail, setBizContactEmail] = useState(businessProfile?.contactEmail || '');
+
+  // Contractor Profile Form State
+  const [isEditingContractor, setIsEditingContractor] = useState<boolean>(false);
+  const [contBizName, setContBizName] = useState(contractorProfile?.businessName || '');
+  const [contExp, setContExp] = useState(contractorProfile?.yearsOfExperience || 1);
+  const [contServiceArea, setContServiceArea] = useState(contractorProfile?.serviceArea || '');
+  const [contLicense, setContLicense] = useState(contractorProfile?.licenseNumber || '');
+  const [contProjectCount, setContProjectCount] = useState(contractorProfile?.projectCount || 0);
+
+  // Organization & Team RBAC State (Phase 2L.2)
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteRole, setInviteRole] = useState<OrgRole>('viewer');
+  const [isInviting, setIsInviting] = useState(false);
+  const [showCreateOrg, setShowCreateOrg] = useState(false);
+  const [newOrgName, setNewOrgName] = useState('');
+  const [newOrgType, setNewOrgType] = useState('Proprietorship');
+  const [isCreatingOrg, setIsCreatingOrg] = useState(false);
+  const [joinToken, setJoinToken] = useState('');
+  const [isJoiningOrg, setIsJoiningOrg] = useState(false);
+  const [copiedTokenId, setCopiedTokenId] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchProfiles().catch(() => {});
+  }, [fetchProfiles]);
+
+  useEffect(() => {
+    if (businessProfile) {
+      setBizName(businessProfile.businessName || '');
+      setBizType(businessProfile.businessType || 'Private Limited Company');
+      setBizGstin(businessProfile.gstin || '');
+      setBizPan(businessProfile.pan || '');
+      setBizAddress(businessProfile.registeredAddress || '');
+      setBizCity(businessProfile.city || '');
+      setBizState(businessProfile.state || '');
+      setBizPincode(businessProfile.pincode || '');
+      setBizContactPerson(businessProfile.contactPerson || '');
+      setBizContactPhone(businessProfile.contactPhone || '');
+      setBizContactEmail(businessProfile.contactEmail || '');
+    }
+  }, [businessProfile]);
+
+  useEffect(() => {
+    if (contractorProfile) {
+      setContBizName(contractorProfile.businessName || '');
+      setContExp(contractorProfile.yearsOfExperience || 1);
+      setContServiceArea(contractorProfile.serviceArea || '');
+      setContLicense(contractorProfile.licenseNumber || '');
+      setContProjectCount(contractorProfile.projectCount || 0);
+    }
+  }, [contractorProfile]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -77,6 +187,149 @@ const AccountPage: React.FC = () => {
     setIsEditingProfile(false);
   };
 
+  const handleSaveBusinessProfile = async () => {
+    if (!bizName.trim()) {
+      toast.error('Company Name is required');
+      return;
+    }
+    await updateBusinessProfile({
+      businessName: bizName.trim(),
+      businessType: bizType.trim(),
+      gstin: bizGstin.trim() || undefined,
+      pan: bizPan.trim() || undefined,
+      registeredAddress: bizAddress.trim(),
+      city: bizCity.trim(),
+      state: bizState.trim(),
+      pincode: bizPincode.trim(),
+      contactPerson: bizContactPerson.trim(),
+      contactPhone: bizContactPhone.trim(),
+      contactEmail: bizContactEmail.trim() || undefined,
+    });
+    setIsEditingBiz(false);
+  };
+
+  const handleSaveContractorProfile = async () => {
+    if (!contBizName.trim()) {
+      toast.error('Firm Name is required');
+      return;
+    }
+    await updateContractorProfile({
+      businessName: contBizName.trim(),
+      yearsOfExperience: Number(contExp) || 1,
+      serviceArea: contServiceArea.trim(),
+      licenseNumber: contLicense.trim() || undefined,
+      projectCount: Number(contProjectCount) || 0,
+    });
+    setIsEditingContractor(false);
+  };
+
+  const handleCreateOrganization = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newOrgName.trim()) {
+      toast.error('Organization name is required');
+      return;
+    }
+    setIsCreatingOrg(true);
+    const res = await createOrganization(newOrgName, newOrgType);
+    setIsCreatingOrg(false);
+    if (res) {
+      setNewOrgName('');
+      setShowCreateOrg(false);
+    }
+  };
+
+  const handleInviteMember = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!activeOrganization) return;
+    if (!inviteEmail.trim()) {
+      toast.error('Recipient email is required');
+      return;
+    }
+    setIsInviting(true);
+    const ok = await inviteMember(activeOrganization.id, inviteEmail, inviteRole);
+    setIsInviting(false);
+    if (ok) {
+      setInviteEmail('');
+      setInviteRole('viewer');
+    }
+  };
+
+  const handleJoinOrganization = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!joinToken.trim()) {
+      toast.error('Invitation token is required');
+      return;
+    }
+    setIsJoiningOrg(true);
+    const ok = await acceptInvitation(joinToken);
+    setIsJoiningOrg(false);
+    if (ok) {
+      setJoinToken('');
+    }
+  };
+
+  const handleRoleChange = async (userId: string, newRole: OrgRole) => {
+    if (!activeOrganization) return;
+    await updateMemberRole(activeOrganization.id, userId, newRole);
+  };
+
+  const handleRemoveMember = async (userId: string, name: string, isSelf: boolean) => {
+    if (!activeOrganization) return;
+    const msg = isSelf
+      ? 'Are you sure you want to leave this organization?'
+      : `Are you sure you want to remove "${name}" from this organization?`;
+    if (window.confirm(msg)) {
+      await removeMember(activeOrganization.id, userId);
+    }
+  };
+
+  const handleRevokeInvitation = async (invitationId: string) => {
+    if (!activeOrganization) return;
+    if (window.confirm('Are you sure you want to revoke this invitation?')) {
+      await revokeInvitation(activeOrganization.id, invitationId);
+    }
+  };
+
+  const handleCopyToken = (token: string, id: string) => {
+    navigator.clipboard.writeText(token);
+    setCopiedTokenId(id);
+    toast.success('Invitation token copied to clipboard');
+    setTimeout(() => setCopiedTokenId(null), 3000);
+  };
+
+  const renderVerificationBadge = (status?: string, defaultLabel = 'Unverified') => {
+    switch (status) {
+      case 'verified':
+        return (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            Verified
+          </span>
+        );
+      case 'pending':
+        return (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
+            <Clock className="w-3.5 h-3.5" />
+            Pending Review
+          </span>
+        );
+      case 'rejected':
+        return (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
+            <AlertCircle className="w-3.5 h-3.5" />
+            Verification Rejected
+          </span>
+        );
+      default:
+        return (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200">
+            <Info className="w-3.5 h-3.5" />
+            {defaultLabel}
+          </span>
+        );
+    }
+  };
+
   const role = currentUser?.role || 'customer';
   const roleBadge = getRoleBadgeColor(role);
   const accountType = currentUser?.accountType || 'individual';
@@ -88,10 +341,15 @@ const AccountPage: React.FC = () => {
     { id: 'orders', label: 'My Orders', icon: Package, badge: orders.length },
     { id: 'estimates', label: 'Saved Estimates', icon: Calculator, badge: estimates.length },
     { id: 'sites', label: 'Construction Sites', icon: MapPin, badge: sites.length },
-    ...(accountType !== 'individual'
+    ...(accountType !== 'individual' || organizations.length > 0
       ? [
           { id: 'business', label: 'Business & Trade', icon: Briefcase },
-          { id: 'team', label: 'Team Members', icon: Users, badge: teamMembers.length },
+          {
+            id: 'team',
+            label: 'Team & Organization',
+            icon: Users,
+            badge: activeOrganization ? members.length : organizations.length,
+          },
         ]
       : []),
     { id: 'settings', label: 'Settings & Dev RBAC', icon: Settings },
@@ -722,128 +980,777 @@ const AccountPage: React.FC = () => {
               {/* TAB 6: Business Profile */}
               {activeTab === 'business' && (
                 <div className="space-y-6">
-                  <div className="border-b border-slate-100 pb-4">
-                    <h2 className="text-xl font-heading font-bold text-slate-900">
-                      Business & Trade Profile
-                    </h2>
-                    <p className="text-xs text-slate-500">
-                      Company registration parameters, specializations, and tax documentation
-                    </p>
+                  <div className="border-b border-slate-100 pb-4 flex items-center justify-between">
+                    <div>
+                      <h2 className="text-xl font-heading font-bold text-slate-900">
+                        Business & Trade Profile
+                      </h2>
+                      <p className="text-xs text-slate-500">
+                        Company registration parameters, specializations, and tax documentation
+                      </p>
+                    </div>
                   </div>
 
-                  {accountType === 'contractor' && contractorProfile && (
-                    <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-3 text-xs">
-                      <span className="text-accent font-bold uppercase tracking-wider text-[10px]">
-                        Contractor Profile
-                      </span>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                        <div>
-                          <span className="text-slate-500 block">Firm Name</span>
-                          <strong className="text-slate-900 text-sm">{contractorProfile.businessName}</strong>
+                  {accountType === 'contractor' && (
+                    <div className="p-6 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-4 text-xs">
+                      <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+                        <div className="flex items-center gap-2.5">
+                          <span className="text-accent font-bold uppercase tracking-wider text-[11px]">
+                            Contractor Profile
+                          </span>
+                          {renderVerificationBadge(contractorProfile?.verificationStatus, 'Unverified Contractor')}
                         </div>
-                        <div>
-                          <span className="text-slate-500 block">Experience</span>
-                          <strong className="text-slate-900 text-sm">{contractorProfile.yearsOfExperience} Years</strong>
-                        </div>
-                        <div>
-                          <span className="text-slate-500 block">Service Area</span>
-                          <strong className="text-slate-900 text-sm">{contractorProfile.serviceArea}</strong>
-                        </div>
+                        {!isEditingContractor ? (
+                          <button
+                            type="button"
+                            onClick={() => setIsEditingContractor(true)}
+                            className="px-3 py-1.5 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 flex items-center gap-1.5 transition-colors shadow-sm"
+                          >
+                            <Edit2 className="w-3.5 h-3.5 text-accent" />
+                            Edit Profile
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setIsEditingContractor(false)}
+                            className="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 rounded-lg text-xs font-bold text-slate-700 transition-colors"
+                          >
+                            Cancel
+                          </button>
+                        )}
                       </div>
 
-                      <div className="pt-2 border-t border-slate-200">
-                        <span className="text-slate-500 block mb-1.5 font-semibold">Specializations:</span>
-                        <div className="flex flex-wrap gap-1.5">
-                          {contractorProfile.specialization.map((spec) => (
-                            <span
-                              key={spec}
-                              className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-800 text-xs font-bold"
+                      {isEditingContractor ? (
+                        <div className="space-y-4 pt-2">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-slate-700 font-semibold mb-1">Firm / Enterprise Name *</label>
+                              <input
+                                type="text"
+                                value={contBizName}
+                                onChange={(e) => setContBizName(e.target.value)}
+                                className="w-full px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-slate-900 font-medium text-xs focus:ring-2 focus:ring-accent outline-none"
+                                placeholder="e.g. BuildRight Constructions"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-slate-700 font-semibold mb-1">Years in Business *</label>
+                              <input
+                                type="number"
+                                min={0}
+                                max={100}
+                                value={contExp}
+                                onChange={(e) => setContExp(Number(e.target.value))}
+                                className="w-full px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-slate-900 font-medium text-xs focus:ring-2 focus:ring-accent outline-none"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-slate-700 font-semibold mb-1">Primary Service Area *</label>
+                              <input
+                                type="text"
+                                value={contServiceArea}
+                                onChange={(e) => setContServiceArea(e.target.value)}
+                                className="w-full px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-slate-900 font-medium text-xs focus:ring-2 focus:ring-accent outline-none"
+                                placeholder="e.g. Pune & Pimpri-Chinchwad Region"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-slate-700 font-semibold mb-1">Contractor / Trade License</label>
+                              <input
+                                type="text"
+                                value={contLicense}
+                                onChange={(e) => setContLicense(e.target.value)}
+                                className="w-full px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-slate-900 font-medium text-xs focus:ring-2 focus:ring-accent outline-none"
+                                placeholder="e.g. MH-PWD-2024-8891"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-slate-700 font-semibold mb-1">Completed Project Count</label>
+                              <input
+                                type="number"
+                                min={0}
+                                value={contProjectCount}
+                                onChange={(e) => setContProjectCount(Number(e.target.value))}
+                                className="w-full px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-slate-900 font-medium text-xs focus:ring-2 focus:ring-accent outline-none"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="flex justify-end gap-2 pt-2">
+                            <Button
+                              variant="outline"
+                              onClick={() => setIsEditingContractor(false)}
                             >
-                              {spec}
-                            </span>
-                          ))}
+                              Cancel
+                            </Button>
+                            <Button
+                              variant="primary"
+                              onClick={handleSaveContractorProfile}
+                            >
+                              Save Contractor Profile
+                            </Button>
+                          </div>
                         </div>
-                      </div>
+                      ) : (
+                        <div className="space-y-3">
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <div>
+                              <span className="text-slate-500 block font-medium">Firm Name</span>
+                              <strong className="text-slate-900 text-sm">{contractorProfile?.businessName || 'Not Set'}</strong>
+                            </div>
+                            <div>
+                              <span className="text-slate-500 block font-medium">Experience</span>
+                              <strong className="text-slate-900 text-sm">{contractorProfile?.yearsOfExperience || 0} Years</strong>
+                            </div>
+                            <div>
+                              <span className="text-slate-500 block font-medium">Service Area</span>
+                              <strong className="text-slate-900 text-sm">{contractorProfile?.serviceArea || 'Not Set'}</strong>
+                            </div>
+                            <div>
+                              <span className="text-slate-500 block font-medium">License / Reg.</span>
+                              <strong className="text-slate-900 text-sm">{contractorProfile?.licenseNumber || 'Not Provided'}</strong>
+                            </div>
+                          </div>
+
+                          {contractorProfile?.specialization && contractorProfile.specialization.length > 0 && (
+                            <div className="pt-2 border-t border-slate-200">
+                              <span className="text-slate-500 block mb-1.5 font-semibold">Specializations:</span>
+                              <div className="flex flex-wrap gap-1.5">
+                                {contractorProfile.specialization.map((spec) => (
+                                  <span
+                                    key={spec}
+                                    className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-800 text-xs font-bold"
+                                  >
+                                    {spec}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   )}
 
-                  {accountType === 'business' && businessProfile && (
-                    <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-3 text-xs">
-                      <span className="text-accent font-bold uppercase tracking-wider text-[10px]">
-                        Corporate Entity
-                      </span>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                        <div>
-                          <span className="text-slate-500 block">Company Name</span>
-                          <strong className="text-slate-900 text-sm">{businessProfile.businessName}</strong>
+                  {accountType === 'business' && (
+                    <div className="p-6 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-4 text-xs">
+                      <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+                        <div className="flex items-center gap-2.5">
+                          <span className="text-accent font-bold uppercase tracking-wider text-[11px]">
+                            Corporate Entity
+                          </span>
+                          {renderVerificationBadge(businessProfile?.taxVerificationStatus, 'Unverified Tax Info')}
                         </div>
-                        <div>
-                          <span className="text-slate-500 block">Entity Type</span>
-                          <strong className="text-slate-900 text-sm">{businessProfile.businessType}</strong>
-                        </div>
-                        <div>
-                          <span className="text-slate-500 block">GSTIN</span>
-                          <strong className="text-slate-900 text-sm">{businessProfile.gstin || 'Not Provided'}</strong>
-                        </div>
+                        {!isEditingBiz ? (
+                          <button
+                            type="button"
+                            onClick={() => setIsEditingBiz(true)}
+                            className="px-3 py-1.5 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 flex items-center gap-1.5 transition-colors shadow-sm"
+                          >
+                            <Edit2 className="w-3.5 h-3.5 text-accent" />
+                            Edit Profile
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setIsEditingBiz(false)}
+                            className="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 rounded-lg text-xs font-bold text-slate-700 transition-colors"
+                          >
+                            Cancel
+                          </button>
+                        )}
                       </div>
 
-                      <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl text-blue-900 text-[11px] flex items-center gap-2">
-                        <Info className="w-4 h-4 text-blue-600 shrink-0" />
-                        <span>GSTIN and PAN verification available after backend integration.</span>
-                      </div>
+                      {isEditingBiz ? (
+                        <div className="space-y-4 pt-2">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-slate-700 font-semibold mb-1">Company / Entity Name *</label>
+                              <input
+                                type="text"
+                                value={bizName}
+                                onChange={(e) => setBizName(e.target.value)}
+                                className="w-full px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-slate-900 font-medium text-xs focus:ring-2 focus:ring-accent outline-none"
+                                placeholder="e.g. Apex Infrastructure Pvt Ltd"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-slate-700 font-semibold mb-1">Business Entity Type *</label>
+                              <select
+                                value={bizType}
+                                onChange={(e) => setBizType(e.target.value)}
+                                className="w-full px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-slate-900 font-medium text-xs focus:ring-2 focus:ring-accent outline-none"
+                              >
+                                <option value="Private Limited Company">Private Limited Company</option>
+                                <option value="Partnership Firm">Partnership Firm</option>
+                                <option value="Proprietorship">Proprietorship</option>
+                                <option value="Limited Liability Partnership (LLP)">Limited Liability Partnership (LLP)</option>
+                                <option value="Public Limited Company">Public Limited Company</option>
+                                <option value="Trust / Society">Trust / Society</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className="block text-slate-700 font-semibold mb-1">GSTIN (15 characters)</label>
+                              <input
+                                type="text"
+                                maxLength={15}
+                                value={bizGstin}
+                                onChange={(e) => setBizGstin(e.target.value.toUpperCase())}
+                                className="w-full px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-slate-900 font-medium text-xs font-mono uppercase focus:ring-2 focus:ring-accent outline-none"
+                                placeholder="e.g. 27AAAAA0000A1Z5"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-slate-700 font-semibold mb-1">PAN (10 characters)</label>
+                              <input
+                                type="text"
+                                maxLength={10}
+                                value={bizPan}
+                                onChange={(e) => setBizPan(e.target.value.toUpperCase())}
+                                className="w-full px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-slate-900 font-medium text-xs font-mono uppercase focus:ring-2 focus:ring-accent outline-none"
+                                placeholder="e.g. AAAAA0000A"
+                              />
+                            </div>
+                            <div className="sm:col-span-2">
+                              <label className="block text-slate-700 font-semibold mb-1">Registered Address *</label>
+                              <input
+                                type="text"
+                                value={bizAddress}
+                                onChange={(e) => setBizAddress(e.target.value)}
+                                className="w-full px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-slate-900 font-medium text-xs focus:ring-2 focus:ring-accent outline-none"
+                                placeholder="Registered Office Building / Street"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-slate-700 font-semibold mb-1">City *</label>
+                              <input
+                                type="text"
+                                value={bizCity}
+                                onChange={(e) => setBizCity(e.target.value)}
+                                className="w-full px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-slate-900 font-medium text-xs focus:ring-2 focus:ring-accent outline-none"
+                                placeholder="City"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-slate-700 font-semibold mb-1">State *</label>
+                              <input
+                                type="text"
+                                value={bizState}
+                                onChange={(e) => setBizState(e.target.value)}
+                                className="w-full px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-slate-900 font-medium text-xs focus:ring-2 focus:ring-accent outline-none"
+                                placeholder="State"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-slate-700 font-semibold mb-1">Pincode *</label>
+                              <input
+                                type="text"
+                                maxLength={6}
+                                value={bizPincode}
+                                onChange={(e) => setBizPincode(e.target.value)}
+                                className="w-full px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-slate-900 font-medium text-xs focus:ring-2 focus:ring-accent outline-none"
+                                placeholder="6-digit Pincode"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-slate-700 font-semibold mb-1">Contact Person *</label>
+                              <input
+                                type="text"
+                                value={bizContactPerson}
+                                onChange={(e) => setBizContactPerson(e.target.value)}
+                                className="w-full px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-slate-900 font-medium text-xs focus:ring-2 focus:ring-accent outline-none"
+                                placeholder="Full Name"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-slate-700 font-semibold mb-1">Contact Phone *</label>
+                              <input
+                                type="text"
+                                value={bizContactPhone}
+                                onChange={(e) => setBizContactPhone(e.target.value)}
+                                className="w-full px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-slate-900 font-medium text-xs focus:ring-2 focus:ring-accent outline-none"
+                                placeholder="+91 98765 43210"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-slate-700 font-semibold mb-1">Contact Email</label>
+                              <input
+                                type="email"
+                                value={bizContactEmail}
+                                onChange={(e) => setBizContactEmail(e.target.value)}
+                                className="w-full px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-slate-900 font-medium text-xs focus:ring-2 focus:ring-accent outline-none"
+                                placeholder="official@company.com"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="flex justify-end gap-2 pt-2">
+                            <Button
+                              variant="outline"
+                              onClick={() => setIsEditingBiz(false)}
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              variant="primary"
+                              onClick={handleSaveBusinessProfile}
+                            >
+                              Save Business Profile
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            <div>
+                              <span className="text-slate-500 block font-medium">Company Name</span>
+                              <strong className="text-slate-900 text-sm">{businessProfile?.businessName || 'Not Set'}</strong>
+                            </div>
+                            <div>
+                              <span className="text-slate-500 block font-medium">Entity Type</span>
+                              <strong className="text-slate-900 text-sm">{businessProfile?.businessType || 'Not Set'}</strong>
+                            </div>
+                            <div>
+                              <span className="text-slate-500 block font-medium">GSTIN</span>
+                              <strong className="text-slate-900 text-sm font-mono">{businessProfile?.gstin || 'Not Provided'}</strong>
+                            </div>
+                            <div>
+                              <span className="text-slate-500 block font-medium">PAN</span>
+                              <strong className="text-slate-900 text-sm font-mono">{businessProfile?.pan || 'Not Provided'}</strong>
+                            </div>
+                            <div>
+                              <span className="text-slate-500 block font-medium">Registered Address</span>
+                              <strong className="text-slate-900 text-sm">
+                                {businessProfile?.registeredAddress ? `${businessProfile.registeredAddress}, ${businessProfile.city}, ${businessProfile.state} - ${businessProfile.pincode}` : 'Not Provided'}
+                              </strong>
+                            </div>
+                            <div>
+                              <span className="text-slate-500 block font-medium">Contact Person</span>
+                              <strong className="text-slate-900 text-sm">
+                                {businessProfile?.contactPerson || 'Not Set'} ({businessProfile?.contactPhone || 'No Phone'})
+                              </strong>
+                            </div>
+                          </div>
+
+                          <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl text-blue-900 text-[11px] flex items-center gap-2 mt-3">
+                            <Info className="w-4 h-4 text-blue-600 shrink-0" />
+                            <span>
+                              GSTIN and PAN inputs are validated for standard format. Full third-party tax verification and B2B invoice eligibility are reviewed by HEPNA MART compliance operations.
+                            </span>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
               )}
 
-              {/* TAB 7: Team Members */}
+              {/* TAB 7: Organization & Team RBAC (Phase 2L.2) */}
               {activeTab === 'team' && (
                 <div className="space-y-6">
-                  <div className="border-b border-slate-100 pb-4">
-                    <h2 className="text-xl font-heading font-bold text-slate-900">
-                      Organization Team Members
-                    </h2>
-                    <p className="text-xs text-slate-500">
-                      Manage collaborative access for project engineers, procurement managers, and accountants
-                    </p>
-                  </div>
-
-                  <div className="p-4 bg-amber-50 rounded-2xl border border-amber-200/80 text-xs text-amber-900 flex items-start gap-2.5">
-                    <Info className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+                  {/* Top Bar / Organization Switcher */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
                     <div>
-                      <span className="font-bold block">Collaboration Notice:</span>
-                      <span className="text-amber-800">
-                        Team invitations via verified email links will be fully active after Phase 2 backend integration.
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <h2 className="text-xl font-heading font-bold text-slate-900">
+                          {activeOrganization ? activeOrganization.name : 'Organization & Team'}
+                        </h2>
+                        {activeOrganization?.current_user_role && (
+                          <span
+                            className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${
+                              getOrgRoleBadgeColor(activeOrganization.current_user_role).bg
+                            } ${getOrgRoleBadgeColor(activeOrganization.current_user_role).text} ${
+                              getOrgRoleBadgeColor(activeOrganization.current_user_role).border
+                            }`}
+                          >
+                            {getOrgRoleLabel(activeOrganization.current_user_role)}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        {activeOrganization
+                          ? `${activeOrganization.business_type} • ${members.length} active member${members.length === 1 ? '' : 's'}`
+                          : 'Manage collaborative customer organizations, team members, and role-based permissions'}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {organizations.length > 1 && (
+                        <select
+                          value={activeOrganization?.id || ''}
+                          onChange={(e) => {
+                            const selected = organizations.find((o) => o.id === e.target.value);
+                            if (selected) setActiveOrganization(selected);
+                          }}
+                          className="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 bg-white shadow-xs focus:ring-2 focus:ring-accent focus:border-accent"
+                        >
+                          {organizations.map((org) => (
+                            <option key={org.id} value={org.id}>
+                              {org.name} ({getOrgRoleLabel(org.current_user_role)})
+                            </option>
+                          ))}
+                        </select>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => setShowCreateOrg(!showCreateOrg)}
+                        className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold flex items-center gap-1.5 transition-colors"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>{showCreateOrg ? 'Cancel' : 'New Org'}</span>
+                      </button>
                     </div>
                   </div>
 
-                  <div className="divide-y divide-slate-100 border border-slate-200/80 rounded-2xl overflow-hidden">
-                    {teamMembers.map((tm) => (
-                      <div
-                        key={tm.id}
-                        className="p-4 bg-white flex items-center justify-between gap-4 text-xs"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center font-bold">
-                            {tm.name.slice(0, 2).toUpperCase()}
-                          </div>
-                          <div>
-                            <strong className="text-slate-900 text-sm block">{tm.name}</strong>
-                            <span className="text-slate-500">{tm.email}</span>
-                          </div>
+                  {/* Create Organization Form (Expandable) */}
+                  {showCreateOrg && (
+                    <form
+                      onSubmit={handleCreateOrganization}
+                      className="p-5 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-4"
+                    >
+                      <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
+                        <Building className="w-4 h-4 text-accent" />
+                        <span>Create New Organization</span>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-600 mb-1">
+                            Organization / Enterprise Name *
+                          </label>
+                          <input
+                            type="text"
+                            value={newOrgName}
+                            onChange={(e) => setNewOrgName(e.target.value)}
+                            placeholder="e.g. Apex Buildcon Pvt Ltd"
+                            required
+                            className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 bg-white focus:ring-2 focus:ring-accent focus:border-accent"
+                          />
                         </div>
-
-                        <div className="flex items-center gap-3">
-                          <span className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 font-bold text-[11px]">
-                            {tm.role}
-                          </span>
-                          <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold text-[10px] uppercase">
-                            {tm.status}
-                          </span>
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-600 mb-1">
+                            Entity / Business Type
+                          </label>
+                          <select
+                            value={newOrgType}
+                            onChange={(e) => setNewOrgType(e.target.value)}
+                            className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 bg-white focus:ring-2 focus:ring-accent focus:border-accent"
+                          >
+                            <option value="Proprietorship">Sole Proprietorship</option>
+                            <option value="Partnership">Partnership Firm</option>
+                            <option value="Private Limited Company">Private Limited Company</option>
+                            <option value="LLP">Limited Liability Partnership (LLP)</option>
+                            <option value="Public Limited Company">Public Limited Company</option>
+                          </select>
                         </div>
                       </div>
-                    ))}
+                      <div className="flex justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setShowCreateOrg(false)}
+                          className="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-200/60"
+                        >
+                          Cancel
+                        </button>
+                        <Button type="submit" size="sm" loading={isCreatingOrg}>
+                          Create Organization
+                        </Button>
+                      </div>
+                    </form>
+                  )}
+
+                  {/* Empty State when no organization */}
+                  {!activeOrganization && (
+                    <div className="p-8 bg-white border border-slate-200/80 rounded-2xl text-center space-y-4">
+                      <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 mx-auto flex items-center justify-center">
+                        <Building className="w-6 h-6" />
+                      </div>
+                      <div className="max-w-md mx-auto">
+                        <h3 className="text-base font-bold text-slate-900">No Organization Active</h3>
+                        <p className="text-xs text-slate-500 mt-1">
+                          Create an organization to invite teammates, collaborate with procurement managers, and assign role-based permissions.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setShowCreateOrg(true)}
+                        className="px-4 py-2 rounded-xl bg-[#071A2B] hover:bg-slate-800 text-white text-xs font-bold inline-flex items-center gap-2"
+                      >
+                        <Plus className="w-4 h-4 text-accent" />
+                        <span>Create Your First Organization</span>
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Active Organization Content */}
+                  {activeOrganization && (
+                    <>
+                      {/* Invite New Member Box (Owner / Admin only) */}
+                      {canInviteOrgMembers(activeOrganization.current_user_role) && (
+                        <div className="p-5 bg-slate-50/80 rounded-2xl border border-slate-200/80 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2 text-slate-900 font-bold text-xs">
+                              <UserPlus className="w-4 h-4 text-accent" />
+                              <span>Invite Team Member</span>
+                            </div>
+                            <span className="text-[11px] text-slate-500">
+                              Invited member will receive an email link valid for 7 days
+                            </span>
+                          </div>
+
+                          <form onSubmit={handleInviteMember} className="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                            <div className="sm:col-span-6">
+                              <input
+                                type="email"
+                                value={inviteEmail}
+                                onChange={(e) => setInviteEmail(e.target.value)}
+                                placeholder="teammate@company.com"
+                                required
+                                className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 bg-white focus:ring-2 focus:ring-accent focus:border-accent"
+                              />
+                            </div>
+                            <div className="sm:col-span-4">
+                              <select
+                                value={inviteRole}
+                                onChange={(e) => setInviteRole(e.target.value as OrgRole)}
+                                className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 bg-white focus:ring-2 focus:ring-accent focus:border-accent"
+                              >
+                                {activeOrganization.current_user_role === 'owner' && (
+                                  <option value="admin">Administrator</option>
+                                )}
+                                <option value="procurement_manager">Procurement Manager</option>
+                                <option value="project_manager">Project Manager</option>
+                                <option value="site_supervisor">Site Supervisor</option>
+                                <option value="viewer">Viewer / Auditor</option>
+                              </select>
+                            </div>
+                            <div className="sm:col-span-2">
+                              <Button
+                                type="submit"
+                                size="sm"
+                                loading={isInviting}
+                                className="w-full flex items-center justify-center gap-1.5"
+                              >
+                                <Send className="w-3.5 h-3.5" />
+                                <span>Invite</span>
+                              </Button>
+                            </div>
+                          </form>
+                        </div>
+                      )}
+
+                      {/* Members List */}
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                            Active Members ({members.length})
+                          </h3>
+                        </div>
+
+                        <div className="divide-y divide-slate-100 border border-slate-200/80 rounded-2xl overflow-hidden bg-white shadow-xs">
+                          {members.map((member) => {
+                            const isSelf = member.user_id === currentUser?.id;
+                            const canChangeRole = canUpdateOrgMemberRole(
+                              activeOrganization.current_user_role,
+                              member.role,
+                              isSelf
+                            );
+                            const canRemove = canRemoveOrgMember(
+                              activeOrganization.current_user_role,
+                              member.role,
+                              isSelf
+                            );
+
+                            return (
+                              <div
+                                key={member.id}
+                                className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                              >
+                                <div className="flex items-center gap-3 min-w-0">
+                                  <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-800 flex items-center justify-center font-bold text-xs shrink-0 border border-slate-200">
+                                    {member.name
+                                      ? member.name.slice(0, 2).toUpperCase()
+                                      : member.email?.slice(0, 2).toUpperCase() || 'TM'}
+                                  </div>
+                                  <div className="min-w-0">
+                                    <div className="flex items-center gap-2">
+                                      <strong className="text-slate-900 text-sm truncate">
+                                        {member.name || member.email?.split('@')[0] || 'Member'}
+                                      </strong>
+                                      {isSelf && (
+                                        <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-[10px] font-bold">
+                                          You
+                                        </span>
+                                      )}
+                                    </div>
+                                    <span className="text-slate-500 truncate block">
+                                      {member.email}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-2.5 self-end sm:self-center">
+                                  {/* Role Selector or Badge */}
+                                  {canChangeRole ? (
+                                    <select
+                                      value={member.role}
+                                      onChange={(e) =>
+                                        handleRoleChange(member.user_id, e.target.value as OrgRole)
+                                      }
+                                      className={`px-2.5 py-1 rounded-xl text-xs font-bold border ${
+                                        getOrgRoleBadgeColor(member.role).bg
+                                      } ${getOrgRoleBadgeColor(member.role).text} ${
+                                        getOrgRoleBadgeColor(member.role).border
+                                      } focus:ring-2 focus:ring-accent`}
+                                    >
+                                      {activeOrganization.current_user_role === 'owner' && (
+                                        <option value="owner">Owner</option>
+                                      )}
+                                      <option value="admin">Admin</option>
+                                      <option value="procurement_manager">Procurement Manager</option>
+                                      <option value="project_manager">Project Manager</option>
+                                      <option value="site_supervisor">Site Supervisor</option>
+                                      <option value="viewer">Viewer</option>
+                                    </select>
+                                  ) : (
+                                    <span
+                                      className={`px-2.5 py-1 rounded-full text-[11px] font-bold border ${
+                                        getOrgRoleBadgeColor(member.role).bg
+                                      } ${getOrgRoleBadgeColor(member.role).text} ${
+                                        getOrgRoleBadgeColor(member.role).border
+                                      }`}
+                                    >
+                                      {getOrgRoleLabel(member.role)}
+                                    </span>
+                                  )}
+
+                                  {/* Remove / Leave Button */}
+                                  {canRemove && (
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        handleRemoveMember(
+                                          member.user_id,
+                                          member.name || member.email || 'Member',
+                                          isSelf
+                                        )
+                                      }
+                                      className={`p-1.5 rounded-lg transition-colors ${
+                                        isSelf
+                                          ? 'text-rose-600 hover:bg-rose-50 text-[11px] font-bold px-2'
+                                          : 'text-slate-400 hover:text-rose-600 hover:bg-rose-50'
+                                      }`}
+                                      title={isSelf ? 'Leave Organization' : 'Remove Member'}
+                                    >
+                                      {isSelf ? 'Leave' : <Trash2 className="w-4 h-4" />}
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Pending Invitations (Owner / Admin only) */}
+                      {canManageOrg(activeOrganization.current_user_role) && invitations.length > 0 && (
+                        <div className="space-y-3 pt-2">
+                          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                            Pending Invitations ({invitations.length})
+                          </h3>
+
+                          <div className="divide-y divide-slate-100 border border-slate-200/80 rounded-2xl overflow-hidden bg-white shadow-xs">
+                            {invitations.map((inv) => (
+                              <div
+                                key={inv.id}
+                                className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center shrink-0">
+                                    <Mail className="w-4 h-4" />
+                                  </div>
+                                  <div>
+                                    <strong className="text-slate-900 block">{inv.email}</strong>
+                                    <span className="text-[11px] text-slate-400">
+                                      Expires: {new Date(inv.expires_at).toLocaleDateString()}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                  <span
+                                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                                      getOrgRoleBadgeColor(inv.role).bg
+                                    } ${getOrgRoleBadgeColor(inv.role).text} ${
+                                      getOrgRoleBadgeColor(inv.role).border
+                                    }`}
+                                  >
+                                    {getOrgRoleLabel(inv.role)}
+                                  </span>
+
+                                  <span
+                                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                                      inv.status === 'pending'
+                                        ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                                        : inv.status === 'accepted'
+                                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                        : 'bg-slate-100 text-slate-600'
+                                    }`}
+                                  >
+                                    {inv.status}
+                                  </span>
+
+                                  {inv.status === 'pending' && (
+                                    <>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleCopyToken(inv.token, inv.id)}
+                                        className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100"
+                                        title="Copy invitation token"
+                                      >
+                                        {copiedTokenId === inv.id ? (
+                                          <Check className="w-3.5 h-3.5 text-emerald-600" />
+                                        ) : (
+                                          <Copy className="w-3.5 h-3.5" />
+                                        )}
+                                      </button>
+
+                                      <button
+                                        type="button"
+                                        onClick={() => handleRevokeInvitation(inv.id)}
+                                        className="px-2 py-1 rounded-lg text-rose-600 hover:bg-rose-50 text-[11px] font-bold"
+                                      >
+                                        Revoke
+                                      </button>
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  {/* Join Organization with Token Card */}
+                  <div className="p-5 bg-white rounded-2xl border border-slate-200/80 shadow-xs space-y-3">
+                    <div className="flex items-center gap-2 text-slate-900 font-bold text-xs">
+                      <Key className="w-4 h-4 text-accent" />
+                      <span>Join an Organization via Invitation Token</span>
+                    </div>
+                    <form onSubmit={handleJoinOrganization} className="flex flex-col sm:flex-row gap-2">
+                      <input
+                        type="text"
+                        value={joinToken}
+                        onChange={(e) => setJoinToken(e.target.value)}
+                        placeholder="Paste your invitation token here..."
+                        className="flex-1 px-3 py-2 rounded-xl border border-slate-200 text-xs text-slate-900 bg-white focus:ring-2 focus:ring-accent focus:border-accent"
+                      />
+                      <Button type="submit" size="sm" loading={isJoiningOrg}>
+                        Accept Invitation
+                      </Button>
+                    </form>
                   </div>
                 </div>
               )}

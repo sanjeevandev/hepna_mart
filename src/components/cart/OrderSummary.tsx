@@ -7,9 +7,10 @@ import { ShieldCheck, FileText, ArrowRight } from 'lucide-react';
 
 interface OrderSummaryProps {
   onGenerateQuote?: () => void;
+  hideCheckoutButton?: boolean;
 }
 
-const OrderSummary: React.FC<OrderSummaryProps> = ({ onGenerateQuote }) => {
+const OrderSummary: React.FC<OrderSummaryProps> = ({ onGenerateQuote, hideCheckoutButton }) => {
   const { getSubtotal, getTax, getDeliveryCharge, getTotal, items } = useCartStore();
 
   const subtotal = getSubtotal();
@@ -62,12 +63,14 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ onGenerateQuote }) => {
       </div>
       
       <div className="space-y-2.5">
-        <Link to="/checkout" className="block">
-          <Button variant="primary" fullWidth size="lg" className="text-base py-3.5 shadow-md shadow-accent/20">
-            <span>Proceed to Checkout</span>
-            <ArrowRight className="w-4 h-4 ml-1" />
-          </Button>
-        </Link>
+        {!hideCheckoutButton && (
+          <Link to="/checkout" className="block">
+            <Button variant="primary" fullWidth size="lg" className="text-base py-3.5 shadow-md shadow-accent/20">
+              <span>Proceed to Checkout</span>
+              <ArrowRight className="w-4 h-4 ml-1" />
+            </Button>
+          </Link>
+        )}
 
         {/* Generate Digital Quote Button */}
         {onGenerateQuote && (

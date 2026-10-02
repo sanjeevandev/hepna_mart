@@ -6,6 +6,17 @@
  * Works seamlessly alongside local Zustand stores for offline fallback.
  */
 
+import type {
+  OrgRole,
+  BackendOrganization,
+  BackendOrgMember,
+  BackendInvitation,
+  CreateOrganizationPayload,
+  UpdateOrganizationPayload,
+  CreateInvitationPayload,
+  AcceptInvitationResponse,
+} from '@/types';
+
 export const API_BASE_URL: string =
   (import.meta.env.VITE_API_BASE_URL as string) || 'http://127.0.0.1:8001/api/v1';
 
@@ -212,6 +223,7 @@ export interface ProductQueryParams {
   sort?: string;
   page?: number;
   page_size?: number;
+  limit?: number;
 }
 
 export interface CreateProductPayload {
@@ -346,6 +358,14 @@ export interface BackendWishlistItem {
   product_id: string;
   product: BackendCartItemProductSummary;
   created_at: string;
+}
+
+export interface BackendWishlistResponse {
+  id: string;
+  user_id: string;
+  items: BackendWishlistItem[];
+  total_items: number;
+  product_ids: string[];
 }
 
 export interface BackendOrderItem {
@@ -611,9 +631,21 @@ class ApiClient {
       if (params.new !== undefined) query.set('new', String(params.new));
       if (params.offer !== undefined) query.set('offer', String(params.offer));
       if (params.active_only !== undefined) query.set('active_only', String(params.active_only));
-      if (params.sort) query.set('sort', params.sort);
+      if (params.sort) {
+        const sortMap: Record<string, string> = {
+          'relevance': 'popular',
+          'price-low': 'price_asc',
+          'price-high': 'price_desc',
+          'rating': 'rating_desc',
+          'discount': 'discount_desc',
+          'newest': 'newest',
+        };
+        const mappedSort = sortMap[params.sort] || params.sort;
+        query.set('sort', mappedSort);
+      }
       if (params.page !== undefined) query.set('page', String(params.page));
-      if (params.page_size !== undefined) query.set('page_size', String(params.page_size));
+      const effectivePageSize = params.page_size !== undefined ? params.page_size : params.limit;
+      if (effectivePageSize !== undefined) query.set('page_size', String(effectivePageSize));
 
       const qs = query.toString();
       return this.get<BackendProductListResponse>(`products${qs ? `?${qs}` : ''}`);
@@ -947,6 +979,192 @@ class ApiClient {
     },
   };
 
+  /**
+   * Customer Projects & BOQ Workspace API Namespace
+   */
+  readonly projects = {
+    list: async (): Promise<ApiResponse<BackendProjectListResponse>> => {
+      return this.get<BackendProjectListResponse>('projects');
+    },
+
+    get: async (projectId: string): Promise<ApiResponse<BackendProject>> => {
+      return this.get<BackendProject>(`projects/${encodeURIComponent(projectId)}`);
+    },
+
+    create: async (payload: CreateProjectPayload): Promise<ApiResponse<BackendProject>> => {
+      return this.post<BackendProject>('projects', payload);
+    },
+
+    update: async (projectId: string, payload: UpdateProjectPayload): Promise<ApiResponse<BackendProject>> => {
+      return this.patch<BackendProject>(`projects/${encodeURIComponent(projectId)}`, payload);
+    },
+
+    delete: async (projectId: string): Promise<ApiResponse<void>> => {
+      return this.delete<void>(`projects/${encodeURIComponent(projectId)}`);
+    },
+
+    addMaterial: async (projectId: string, payload: AddProjectMaterialPayload): Promise<ApiResponse<BackendProject>> => {
+      return this.post<BackendProject>(`projects/${encodeURIComponent(projectId)}/materials`, payload);
+    },
+
+    updateMaterial: async (projectId: string, productId: string, payload: UpdateProjectMaterialPayload): Promise<ApiResponse<BackendProject>> => {
+      return this.patch<BackendProject>(`projects/${encodeURIComponent(projectId)}/materials/${encodeURIComponent(productId)}`, payload);
+    },
+
+    removeMaterial: async (projectId: string, productId: string): Promise<ApiResponse<BackendProject>> => {
+      return this.delete<BackendProject>(`projects/${encodeURIComponent(projectId)}/materials/${encodeURIComponent(productId)}`);
+    },
+
+    refreshBOQPricing: async (projectId: string): Promise<ApiResponse<BackendProject>> => {
+      return this.post<BackendProject>(`projects/${encodeURIComponent(projectId)}/refresh-pricing`);
+    },
+
+    toggleStage: async (projectId: string, stage: string): Promise<ApiResponse<BackendProject>> => {
+      return this.post<BackendProject>(`projects/${encodeURIComponent(projectId)}/stages/${encodeURIComponent(stage)}/toggle`);
+    },
+
+    listMembers: async (projectId: string): Promise<ApiResponse<BackendProjectMember[]>> => {
+      return this.get<BackendProjectMember[]>(`projects/${encodeURIComponent(projectId)}/members`);
+    },
+
+    addMember: async (projectId: string, payload: AddProjectMemberPayload): Promise<ApiResponse<BackendProjectMember>> => {
+      return this.post<BackendProjectMember>(`projects/${encodeURIComponent(projectId)}/members`, payload);
+    },
+
+    updateMemberRole: async (projectId: string, userId: string, payload: UpdateProjectMemberPayload): Promise<ApiResponse<BackendProjectMember>> => {
+      return this.patch<BackendProjectMember>(`projects/${encodeURIComponent(projectId)}/members/${encodeURIComponent(userId)}`, payload);
+    },
+
+    removeMember: async (projectId: string, userId: string): Promise<ApiResponse<void>> => {
+      return this.delete<void>(`projects/${encodeURIComponent(projectId)}/members/${encodeURIComponent(userId)}`);
+    },
+
+    transferOrganization: async (projectId: string, payload: TransferProjectPayload): Promise<ApiResponse<BackendProject>> => {
+      return this.post<BackendProject>(`projects/${encodeURIComponent(projectId)}/transfer-organization`, payload);
+    },
+
+    getActivity: async (
+      projectId: string,
+      params?: { page?: number; limit?: number; action?: string }
+    ): Promise<ApiResponse<BackendProjectActivityListResponse>> => {
+      const queryParams = new URLSearchParams();
+      if (params?.page) queryParams.set('page', params.page.toString());
+      if (params?.limit) queryParams.set('limit', params.limit.toString());
+      if (params?.action) queryParams.set('action', params.action);
+      const qs = queryParams.toString();
+      const endpoint = qs
+        ? `projects/${encodeURIComponent(projectId)}/activity?${qs}`
+        : `projects/${encodeURIComponent(projectId)}/activity`;
+      return this.get<BackendProjectActivityListResponse>(endpoint);
+    },
+
+  };
+
+  /**
+   * Construction Cost Estimates API Namespace
+   */
+  readonly estimates = {
+    list: async (): Promise<ApiResponse<BackendEstimateListResponse>> => {
+      return this.get<BackendEstimateListResponse>('estimates');
+    },
+
+    get: async (estimateId: string): Promise<ApiResponse<BackendEstimate>> => {
+      return this.get<BackendEstimate>(`estimates/${encodeURIComponent(estimateId)}`);
+    },
+
+    create: async (payload: CreateEstimatePayload): Promise<ApiResponse<BackendEstimate>> => {
+      return this.post<BackendEstimate>('estimates', payload);
+    },
+
+    update: async (estimateId: string, payload: UpdateEstimatePayload): Promise<ApiResponse<BackendEstimate>> => {
+      return this.patch<BackendEstimate>(`estimates/${encodeURIComponent(estimateId)}`, payload);
+    },
+
+    delete: async (estimateId: string): Promise<ApiResponse<void>> => {
+      return this.delete<void>(`estimates/${encodeURIComponent(estimateId)}`);
+    },
+
+    refreshPricing: async (estimateId: string): Promise<ApiResponse<BackendEstimate>> => {
+      return this.post<BackendEstimate>(`estimates/${encodeURIComponent(estimateId)}/refresh-pricing`);
+    },
+
+    transferToProject: async (estimateId: string, payload: TransferToProjectPayload): Promise<ApiResponse<{ message: string; project_id: string; materials_added: number }>> => {
+      return this.post<{ message: string; project_id: string; materials_added: number }>(`estimates/${encodeURIComponent(estimateId)}/transfer`, payload);
+    },
+  };
+
+  /**
+   * Customer Business & Contractor Profiles API Namespace (Phase 2L.1)
+   */
+  readonly profile = {
+    getBusiness: async (): Promise<ApiResponse<BackendBusinessProfile>> => {
+      return this.get<BackendBusinessProfile>('profile/business');
+    },
+
+    updateBusiness: async (payload: BusinessProfilePayload): Promise<ApiResponse<BackendBusinessProfile>> => {
+      return this.put<BackendBusinessProfile>('profile/business', payload);
+    },
+
+    getContractor: async (): Promise<ApiResponse<BackendContractorProfile>> => {
+      return this.get<BackendContractorProfile>('profile/contractor');
+    },
+
+    updateContractor: async (payload: ContractorProfilePayload): Promise<ApiResponse<BackendContractorProfile>> => {
+      return this.put<BackendContractorProfile>('profile/contractor', payload);
+    },
+  };
+
+  /**
+   * Customer Organizations & Team RBAC API Namespace (Phase 2L.2)
+   */
+  readonly organizations = {
+    list: async (): Promise<ApiResponse<BackendOrganization[]>> => {
+      return this.get<BackendOrganization[]>('organizations');
+    },
+
+    create: async (payload: CreateOrganizationPayload): Promise<ApiResponse<BackendOrganization>> => {
+      return this.post<BackendOrganization>('organizations', payload);
+    },
+
+    get: async (orgId: string): Promise<ApiResponse<BackendOrganization>> => {
+      return this.get<BackendOrganization>(`organizations/${encodeURIComponent(orgId)}`);
+    },
+
+    update: async (orgId: string, payload: UpdateOrganizationPayload): Promise<ApiResponse<BackendOrganization>> => {
+      return this.put<BackendOrganization>(`organizations/${encodeURIComponent(orgId)}`, payload);
+    },
+
+    listMembers: async (orgId: string): Promise<ApiResponse<BackendOrgMember[]>> => {
+      return this.get<BackendOrgMember[]>(`organizations/${encodeURIComponent(orgId)}/members`);
+    },
+
+    updateMemberRole: async (orgId: string, userId: string, role: OrgRole): Promise<ApiResponse<BackendOrgMember>> => {
+      return this.patch<BackendOrgMember>(`organizations/${encodeURIComponent(orgId)}/members/${encodeURIComponent(userId)}`, { role });
+    },
+
+    removeMember: async (orgId: string, userId: string): Promise<ApiResponse<{ message: string; organization_id: string; user_id: string }>> => {
+      return this.delete<{ message: string; organization_id: string; user_id: string }>(`organizations/${encodeURIComponent(orgId)}/members/${encodeURIComponent(userId)}`);
+    },
+
+    listInvitations: async (orgId: string): Promise<ApiResponse<BackendInvitation[]>> => {
+      return this.get<BackendInvitation[]>(`organizations/${encodeURIComponent(orgId)}/invitations`);
+    },
+
+    createInvitation: async (orgId: string, payload: CreateInvitationPayload): Promise<ApiResponse<BackendInvitation>> => {
+      return this.post<BackendInvitation>(`organizations/${encodeURIComponent(orgId)}/invitations`, payload);
+    },
+
+    revokeInvitation: async (orgId: string, invitationId: string): Promise<ApiResponse<{ message: string; invitation_id: string; status: string }>> => {
+      return this.delete<{ message: string; invitation_id: string; status: string }>(`organizations/${encodeURIComponent(orgId)}/invitations/${encodeURIComponent(invitationId)}`);
+    },
+  };
+
+  readonly invitations = {
+    accept: async (token: string): Promise<ApiResponse<AcceptInvitationResponse>> => {
+      return this.post<AcceptInvitationResponse>(`invitations/${encodeURIComponent(token)}/accept`);
+    },
+  };
+
   patch<T = any>(endpoint: string, body?: any, headers?: Record<string, string>) {
     return this.request<T>(endpoint, {
       method: 'PATCH',
@@ -954,6 +1172,41 @@ class ApiClient {
       headers,
     });
   }
+
+  /**
+   * Project Notifications & Activity Alerts API Namespace (Phase 2L.5)
+   */
+  readonly notifications = {
+    list: async (params?: {
+      page?: number;
+      limit?: number;
+      is_read?: boolean;
+      notification_type?: string;
+      project_id?: string;
+    }): Promise<ApiResponse<ProjectNotificationListResponse>> => {
+      const q = new URLSearchParams();
+      if (params?.page) q.set('page', params.page.toString());
+      if (params?.limit) q.set('limit', params.limit.toString());
+      if (params?.is_read !== undefined) q.set('is_read', params.is_read.toString());
+      if (params?.notification_type) q.set('notification_type', params.notification_type);
+      if (params?.project_id) q.set('project_id', params.project_id);
+      const qs = q.toString();
+      const ep = qs ? `notifications?${qs}` : 'notifications';
+      return this.get<ProjectNotificationListResponse>(ep);
+    },
+
+    getUnreadCount: async (): Promise<ApiResponse<UnreadCountResponse>> => {
+      return this.get<UnreadCountResponse>('notifications/unread-count');
+    },
+
+    markRead: async (notificationId: string): Promise<ApiResponse<ProjectNotification>> => {
+      return this.patch<ProjectNotification>(`notifications/${encodeURIComponent(notificationId)}/read`);
+    },
+
+    markAllRead: async (): Promise<ApiResponse<{ status: string; marked_read_count: number }>> => {
+      return this.post<{ status: string; marked_read_count: number }>('notifications/read-all');
+    },
+  };
 
   /**
    * Probes the backend health endpoint.
@@ -1202,6 +1455,277 @@ export interface BackendPaymentListResponse {
   page: number;
   limit: number;
 }
+
+// Project & BOQ Types
+export interface BackendProjectMaterial {
+  id: string;
+  project_id: string;
+  product_id: string;
+  quantity: number;
+  unit: string;
+  purchased_quantity: number;
+  wastage_percent: number;
+  stage?: string | null;
+  price_at_addition: number;
+  notes?: string | null;
+  added_at: string;
+  product_name?: string | null;
+  brand?: string | null;
+  image?: string | null;
+  current_price?: number | null;
+  in_stock?: boolean | null;
+  stock?: number | null;
+}
+
+export interface BackendProjectActivityActor {
+  id: string;
+  email: string;
+  name?: string | null;
+}
+
+export interface BackendProjectActivity {
+  id: string;
+  organization_id?: string | null;
+  project_id?: string | null;
+  actor_user_id?: string | null;
+  actor?: BackendProjectActivityActor | null;
+  action: string;
+  resource_type: string;
+  resource_id?: string | null;
+  metadata: Record<string, any>;
+  created_at: string;
+}
+
+export interface BackendProjectActivityListResponse {
+  activities: BackendProjectActivity[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export interface BackendProjectMember {
+  id: string;
+  project_id: string;
+  user_id: string;
+  role: OrgRole;
+  email?: string | null;
+  name?: string | null;
+  created_at: string;
+  updated_at?: string | null;
+}
+
+export interface BackendProject {
+  id: string;
+  user_id: string;
+  organization_id?: string | null;
+  organization_name?: string | null;
+  current_user_role?: OrgRole | null;
+  member_count?: number;
+  is_shared?: boolean;
+  name: string;
+  project_type: string;
+  built_up_area: number;
+  area_unit: string;
+  floors: number;
+  stage: string;
+  city: string;
+  pincode: string;
+  completed_stages: string[];
+  notes?: string | null;
+  created_at: string;
+  updated_at: string;
+  materials: BackendProjectMaterial[];
+  members?: BackendProjectMember[];
+}
+
+export interface BackendProjectListResponse {
+  projects: BackendProject[];
+  total: number;
+}
+
+export interface CreateProjectPayload {
+  name: string;
+  organization_id?: string | null;
+  project_type: string;
+  built_up_area: number;
+  area_unit?: string;
+  floors?: number;
+  stage?: string;
+  city?: string;
+  pincode?: string;
+  notes?: string;
+}
+
+export interface AddProjectMemberPayload {
+  user_id: string;
+  role: OrgRole;
+}
+
+export interface UpdateProjectMemberPayload {
+  role: OrgRole;
+}
+
+export interface TransferProjectPayload {
+  target_organization_id: string | null;
+}
+
+export interface UpdateProjectPayload {
+  name?: string;
+  project_type?: string;
+  built_up_area?: number;
+  area_unit?: string;
+  floors?: number;
+  stage?: string;
+  city?: string;
+  pincode?: string;
+  notes?: string;
+  completed_stages?: string[];
+}
+
+export interface AddProjectMaterialPayload {
+  product_id: string;
+  quantity: number;
+  unit?: string;
+  purchased_quantity?: number;
+  wastage_percent?: number;
+  stage?: string;
+  price_at_addition?: number;
+  notes?: string;
+}
+
+export interface UpdateProjectMaterialPayload {
+  quantity?: number;
+  unit?: string;
+  purchased_quantity?: number;
+  wastage_percent?: number;
+  stage?: string;
+  notes?: string;
+}
+
+// Estimate Types
+export interface BackendEstimate {
+  id: string;
+  user_id: string;
+  project_id?: string | null;
+  inputs: Record<string, any>;
+  materials: Record<string, any>[];
+  subtotal_at_estimate: number;
+  tax_at_estimate: number;
+  delivery_at_estimate: number;
+  total_at_estimate: number;
+  current_subtotal: number;
+  current_tax: number;
+  current_delivery: number;
+  current_total: number;
+  price_difference: number;
+  has_price_changes: boolean;
+  validity_days: number;
+  notes?: string | null;
+  price_snapshot_timestamp: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BackendEstimateListResponse {
+  estimates: BackendEstimate[];
+  total: number;
+}
+
+export interface CreateEstimatePayload {
+  id?: string;
+  project_id?: string;
+  inputs: Record<string, any>;
+  materials: Record<string, any>[];
+  subtotal_at_estimate: number;
+  tax_at_estimate: number;
+  delivery_at_estimate: number;
+  total_at_estimate: number;
+  validity_days?: number;
+  notes?: string;
+}
+
+export interface UpdateEstimatePayload {
+  notes?: string;
+  project_id?: string;
+}
+
+export interface TransferToProjectPayload {
+  target_project_id: string;
+  stage?: string;
+}
+
+// Profile Types (Phase 2L.1)
+export interface BackendBusinessProfile {
+  id: string;
+  user_id: string;
+  business_name: string;
+  business_type: string;
+  gstin?: string | null;
+  pan?: string | null;
+  registered_address: string;
+  city: string;
+  state: string;
+  pincode: string;
+  contact_person: string;
+  contact_phone: string;
+  contact_email?: string | null;
+  tax_verification_status: string;
+  tax_verification_notes?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BusinessProfilePayload {
+  business_name: string;
+  business_type?: string;
+  gstin?: string | null;
+  pan?: string | null;
+  registered_address: string;
+  city: string;
+  state: string;
+  pincode: string;
+  contact_person: string;
+  contact_phone: string;
+  contact_email?: string | null;
+}
+
+export interface BackendContractorProfile {
+  id: string;
+  user_id: string;
+  business_name: string;
+  specialization: string[];
+  years_of_experience: number;
+  service_area: string;
+  license_number?: string | null;
+  project_count: number;
+  preferred_materials: string[];
+  verification_status: string;
+  verification_notes?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ContractorProfilePayload {
+  business_name: string;
+  specialization?: string[];
+  years_of_experience?: number;
+  service_area?: string;
+  license_number?: string | null;
+  project_count?: number;
+  preferred_materials?: string[];
+}
+
+// Organization & Team RBAC Types (Phase 2L.2)
+export type {
+  OrgRole,
+  BackendOrganization,
+  BackendOrgMember,
+  BackendInvitation,
+  CreateOrganizationPayload,
+  UpdateOrganizationPayload,
+  CreateInvitationPayload,
+  AcceptInvitationResponse,
+} from '@/types';
 
 export const apiClient = new ApiClient(API_BASE_URL);
 export default apiClient;

@@ -10,7 +10,7 @@ export interface SectionMotionProps {
   threshold?: number;
   rootMargin?: string;
   delay?: number;
-  as?: keyof JSX.IntrinsicElements;
+  as?: React.ElementType;
 }
 
 const SectionMotion: React.FC<SectionMotionProps> = ({
@@ -22,7 +22,7 @@ const SectionMotion: React.FC<SectionMotionProps> = ({
   delay = 0,
   as: Component = 'div',
 }) => {
-  const ref = useRef<HTMLElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -62,7 +62,6 @@ const SectionMotion: React.FC<SectionMotionProps> = ({
   const variantClass = `section-motion--${variant}`;
 
   return (
-    // @ts-expect-error dynamic component
     <Component
       ref={ref}
       className={`section-motion ${variantClass} ${isVisible ? 'is-visible' : ''} ${className}`.trim()}

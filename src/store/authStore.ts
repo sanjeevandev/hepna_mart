@@ -11,6 +11,9 @@ import {
 } from '@/lib/api';
 import { useCartStore } from '@/store/cartStore';
 import { useWishlistStore } from '@/store/wishlistStore';
+import { useProjectStore } from '@/store/projectStore';
+import { useEstimateStore } from '@/store/estimateStore';
+import { useBusinessStore } from '@/store/businessStore';
 import toast from 'react-hot-toast';
 
 
@@ -205,9 +208,10 @@ export const useAuthStore = create<AuthState>()(
         removeAuthToken();
         apiClient.auth.logout().catch(() => {});
         set({ currentUser: null, isAuthenticated: false, serverPermissions: [] });
-        // Clear or reset active user cart & wishlist
+        // Clear or reset active user cart, wishlist & profiles
         useCartStore.getState().clearCart().catch(() => {});
         useWishlistStore.getState().clearWishlist().catch(() => {});
+        useBusinessStore.getState().clearProfiles();
         toast('Signed out successfully');
       },
 
@@ -263,6 +267,9 @@ export const useAuthStore = create<AuthState>()(
             .then(async () => {
               await useCartStore.getState().fetchCart().catch(() => {});
               await useWishlistStore.getState().fetchWishlist().catch(() => {});
+              await useProjectStore.getState().fetchProjects().catch(() => {});
+              await useEstimateStore.getState().fetchEstimates().catch(() => {});
+              await useBusinessStore.getState().fetchProfiles().catch(() => {});
             })
             .catch(() => {});
 
@@ -339,9 +346,12 @@ export const useAuthStore = create<AuthState>()(
               serverPermissions: permissions,
             });
 
-            // Safe merge guest cart & wishlist into backend
+            // Safe merge guest cart & wishlist into backend + sync projects, estimates, and business profiles
             useCartStore.getState().mergeGuestCart().catch(() => {});
             useWishlistStore.getState().mergeGuestWishlist().catch(() => {});
+            useProjectStore.getState().fetchProjects().catch(() => {});
+            useEstimateStore.getState().fetchEstimates().catch(() => {});
+            useBusinessStore.getState().fetchProfiles().catch(() => {});
 
             toast.success(`Welcome back, ${userProfile.name}!`);
             return true;
@@ -364,9 +374,12 @@ export const useAuthStore = create<AuthState>()(
               serverPermissions: [],
             });
 
-            // Safe merge guest cart & wishlist into backend
+            // Safe merge guest cart & wishlist into backend + sync projects, estimates, and business profiles
             useCartStore.getState().mergeGuestCart().catch(() => {});
             useWishlistStore.getState().mergeGuestWishlist().catch(() => {});
+            useProjectStore.getState().fetchProjects().catch(() => {});
+            useEstimateStore.getState().fetchEstimates().catch(() => {});
+            useBusinessStore.getState().fetchProfiles().catch(() => {});
 
             toast.success(`Welcome to HEPNA MART, ${userProfile.name}!`);
             return true;
@@ -388,9 +401,12 @@ export const useAuthStore = create<AuthState>()(
               isAuthenticated: true,
               serverPermissions: res.data.permissions || [],
             });
-            // Fetch synced cart & wishlist
+            // Fetch synced cart & wishlist + projects, estimates, and business profiles
             useCartStore.getState().fetchCart().catch(() => {});
             useWishlistStore.getState().fetchWishlist().catch(() => {});
+            useProjectStore.getState().fetchProjects().catch(() => {});
+            useEstimateStore.getState().fetchEstimates().catch(() => {});
+            useBusinessStore.getState().fetchProfiles().catch(() => {});
           }
         } catch {
           // Token invalid or expired

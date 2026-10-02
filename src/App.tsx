@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, Suspense, lazy } from 'react';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import Lenis from 'lenis';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -8,56 +8,57 @@ import PageTransition from '@/components/ui/PageTransition';
 import ProductCompareBar from '@/components/product/ProductCompareBar';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 
-// Pages
+// Root Landing Page (eager loaded for instant first paint)
 import HomePage from '@/pages/HomePage';
-import ShopPage from '@/pages/ShopPage';
-import CategoriesPage from '@/pages/CategoriesPage';
-import CategoryProductsPage from '@/pages/CategoryProductsPage';
-import ProductDetailsPage from '@/pages/ProductDetailsPage';
-import CartPage from '@/pages/CartPage';
-import CheckoutPage from '@/pages/CheckoutPage';
-import WishlistPage from '@/pages/WishlistPage';
-import OrdersPage from '@/pages/OrdersPage';
-import OrderDetailPage from '@/pages/OrderDetailPage';
-import AccountPage from '@/pages/AccountPage';
-import WholesalePage from '@/pages/WholesalePage';
-import RFQListPage from '@/pages/RFQListPage';
-import RFQDetailPage from '@/pages/RFQDetailPage';
-import QuoteDetailPage from '@/pages/QuoteDetailPage';
-import ConstructionToolsPage from '@/pages/ConstructionToolsPage';
-import OffersPage from '@/pages/OffersPage';
-import AboutPage from '@/pages/AboutPage';
-import ContactPage from '@/pages/ContactPage';
-import SearchResultsPage from '@/pages/SearchResultsPage';
-import ProjectsDashboardPage from '@/pages/ProjectsDashboardPage';
-import CreateProjectPage from '@/pages/CreateProjectPage';
-import ProjectDetailPage from '@/pages/ProjectDetailPage';
-import ProjectBOQPage from '@/pages/ProjectBOQPage';
-import CostCalculatorPage from '@/pages/CostCalculatorPage';
-import EstimatesPage from '@/pages/EstimatesPage';
-import EstimateDetailsPage from '@/pages/EstimateDetailsPage';
-import PaymentPage from '@/pages/PaymentPage';
 
-import AccountSetupPage from '@/pages/AccountSetupPage';
+// Lazy Loaded Storefront & Customer Pages
+const ShopPage = lazy(() => import('@/pages/ShopPage'));
+const CategoriesPage = lazy(() => import('@/pages/CategoriesPage'));
+const CategoryProductsPage = lazy(() => import('@/pages/CategoryProductsPage'));
+const ProductDetailsPage = lazy(() => import('@/pages/ProductDetailsPage'));
+const CartPage = lazy(() => import('@/pages/CartPage'));
+const CheckoutPage = lazy(() => import('@/pages/CheckoutPage'));
+const WishlistPage = lazy(() => import('@/pages/WishlistPage'));
+const OrdersPage = lazy(() => import('@/pages/OrdersPage'));
+const OrderDetailPage = lazy(() => import('@/pages/OrderDetailPage'));
+const AccountPage = lazy(() => import('@/pages/AccountPage'));
+const AccountSetupPage = lazy(() => import('@/pages/AccountSetupPage'));
+const WholesalePage = lazy(() => import('@/pages/WholesalePage'));
+const RFQListPage = lazy(() => import('@/pages/RFQListPage'));
+const RFQDetailPage = lazy(() => import('@/pages/RFQDetailPage'));
+const QuoteDetailPage = lazy(() => import('@/pages/QuoteDetailPage'));
+const ConstructionToolsPage = lazy(() => import('@/pages/ConstructionToolsPage'));
+const OffersPage = lazy(() => import('@/pages/OffersPage'));
+const AboutPage = lazy(() => import('@/pages/AboutPage'));
+const ContactPage = lazy(() => import('@/pages/ContactPage'));
+const SearchResultsPage = lazy(() => import('@/pages/SearchResultsPage'));
+const ProjectsDashboardPage = lazy(() => import('@/pages/ProjectsDashboardPage'));
+const CreateProjectPage = lazy(() => import('@/pages/CreateProjectPage'));
+const ProjectDetailPage = lazy(() => import('@/pages/ProjectDetailPage'));
+const ProjectBOQPage = lazy(() => import('@/pages/ProjectBOQPage'));
+const CostCalculatorPage = lazy(() => import('@/pages/CostCalculatorPage'));
+const EstimatesPage = lazy(() => import('@/pages/EstimatesPage'));
+const EstimateDetailsPage = lazy(() => import('@/pages/EstimateDetailsPage'));
+const PaymentPage = lazy(() => import('@/pages/PaymentPage'));
 
-// Admin Architecture & Pages
+// Admin Architecture & Lazy Loaded Pages
 import AdminRoute from '@/components/admin/AdminRoute';
 import AdminLayout from '@/components/admin/AdminLayout';
-import AdminOverviewPage from '@/pages/admin/AdminOverviewPage';
-import AdminProductsPage from '@/pages/admin/AdminProductsPage';
-import AdminCategoriesPage from '@/pages/admin/AdminCategoriesPage';
-import AdminInventoryPage from '@/pages/admin/AdminInventoryPage';
-import AdminOrdersPage from '@/pages/admin/AdminOrdersPage';
-import AdminPaymentsPage from '@/pages/admin/AdminPaymentsPage';
-import AdminCustomersPage from '@/pages/admin/AdminCustomersPage';
-import AdminProjectsPage from '@/pages/admin/AdminProjectsPage';
-import AdminBOQsPage from '@/pages/admin/AdminBOQsPage';
-import AdminEstimatesPage from '@/pages/admin/AdminEstimatesPage';
-import AdminQuotesPage from '@/pages/admin/AdminQuotesPage';
-import AdminSuppliersPage from '@/pages/admin/AdminSuppliersPage';
-import AdminPricingPage from '@/pages/admin/AdminPricingPage';
-import AdminReportsPage from '@/pages/admin/AdminReportsPage';
-import AdminSettingsPage from '@/pages/admin/AdminSettingsPage';
+const AdminOverviewPage = lazy(() => import('@/pages/admin/AdminOverviewPage'));
+const AdminProductsPage = lazy(() => import('@/pages/admin/AdminProductsPage'));
+const AdminCategoriesPage = lazy(() => import('@/pages/admin/AdminCategoriesPage'));
+const AdminInventoryPage = lazy(() => import('@/pages/admin/AdminInventoryPage'));
+const AdminOrdersPage = lazy(() => import('@/pages/admin/AdminOrdersPage'));
+const AdminPaymentsPage = lazy(() => import('@/pages/admin/AdminPaymentsPage'));
+const AdminCustomersPage = lazy(() => import('@/pages/admin/AdminCustomersPage'));
+const AdminProjectsPage = lazy(() => import('@/pages/admin/AdminProjectsPage'));
+const AdminBOQsPage = lazy(() => import('@/pages/admin/AdminBOQsPage'));
+const AdminEstimatesPage = lazy(() => import('@/pages/admin/AdminEstimatesPage'));
+const AdminQuotesPage = lazy(() => import('@/pages/admin/AdminQuotesPage'));
+const AdminSuppliersPage = lazy(() => import('@/pages/admin/AdminSuppliersPage'));
+const AdminPricingPage = lazy(() => import('@/pages/admin/AdminPricingPage'));
+const AdminReportsPage = lazy(() => import('@/pages/admin/AdminReportsPage'));
+const AdminSettingsPage = lazy(() => import('@/pages/admin/AdminSettingsPage'));
 
 // Lenis smooth scroll and scroll restoration provider
 function SmoothScrollProvider({ children }: { children: React.ReactNode }) {
@@ -127,6 +128,13 @@ const NotFound: React.FC = () => (
   </div>
 );
 
+const PageFallback: React.FC = () => (
+  <div className="min-h-[50vh] flex flex-col items-center justify-center p-8">
+    <div className="w-8 h-8 border-2 border-slate-200 border-t-accent rounded-full animate-spin mb-3" />
+    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Loading...</p>
+  </div>
+);
+
 function AppContent() {
   const { pathname } = useLocation();
   const isAdminRoute = pathname.startsWith('/admin');
@@ -137,7 +145,8 @@ function AppContent() {
 
       <main className="flex-grow">
         <PageTransition>
-          <Routes>
+          <Suspense fallback={<PageFallback />}>
+            <Routes>
             {/* Public Storefront & Customer Routes */}
             <Route path="/" element={<HomePage />} />
             <Route path="/shop" element={<ShopPage />} />
@@ -324,6 +333,7 @@ function AppContent() {
 
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </Suspense>
         </PageTransition>
       </main>
 

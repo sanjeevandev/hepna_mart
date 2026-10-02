@@ -1,4 +1,4 @@
-import { UserRole, AccountType, Permission } from '@/types';
+import { UserRole, AccountType, Permission, OrgRole } from '@/types';
 
 /**
  * =========================================================================
@@ -236,4 +236,132 @@ export function getAccountTypeLabel(type: AccountType): string {
     default:
       return 'Standard';
   }
+}
+
+/**
+ * =========================================================================
+ * CUSTOMER ORGANIZATION / TEAM RBAC HELPERS (Phase 2L.2)
+ * =========================================================================
+ */
+
+/**
+ * Formats an OrgRole into a human-friendly string
+ */
+export function getOrgRoleLabel(role: OrgRole | string | undefined | null): string {
+  switch (role) {
+    case 'owner':
+      return 'Owner';
+    case 'admin':
+      return 'Administrator';
+    case 'procurement_manager':
+      return 'Procurement Manager';
+    case 'project_manager':
+      return 'Project Manager';
+    case 'site_supervisor':
+      return 'Site Supervisor';
+    case 'viewer':
+      return 'Viewer';
+    default:
+      return 'Member';
+  }
+}
+
+/**
+ * Returns accessible styling tokens for organization role badges
+ */
+export function getOrgRoleBadgeColor(role: OrgRole | string | undefined | null): {
+  bg: string;
+  text: string;
+  border: string;
+} {
+  switch (role) {
+    case 'owner':
+      return {
+        bg: 'bg-purple-50',
+        text: 'text-purple-700',
+        border: 'border-purple-200',
+      };
+    case 'admin':
+      return {
+        bg: 'bg-blue-50',
+        text: 'text-blue-700',
+        border: 'border-blue-200',
+      };
+    case 'procurement_manager':
+      return {
+        bg: 'bg-amber-50',
+        text: 'text-amber-800',
+        border: 'border-amber-200',
+      };
+    case 'project_manager':
+      return {
+        bg: 'bg-emerald-50',
+        text: 'text-emerald-700',
+        border: 'border-emerald-200',
+      };
+    case 'site_supervisor':
+      return {
+        bg: 'bg-cyan-50',
+        text: 'text-cyan-700',
+        border: 'border-cyan-200',
+      };
+    case 'viewer':
+    default:
+      return {
+        bg: 'bg-slate-50',
+        text: 'text-slate-600',
+        border: 'border-slate-200',
+      };
+  }
+}
+
+/**
+ * Checks if caller can manage organization settings and invite/remove members
+ */
+export function canManageOrg(role: OrgRole | undefined | null): boolean {
+  return role === 'owner' || role === 'admin';
+}
+
+/**
+ * Checks if caller can invite new members to the organization
+ */
+export function canInviteOrgMembers(role: OrgRole | undefined | null): boolean {
+  return role === 'owner' || role === 'admin';
+}
+
+/**
+ * Checks if caller can change a member's role
+ */
+export function canUpdateOrgMemberRole(
+  callerRole: OrgRole | undefined | null,
+  targetRole: OrgRole,
+  isSelf: boolean
+): boolean {
+  if (isSelf) return false;
+  if (callerRole === 'owner') return true;
+  if (callerRole === 'admin') {
+    return targetRole !== 'owner';
+  }
+  return false;
+}
+
+/**
+ * Checks if caller can remove a member from the organization
+ */
+export function canRemoveOrgMember(
+  callerRole: OrgRole | undefined | null,
+  targetRole: OrgRole,
+  isSelf: boolean
+): boolean {
+  if (isSelf) {
+    // Owner cannot leave without transfer/delete
+    return targetRole !== 'owner';
+  }
+  if (callerRole === 'owner') {
+    return targetRole !== 'owner';
+  }
+  if (callerRole === 'admin') {
+    return targetRole !== 'owner' && targetRole !== 'admin';
+  }
+  return false;
 }

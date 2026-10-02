@@ -92,10 +92,10 @@ const OrdersPage: React.FC = () => {
     return result;
   }, [orders, activeTab, searchQuery]);
 
-  const handleReorder = (orderId: string, e: React.MouseEvent) => {
+  const handleReorder = async (orderId: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const res = reorderItems(orderId);
+    const res = await reorderItems(orderId);
     if (res.added > 0) {
       navigate('/cart');
     }

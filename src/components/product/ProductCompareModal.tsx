@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { X, Check, Minus, ShoppingCart, Trash2, ShieldCheck, Truck } from 'lucide-react';
+import { Product } from '@/types';
 import { useCompareStore } from '@/store/compareStore';
 import { useCartStore } from '@/store/cartStore';
 import { formatPrice } from '@/utils/formatPrice';
@@ -10,12 +11,26 @@ const ProductCompareModal: React.FC = () => {
   const { items, isModalOpen, setModalOpen, removeFromCompare, clearCompare } = useCompareStore();
   const { addToCart } = useCartStore();
 
+  // Helper to extract a specification value regardless of Record vs Array format
+  const getSpecValue = (specs: Product['specifications'], key: string): string | undefined => {
+    if (!specs) return undefined;
+    if (Array.isArray(specs)) {
+      const found = specs.find((s) => s.key.toLowerCase() === key.toLowerCase());
+      return found?.value;
+    }
+    return (specs as Record<string, string>)[key];
+  };
+
   // Aggregate all unique specification keys from all products
   const allSpecKeys = useMemo(() => {
     const keysSet = new Set<string>();
     items.forEach((item) => {
       if (item.specifications) {
-        Object.keys(item.specifications).forEach((k) => keysSet.add(k));
+        if (Array.isArray(item.specifications)) {
+          item.specifications.forEach((s) => keysSet.add(s.key));
+        } else {
+          Object.keys(item.specifications).forEach((k) => keysSet.add(k));
+        }
       }
     });
     return Array.from(keysSet);
@@ -227,11 +242,14 @@ const ProductCompareModal: React.FC = () => {
                         <td className="p-3 font-semibold text-gray-600 capitalize">
                           {key.replace(/([A-Z])/g, ' $1').trim()}
                         </td>
-                        {items.map((p) => (
-                          <td key={p.id} className="p-3 text-gray-800 font-medium">
-                            {p.specifications?.[key] ? p.specifications[key] : <span className="text-gray-400">Not specified</span>}
-                          </td>
-                        ))}
+                        {items.map((p) => {
+                          const specVal = getSpecValue(p.specifications, key);
+                          return (
+                            <td key={p.id} className="p-3 text-gray-800 font-medium">
+                              {specVal ? specVal : <span className="text-gray-400">Not specified</span>}
+                            </td>
+                          );
+                        })}
                         {Array.from({ length: Math.max(0, 4 - items.length) }).map((_, i) => (
                           <td key={i} className="p-3 text-gray-300">—</td>
                         ))}

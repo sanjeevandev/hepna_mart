@@ -10,14 +10,40 @@ import {
   compareEstimateWithCurrentPrices,
 } from '@/utils/constructionCalculator';
 import { products } from '@/data/products';
+import { apiClient, getAuthToken, BackendEstimate } from '@/lib/api';
 import { useProjectStore } from './projectStore';
 import { useCartStore } from './cartStore';
 import toast from 'react-hot-toast';
 
+function transformBackendEstimate(be: BackendEstimate): ConstructionEstimate {
+  return {
+    id: be.id,
+    inputs: be.inputs as CalculatorProjectInputs,
+    materials: (be.materials || []) as EstimatedMaterialLine[],
+    subtotalAtEstimate: be.subtotal_at_estimate,
+    taxAtEstimate: be.tax_at_estimate,
+    deliveryAtEstimate: be.delivery_at_estimate,
+    totalAtEstimate: be.total_at_estimate,
+    currentSubtotal: be.current_subtotal,
+    currentTax: be.current_tax,
+    currentDelivery: be.current_delivery,
+    currentTotal: be.current_total,
+    priceDifference: be.price_difference,
+    hasPriceChanges: be.has_price_changes,
+    createdAt: typeof be.created_at === 'string' ? be.created_at : new Date(be.created_at).toISOString(),
+    updatedAt: typeof be.updated_at === 'string' ? be.updated_at : new Date(be.updated_at).toISOString(),
+    priceSnapshotTimestamp: typeof be.price_snapshot_timestamp === 'string' ? be.price_snapshot_timestamp : new Date(be.price_snapshot_timestamp).toISOString(),
+    validityDays: be.validity_days,
+    notes: be.notes || undefined,
+  };
+}
+
 interface EstimateState {
   estimates: ConstructionEstimate[];
   activeEstimateId: string | null;
+  isLoading: boolean;
 
+  fetchEstimates: () => Promise<void>;
   createEstimate: (inputs: CalculatorProjectInputs) => ConstructionEstimate;
   getEstimate: (id: string) => ConstructionEstimate | undefined;
   updateEstimate: (id: string, updates: Partial<ConstructionEstimate>) => void;
@@ -118,6 +144,27 @@ export const useEstimateStore = create<EstimateState>()(
     (set, get) => ({
       estimates: defaultSeedEstimates,
       activeEstimateId: 'EST-89214',
+      isLoading: false,
+
+      fetchEstimates: async () => {
+        const token = getAuthToken();
+        if (!token) return;
+        set({ isLoading: true });
+        try {
+          const res = await apiClient.estimates.list();
+          if (res.data?.estimates) {
+            const transformed = res.data.estimates.map(transformBackendEstimate);
+            set({ estimates: transformed, isLoading: false });
+            if (transformed.length > 0 && !get().activeEstimateId) {
+              set({ activeEstimateId: transformed[0].id });
+            }
+          } else {
+            set({ isLoading: false });
+          }
+        } catch {
+          set({ isLoading: false });
+        }
+      },
 
       createEstimate: (inputs: CalculatorProjectInputs) => {
         const id = 'EST-' + Math.floor(10000 + Math.random() * 90000);
@@ -149,6 +196,29 @@ export const useEstimateStore = create<EstimateState>()(
         }));
 
         toast.success(`Estimate #${id} created & saved to your dashboard!`);
+
+        if (getAuthToken()) {
+          apiClient.estimates.create({
+            id,
+            project_id: inputs.projectId,
+            inputs: inputs as Record<string, any>,
+            materials: materials as Record<string, any>[],
+            subtotal_at_estimate: subtotal,
+            tax_at_estimate: tax,
+            delivery_at_estimate: delivery,
+            total_at_estimate: total,
+            validity_days: 7,
+          }).then((res) => {
+            if (res.data?.id) {
+              const serverEstimate = transformBackendEstimate(res.data);
+              set((state) => ({
+                estimates: state.estimates.map((e) => (e.id === id ? serverEstimate : e)),
+                activeEstimateId: state.activeEstimateId === id ? serverEstimate.id : state.activeEstimateId,
+              }));
+            }
+          }).catch(() => {});
+        }
+
         return newEstimate;
       },
 
@@ -170,6 +240,13 @@ export const useEstimateStore = create<EstimateState>()(
             e.id === id ? { ...e, ...updates, updatedAt: new Date().toISOString() } : e
           ),
         }));
+
+        if (getAuthToken()) {
+          apiClient.estimates.update(id, {
+            notes: updates.notes,
+            project_id: updates.inputs?.projectId,
+          }).catch(() => {});
+        }
       },
 
       deleteEstimate: (id: string) => {
@@ -179,6 +256,10 @@ export const useEstimateStore = create<EstimateState>()(
           activeEstimateId: state.activeEstimateId === id ? null : state.activeEstimateId,
         }));
         toast.success(`Estimate #${target?.id || id} removed.`);
+
+        if (getAuthToken()) {
+          apiClient.estimates.delete(id).catch(() => {});
+        }
       },
 
       refreshEstimatePricing: (id: string) => {
@@ -223,6 +304,11 @@ export const useEstimateStore = create<EstimateState>()(
         }));
 
         toast.success(`Estimate #${id} updated with today's live catalog pricing!`);
+
+        if (getAuthToken()) {
+          apiClient.estimates.refreshPricing(id).catch(() => {});
+        }
+
         return updated;
       },
 
@@ -256,6 +342,14 @@ export const useEstimateStore = create<EstimateState>()(
         });
 
         toast.success(`Transferred ${addedCount} estimated materials to "${targetProject.name}" BOQ!`);
+
+        if (getAuthToken()) {
+          apiClient.estimates.transferToProject(estimateId, {
+            target_project_id: targetProjectId,
+            stage: targetProject.stage || 'Foundation',
+          }).catch(() => {});
+        }
+
         return true;
       },
 

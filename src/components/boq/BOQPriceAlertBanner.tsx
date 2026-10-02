@@ -7,6 +7,7 @@ interface BOQPriceAlertBannerProps {
   changedItemsCount: number;
   onRefreshPrices: () => void;
   isUpdating?: boolean;
+  canRefresh?: boolean;
 }
 
 export const BOQPriceAlertBanner: React.FC<BOQPriceAlertBannerProps> = ({
@@ -14,6 +15,7 @@ export const BOQPriceAlertBanner: React.FC<BOQPriceAlertBannerProps> = ({
   changedItemsCount,
   onRefreshPrices,
   isUpdating = false,
+  canRefresh = true,
 }) => {
   if (changedItemsCount === 0) {
     return (
@@ -81,17 +83,19 @@ export const BOQPriceAlertBanner: React.FC<BOQPriceAlertBannerProps> = ({
         </div>
       </div>
 
-      <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
-        <button
-          type="button"
-          onClick={onRefreshPrices}
-          disabled={isUpdating}
-          className="px-4 py-2 rounded-xl bg-[#071A2B] hover:bg-[#0B2742] text-white text-xs font-bold flex items-center gap-2 transition-all shadow-sm hover:shadow active:scale-[0.98] disabled:opacity-50"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 text-accent ${isUpdating ? 'animate-spin' : ''}`} />
-          <span>Update to Live Catalog Rates</span>
-        </button>
-      </div>
+      {canRefresh && (
+        <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+          <button
+            type="button"
+            onClick={onRefreshPrices}
+            disabled={isUpdating}
+            className="px-4 py-2 rounded-xl bg-[#071A2B] hover:bg-[#0B2742] text-white text-xs font-bold flex items-center gap-2 transition-all shadow-sm hover:shadow active:scale-[0.98] disabled:opacity-50"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 text-accent ${isUpdating ? 'animate-spin' : ''}`} />
+            <span>Update to Live Catalog Rates</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 };

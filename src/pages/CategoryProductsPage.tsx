@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Category, Product } from '@/types';
+import { useSearchStore } from '@/store/searchStore';
 import catalogService from '@/services/catalogService';
 import ProductGrid from '@/components/product/ProductGrid';
 import ProductFilters from '@/components/product/ProductFilters';
@@ -10,19 +11,70 @@ import { ChevronRight, Loader2 } from 'lucide-react';
 
 const CategoryProductsPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
+  const { filters } = useSearchStore();
   const [category, setCategory] = useState<Category | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
-  const loadCategoryData = () => {
+
+  // Load category metadata
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    if (!slug) return;
+
+    catalogService.getCategoryBySlug(slug)
+      .then((catData) => {
+        setCategory(catData);
+      })
+      .catch((err: any) => {
+        setError(err.message || 'Unable to load category details.');
+      });
+  }, [slug]);
+
+  // Query products with active category slug and active filters
+  const loadCategoryProducts = useCallback(async () => {
     if (!slug) return;
     setLoading(true);
     setError(null);
+    try {
+      const prodData = await catalogService.getProducts({
+        category: slug,
+        brand: filters.brand || undefined,
+        min_price: filters.minPrice,
+        max_price: filters.maxPrice,
+        in_stock: filters.inStock,
+        sort: filters.sortBy || 'popular',
+        page: 1,
+        page_size: 60,
+      });
+      setProducts(prodData.products);
+    } catch (err: any) {
+      setError(err.message || 'Unable to load category supplies. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }, [slug, filters]);
 
+  useEffect(() => {
+    loadCategoryProducts();
+  }, [loadCategoryProducts]);
+
+  const handleRetry = () => {
+    if (!slug) return;
+    setLoading(true);
+    setError(null);
     Promise.all([
       catalogService.getCategoryBySlug(slug),
-      catalogService.getProducts({ category: slug, page_size: 60 }),
+      catalogService.getProducts({
+        category: slug,
+        brand: filters.brand || undefined,
+        min_price: filters.minPrice,
+        max_price: filters.maxPrice,
+        in_stock: filters.inStock,
+        sort: filters.sortBy || 'popular',
+        page: 1,
+        page_size: 60,
+      }),
     ])
       .then(([catData, prodData]) => {
         setCategory(catData);
@@ -35,12 +87,7 @@ const CategoryProductsPage: React.FC = () => {
       });
   };
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-    loadCategoryData();
-  }, [slug]);
-
-  if (loading) {
+  if (loading && !category) {
     return (
       <div className="container-custom py-24 flex flex-col items-center justify-center">
         <Loader2 className="w-8 h-8 text-accent animate-spin mb-3" />
@@ -49,13 +96,13 @@ const CategoryProductsPage: React.FC = () => {
     );
   }
 
-  if (error) {
+  if (error && !category) {
     return (
       <div className="container-custom py-20 text-center max-w-md mx-auto">
         <h2 className="text-2xl font-bold text-red-600 mb-2">Failed to load category</h2>
         <p className="text-xs text-gray-500 mb-6">{error}</p>
         <button
-          onClick={loadCategoryData}
+          onClick={handleRetry}
           className="px-6 py-2.5 bg-accent hover:bg-accent-dark text-white rounded-xl text-xs font-bold transition-colors"
         >
           Retry Connection

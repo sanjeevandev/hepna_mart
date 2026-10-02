@@ -83,6 +83,21 @@ const ProjectBOQPage: React.FC = () => {
 
   const project = projectId ? getProject(projectId) : undefined;
 
+  const isPersonal = !project?.organization_id && !project?.organizationId;
+  const role = project?.currentUserRole || project?.current_user_role;
+  const isOwnerOrAdmin = isPersonal || role === 'OWNER' || role === 'ADMIN';
+  const isPM = isOwnerOrAdmin || role === 'PROJECT_MANAGER';
+  const isProcurement = isPM || role === 'PROCUREMENT_MANAGER';
+  const isSupervisor = role === 'SITE_SUPERVISOR';
+  const isViewer = role === 'VIEWER';
+
+  const canAddMaterial = isPersonal || isPM || isProcurement;
+  const canEditBase = isPersonal || isPM || isProcurement;
+  const canEditPurchased = isPersonal || isPM || isProcurement || isSupervisor;
+  const canEditNotes = isPersonal || isPM || isProcurement || isSupervisor;
+  const canDelete = isPersonal || isPM || isProcurement;
+  const canRefreshPricing = isPersonal || isPM || isProcurement;
+
   if (!project) {
     return (
       <div className="container-custom py-20 text-center">
@@ -418,14 +433,16 @@ const ProjectBOQPage: React.FC = () => {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <button
-                type="button"
-                onClick={() => setIsAddMaterialOpen(true)}
-                className="px-4 py-2.5 rounded-xl bg-accent hover:bg-accent-dark text-white text-xs sm:text-sm font-bold flex items-center gap-2 transition-all shadow-lg shadow-accent/30 hover:scale-[1.02] active:scale-[0.98]"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Add Material</span>
-              </button>
+              {canAddMaterial && (
+                <button
+                  type="button"
+                  onClick={() => setIsAddMaterialOpen(true)}
+                  className="px-4 py-2.5 rounded-xl bg-accent hover:bg-accent-dark text-white text-xs sm:text-sm font-bold flex items-center gap-2 transition-all shadow-lg shadow-accent/30 hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Add Material</span>
+                </button>
+              )}
 
               <button
                 type="button"
@@ -439,6 +456,31 @@ const ProjectBOQPage: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Role Collaboration Notice Banners */}
+        {isViewer && (
+          <div className="p-4 bg-slate-100 rounded-2xl border border-slate-200 flex items-center gap-3 text-xs text-slate-700">
+            <div className="w-8 h-8 rounded-xl bg-slate-200 text-slate-600 flex items-center justify-center shrink-0">
+              <ShieldCheck className="w-4 h-4" />
+            </div>
+            <div>
+              <strong className="font-bold text-slate-900 block">Read-Only Viewer Access</strong>
+              <span>You have view permissions for this organization project. Bill of Quantities is displayed in read-only mode.</span>
+            </div>
+          </div>
+        )}
+
+        {isSupervisor && (
+          <div className="p-4 bg-blue-50/90 rounded-2xl border border-blue-200 flex items-center gap-3 text-xs text-blue-900">
+            <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
+              <HardHat className="w-4 h-4" />
+            </div>
+            <div>
+              <strong className="font-bold text-blue-950 block">Site Supervisor Workspace</strong>
+              <span>You can record on-site material procurement and add site notes. Structural base quantities and material additions are managed by project managers.</span>
+            </div>
+          </div>
+        )}
 
         {/* Top Summary Metrics Cards */}
         <BOQSummaryCards
@@ -457,6 +499,7 @@ const ProjectBOQPage: React.FC = () => {
           priceVariance={priceVariance}
           changedItemsCount={changedPriceItemsCount}
           onRefreshPrices={() => refreshBOQPricing(project.id)}
+          canRefresh={canRefreshPricing}
         />
 
         {/* Indicative Calculation Disclaimer Alert */}
@@ -611,14 +654,16 @@ const ProjectBOQPage: React.FC = () => {
               >
                 Reset Filters
               </button>
-              <button
-                type="button"
-                onClick={() => setIsAddMaterialOpen(true)}
-                className="px-4 py-2 rounded-xl bg-accent hover:bg-accent-dark text-white text-xs font-bold transition-colors flex items-center gap-1.5"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Add Material</span>
-              </button>
+              {canAddMaterial && (
+                <button
+                  type="button"
+                  onClick={() => setIsAddMaterialOpen(true)}
+                  className="px-4 py-2 rounded-xl bg-accent hover:bg-accent-dark text-white text-xs font-bold transition-colors flex items-center gap-1.5"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add Material</span>
+                </button>
+              )}
             </div>
           </div>
         ) : groupedItems ? (
@@ -629,6 +674,10 @@ const ProjectBOQPage: React.FC = () => {
                 key={groupTitle}
                 groupTitle={groupTitle}
                 items={groupMaterials}
+                canEditBase={canEditBase}
+                canEditPurchased={canEditPurchased}
+                canEditNotes={canEditNotes}
+                canDelete={canDelete}
                 onUpdateBaseQty={(prodId, qty) =>
                   updateMaterialQuantity(project.id, prodId, qty)
                 }
@@ -677,6 +726,10 @@ const ProjectBOQPage: React.FC = () => {
                       key={it.productId}
                       item={it}
                       index={idx}
+                      canEditBase={canEditBase}
+                      canEditPurchased={canEditPurchased}
+                      canEditNotes={canEditNotes}
+                      canDelete={canDelete}
                       onUpdateBaseQty={(qty) =>
                         updateMaterialQuantity(project.id, it.productId, qty)
                       }
@@ -707,6 +760,10 @@ const ProjectBOQPage: React.FC = () => {
                   key={it.productId}
                   item={it}
                   index={idx}
+                  canEditBase={canEditBase}
+                  canEditPurchased={canEditPurchased}
+                  canEditNotes={canEditNotes}
+                  canDelete={canDelete}
                   onUpdateBaseQty={(qty) =>
                     updateMaterialQuantity(project.id, it.productId, qty)
                   }

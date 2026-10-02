@@ -17,6 +17,7 @@ import {
   HelpCircle,
 } from 'lucide-react';
 import { apiClient, getAuthToken, BackendPayment, BackendPaymentConfig } from '@/lib/api';
+import { useAuthStore } from '@/store/authStore';
 import { useOrderStore } from '@/store/orderStore';
 import { formatPrice } from '@/utils/formatPrice';
 import Button from '@/components/ui/Button';

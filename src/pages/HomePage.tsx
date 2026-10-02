@@ -34,14 +34,6 @@ const HomePage: React.FC = () => {
         eyebrow="HEPNA MART"
         title="Great Buildings Begin With Great Foundations"
         scrollHint="Scroll to build"
-        startWidth={55}
-        startHeight={62}
-        startRadius={24}
-        endRadius={0}
-        mediaZoom={1.12}
-        scrollDistance={0.60}
-        holdDistance={0.0}
-        overlayScrim={0.52}
       >
         <div className="flex flex-col items-center justify-center max-w-2xl px-4 text-white text-center">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-accent/20 border border-accent/40 text-accent-light text-xs sm:text-sm font-semibold uppercase tracking-widest mb-3 backdrop-blur-md">

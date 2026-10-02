@@ -142,7 +142,10 @@ const ProductDetailsPage: React.FC = () => {
       {/* Main Product Area */}
       <SectionReveal variant="hero">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 mb-16">
-          <ProductGallery images={product.images || ['https://placehold.co/600?text=HEPNA']} />
+          <ProductGallery
+            images={product.images || ['https://placehold.co/600?text=HEPNA']}
+            productName={product.name}
+          />
           
           <div className="flex flex-col">
             <div className="mb-3">
@@ -170,9 +173,11 @@ const ProductDetailsPage: React.FC = () => {
 
             <div className="mb-6 flex flex-wrap items-center gap-2">
               <Badge 
-                text={inStock ? `In Stock (${product.stock} units)` : 'Out of Stock'} 
-                variant={inStock ? 'success' : 'danger'} 
-              />
+                variant={inStock ? 'discount' : 'outOfStock'}
+                className={inStock ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : ''}
+              >
+                {inStock ? `In Stock (${product.stock} units)` : 'Out of Stock'}
+              </Badge>
               {product.deliveryAvailable && (
                 <span className="inline-flex items-center gap-1 text-xs font-semibold text-slate-700 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
                   <Truck className="w-3.5 h-3.5 text-accent" />

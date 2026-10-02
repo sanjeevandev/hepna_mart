@@ -10,6 +10,7 @@ from app.core.database import get_db
 from app.core.security import decode_access_token
 from app.core.rbac import Permission, has_permission, is_staff_role
 from app.models.user import User, UserRole
+from app.models.organization import Organization, OrganizationMember, OrgRole
 
 logger = logging.getLogger("hepna.dependencies")
 
@@ -128,3 +129,51 @@ def require_permission(permission: Union[Permission, str]) -> Callable:
         return current_user
 
     return permission_checker
+
+
+def get_org_membership(
+    org_id: str,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db),
+) -> OrganizationMember:
+    """
+    Authoritative dependency to verify user membership in an organization.
+    Ensures customer cross-tenant isolation and IDOR protection.
+    """
+    membership = db.scalar(
+        select(OrganizationMember).where(
+            OrganizationMember.organization_id == org_id,
+            OrganizationMember.user_id == current_user.id,
+        )
+    )
+    if not membership:
+        org_exists = db.scalar(select(Organization.id).where(Organization.id == org_id))
+        if not org_exists:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Organization '{org_id}' not found.",
+            )
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied. You are not a member of this organization.",
+        )
+    return membership
+
+
+def require_org_role(allowed_roles: Union[OrgRole, List[OrgRole]]) -> Callable:
+    """
+    Parameterized dependency factory verifying caller's role within an organization.
+    """
+    roles_list = [allowed_roles] if isinstance(allowed_roles, OrgRole) else list(allowed_roles)
+
+    def role_checker(membership: OrganizationMember = Depends(get_org_membership)) -> OrganizationMember:
+        if membership.role not in roles_list:
+            role_names = ", ".join(r.value for r in roles_list)
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Access denied: Requires one of [{role_names}] roles in this organization.",
+            )
+        return membership
+
+    return role_checker
+

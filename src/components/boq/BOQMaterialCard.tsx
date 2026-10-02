@@ -19,6 +19,10 @@ import { BOQItemComputed } from './BOQMaterialRow';
 interface BOQMaterialCardProps {
   item: BOQItemComputed;
   index: number;
+  canEditBase?: boolean;
+  canEditPurchased?: boolean;
+  canEditNotes?: boolean;
+  canDelete?: boolean;
   onUpdateBaseQty: (qty: number) => void;
   onUpdateUnit: (unit: string) => void;
   onUpdatePurchasedQty: (qty: number) => void;
@@ -47,6 +51,10 @@ const WASTAGE_OPTIONS = [0, 3, 5, 8, 10, 15];
 export const BOQMaterialCard: React.FC<BOQMaterialCardProps> = ({
   item,
   index,
+  canEditBase = true,
+  canEditPurchased = true,
+  canEditNotes = true,
+  canDelete = true,
   onUpdateBaseQty,
   onUpdateUnit,
   onUpdatePurchasedQty,
@@ -93,14 +101,16 @@ export const BOQMaterialCard: React.FC<BOQMaterialCardProps> = ({
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={onRemove}
-          className="p-1.5 text-slate-300 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors shrink-0"
-          title="Remove from BOQ"
-        >
-          <Trash2 className="w-4 h-4" />
-        </button>
+        {canDelete && (
+          <button
+            type="button"
+            onClick={onRemove}
+            className="p-1.5 text-slate-300 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors shrink-0"
+            title="Remove from BOQ"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       {/* Progress & Status Strip */}
@@ -146,46 +156,58 @@ export const BOQMaterialCard: React.FC<BOQMaterialCardProps> = ({
         {/* Required Base */}
         <div className="bg-slate-50 p-2 rounded-xl border border-slate-100 flex flex-col justify-between">
           <span className="text-[10px] font-bold text-slate-500 uppercase">Required</span>
-          <div className="flex items-center justify-center gap-1 my-1">
-            <button
-              type="button"
-              onClick={() => onUpdateBaseQty(Math.max(1, item.quantity - 1))}
-              className="w-5 h-5 bg-white border border-slate-200 rounded font-bold text-slate-600 flex items-center justify-center text-xs"
-            >
-              -
-            </button>
-            <span className="font-extrabold text-slate-900 text-xs">{item.quantity}</span>
-            <button
-              type="button"
-              onClick={() => onUpdateBaseQty(item.quantity + 1)}
-              className="w-5 h-5 bg-white border border-slate-200 rounded font-bold text-slate-600 flex items-center justify-center text-xs"
-            >
-              +
-            </button>
-          </div>
+          {canEditBase ? (
+            <div className="flex items-center justify-center gap-1 my-1">
+              <button
+                type="button"
+                onClick={() => onUpdateBaseQty(Math.max(1, item.quantity - 1))}
+                className="w-5 h-5 bg-white border border-slate-200 rounded font-bold text-slate-600 flex items-center justify-center text-xs"
+              >
+                -
+              </button>
+              <span className="font-extrabold text-slate-900 text-xs">{item.quantity}</span>
+              <button
+                type="button"
+                onClick={() => onUpdateBaseQty(item.quantity + 1)}
+                className="w-5 h-5 bg-white border border-slate-200 rounded font-bold text-slate-600 flex items-center justify-center text-xs"
+              >
+                +
+              </button>
+            </div>
+          ) : (
+            <div className="font-extrabold text-slate-900 text-xs my-1">
+              {item.quantity}
+            </div>
+          )}
           <span className="text-[10px] text-slate-500">+{item.wastagePercent || 0}% waste</span>
         </div>
 
         {/* Procured */}
         <div className="bg-slate-50 p-2 rounded-xl border border-slate-100 flex flex-col justify-between">
           <span className="text-[10px] font-bold text-slate-500 uppercase">Purchased</span>
-          <div className="flex items-center justify-center gap-1 my-1">
-            <button
-              type="button"
-              onClick={() => onUpdatePurchasedQty(Math.max(0, (item.purchasedQuantity || 0) - 1))}
-              className="w-5 h-5 bg-white border border-slate-200 rounded font-bold text-slate-600 flex items-center justify-center text-xs"
-            >
-              -
-            </button>
-            <span className="font-extrabold text-slate-900 text-xs">{item.purchasedQuantity || 0}</span>
-            <button
-              type="button"
-              onClick={() => onUpdatePurchasedQty((item.purchasedQuantity || 0) + 1)}
-              className="w-5 h-5 bg-white border border-slate-200 rounded font-bold text-slate-600 flex items-center justify-center text-xs"
-            >
-              +
-            </button>
-          </div>
+          {canEditPurchased ? (
+            <div className="flex items-center justify-center gap-1 my-1">
+              <button
+                type="button"
+                onClick={() => onUpdatePurchasedQty(Math.max(0, (item.purchasedQuantity || 0) - 1))}
+                className="w-5 h-5 bg-white border border-slate-200 rounded font-bold text-slate-600 flex items-center justify-center text-xs"
+              >
+                -
+              </button>
+              <span className="font-extrabold text-slate-900 text-xs">{item.purchasedQuantity || 0}</span>
+              <button
+                type="button"
+                onClick={() => onUpdatePurchasedQty((item.purchasedQuantity || 0) + 1)}
+                className="w-5 h-5 bg-white border border-slate-200 rounded font-bold text-slate-600 flex items-center justify-center text-xs"
+              >
+                +
+              </button>
+            </div>
+          ) : (
+            <div className="font-extrabold text-slate-900 text-xs my-1">
+              {item.purchasedQuantity || 0}
+            </div>
+          )}
           <span className="text-[10px] text-slate-500">{item.unit}</span>
         </div>
 
@@ -206,13 +228,15 @@ export const BOQMaterialCard: React.FC<BOQMaterialCardProps> = ({
             <span className="truncate">
               {item.notes ? `Note: ${item.notes}` : 'No site notes added'}
             </span>
-            <button
-              type="button"
-              onClick={() => setIsEditingNotes(true)}
-              className="text-accent font-semibold hover:underline shrink-0 ml-2"
-            >
-              {item.notes ? 'Edit' : '+ Add Note'}
-            </button>
+            {canEditNotes && (
+              <button
+                type="button"
+                onClick={() => setIsEditingNotes(true)}
+                className="text-accent font-semibold hover:underline shrink-0 ml-2"
+              >
+                {item.notes ? 'Edit' : '+ Add Note'}
+              </button>
+            )}
           </div>
         ) : (
           <div className="flex items-center gap-1.5">

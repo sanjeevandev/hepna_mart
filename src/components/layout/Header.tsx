@@ -9,6 +9,7 @@ import { isInternalStaff } from '@/utils/rbac';
 import SearchBar from '../ui/SearchBar';
 import MobileNav from './MobileNav';
 import GooeyNav, { GooeyNavItem } from '../ui/GooeyNav';
+import NotificationCenter from './NotificationCenter';
 
 const navItems: GooeyNavItem[] = [
   { label: 'Home', href: '/' },
@@ -148,6 +149,9 @@ const Header: React.FC = () => {
                 <HardHat className="h-4 w-4 text-accent" />
                 <span>Projects</span>
               </Link>
+
+              {/* In-App Project Notification Center (Phase 2L.5) */}
+              <NotificationCenter />
 
               {/* Account Link */}
               <Link

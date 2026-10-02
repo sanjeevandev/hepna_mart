@@ -26,7 +26,7 @@ export interface Product {
   deliveryAvailable: boolean;
   featured: boolean;
   newArrival: boolean;
-  specifications?: Record<string, string>;
+  specifications?: Record<string, string> | Array<{ key: string; value: string }>;
   features?: string[];
 }
 
@@ -94,6 +94,91 @@ export interface ProjectMaterialItem {
   priceAtAddition?: number;
 }
 
+export interface ProjectMember {
+  id: string;
+  projectId: string;
+  userId: string;
+  role: OrgRole;
+  email?: string | null;
+  name?: string | null;
+  createdAt: string;
+  updatedAt?: string | null;
+}
+
+export interface AddProjectMemberPayload {
+  user_id: string;
+  role: OrgRole;
+}
+
+export interface UpdateProjectMemberPayload {
+  role: OrgRole;
+}
+
+export interface TransferProjectPayload {
+  target_organization_id: string | null;
+}
+
+export interface ProjectActivityActor {
+  id: string;
+  email: string;
+  name?: string | null;
+}
+
+export interface NotificationActorSummary {
+  id?: string | null;
+  email?: string | null;
+  name?: string | null;
+}
+
+export interface ProjectNotification {
+  id: string;
+  recipient_user_id: string;
+  organization_id?: string | null;
+  project_id?: string | null;
+  project_name?: string | null;
+  activity_log_id?: string | null;
+  notification_type: string;
+  title: string;
+  message: string;
+  metadata: Record<string, any>;
+  is_read: boolean;
+  read_at?: string | null;
+  created_at: string;
+  actor?: NotificationActorSummary | null;
+}
+
+export interface ProjectNotificationListResponse {
+  notifications: ProjectNotification[];
+  total: number;
+  page: number;
+  limit: number;
+  unread_count: number;
+}
+
+export interface UnreadCountResponse {
+  unread_count: number;
+}
+
+export interface ProjectActivityEvent {
+  id: string;
+  organization_id?: string | null;
+  project_id?: string | null;
+  actor_user_id?: string | null;
+  actor?: ProjectActivityActor | null;
+  action: string;
+  resource_type: string;
+  resource_id?: string | null;
+  metadata: Record<string, any>;
+  created_at: string;
+}
+
+export interface ProjectActivityListResponse {
+  activities: ProjectActivityEvent[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -111,6 +196,17 @@ export interface Project {
   ownerUserId?: string;
   businessId?: string;
   memberIds?: string[];
+  organizationId?: string | null;
+  organization_id?: string | null;
+  organizationName?: string | null;
+  organization_name?: string | null;
+  currentUserRole?: OrgRole | null;
+  current_user_role?: OrgRole | null;
+  memberCount?: number;
+  member_count?: number;
+  isShared?: boolean;
+  is_shared?: boolean;
+  members?: ProjectMember[];
 }
 
 // --- Account, RBAC & Organization Types ---
@@ -157,9 +253,13 @@ export interface ContractorProfile {
   specialization: ContractorSpecialization[];
   yearsOfExperience: number;
   serviceArea: string;
+  licenseNumber?: string;
   projectCount?: number;
   preferredMaterials?: string[];
+  verificationStatus?: string;
+  verificationNotes?: string;
   createdAt: string;
+  updatedAt?: string;
 }
 
 export interface BusinessProfile {
@@ -175,16 +275,91 @@ export interface BusinessProfile {
   pincode: string;
   contactPerson: string;
   contactPhone: string;
+  contactEmail?: string;
+  taxVerificationStatus?: string;
+  taxVerificationNotes?: string;
   createdAt: string;
   updatedAt: string;
 }
+
+export type OrgRole =
+  | 'owner'
+  | 'admin'
+  | 'procurement_manager'
+  | 'project_manager'
+  | 'site_supervisor'
+  | 'viewer';
 
 export type TeamMemberRole =
   | 'Owner'
   | 'Admin'
   | 'Procurement Manager'
   | 'Project Manager'
+  | 'Site Supervisor'
   | 'Viewer';
+
+export interface BackendOrganization {
+  id: string;
+  name: string;
+  owner_id: string;
+  slug?: string | null;
+  business_type: string;
+  is_active: boolean;
+  current_user_role?: OrgRole | null;
+  member_count: number;
+  created_at: string;
+  updated_at?: string | null;
+}
+
+export interface BackendOrgMember {
+  id: string;
+  organization_id: string;
+  user_id: string;
+  role: OrgRole;
+  email?: string | null;
+  name?: string | null;
+  created_at: string;
+  updated_at?: string | null;
+}
+
+export interface BackendInvitation {
+  id: string;
+  organization_id: string;
+  invited_by_user_id: string;
+  email: string;
+  role: OrgRole;
+  token: string;
+  status: 'pending' | 'accepted' | 'revoked' | 'expired';
+  expires_at: string;
+  created_at: string;
+  updated_at?: string | null;
+}
+
+export interface CreateOrganizationPayload {
+  name: string;
+  slug?: string;
+  business_type?: string;
+}
+
+export interface UpdateOrganizationPayload {
+  name?: string;
+  slug?: string;
+  business_type?: string;
+  is_active?: boolean;
+}
+
+export interface CreateInvitationPayload {
+  email: string;
+  role: OrgRole;
+}
+
+export interface AcceptInvitationResponse {
+  status: string;
+  message: string;
+  organization_id: string;
+  organization_name: string;
+  role: OrgRole;
+}
 
 export interface TeamMember {
   id: string;
@@ -303,6 +478,8 @@ export interface Order {
   date: string;
   deliveryAddress: DeliveryAddress;
   paymentMethod: string;
+  paymentStatus?: string;
+  payment_status?: string;
   estimatedDelivery: string;
   deliveryWindow?: string;
   projectId?: string;
@@ -345,6 +522,8 @@ export interface SearchFilters {
   category?: string;
   brand?: string;
   priceRange?: [number, number];
+  minPrice?: number;
+  maxPrice?: number;
   rating?: number;
   inStock?: boolean;
   material?: string;

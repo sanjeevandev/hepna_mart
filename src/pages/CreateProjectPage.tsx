@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { HardHat, Building, Ruler, Layers, MapPin, Calendar, CheckCircle2, ArrowLeft, ArrowRight, ShieldCheck, Info } from 'lucide-react';
+import { HardHat, Building, Ruler, Layers, MapPin, Calendar, CheckCircle2, ArrowLeft, ArrowRight, ShieldCheck, Info, Users } from 'lucide-react';
 import { useProjectStore } from '@/store/projectStore';
+import { useBusinessStore } from '@/store/businessStore';
 import { ProjectType, ProjectStage } from '@/types';
 import Button from '@/components/ui/Button';
 
@@ -27,8 +28,10 @@ const PROJECT_STAGES: ProjectStage[] = [
 const CreateProjectPage: React.FC = () => {
   const navigate = useNavigate();
   const { createProject } = useProjectStore();
+  const { organizations, fetchOrganizations } = useBusinessStore();
 
   const [name, setName] = useState('');
+  const [selectedOrgId, setSelectedOrgId] = useState<string>('');
   const [type, setType] = useState<ProjectType>('House');
   const [builtUpArea, setBuiltUpArea] = useState<string>('1500');
   const [areaUnit, setAreaUnit] = useState<'sq.ft' | 'sq.m'>('sq.ft');
@@ -38,6 +41,10 @@ const CreateProjectPage: React.FC = () => {
   const [pincode, setPincode] = useState('411045');
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    fetchOrganizations();
+  }, [fetchOrganizations]);
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
@@ -61,6 +68,8 @@ const CreateProjectPage: React.FC = () => {
 
     const projectId = createProject({
       name: name.trim(),
+      organizationId: selectedOrgId || null,
+      organization_id: selectedOrgId || null,
       type,
       builtUpArea: parseFloat(builtUpArea),
       areaUnit,
@@ -96,24 +105,50 @@ const CreateProjectPage: React.FC = () => {
               <span>Project Planning Engine</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-heading font-black text-white">
-              Create Your Construction Project
+              Create Construction Workspace
             </h1>
             <p className="text-xs sm:text-sm text-slate-300 mt-2 max-w-xl leading-relaxed">
-              Configure your building specs to organize materials, track phase milestones, and automatically calculate your comprehensive Bill of Quantities (BOQ).
+              Configure building specifications to organize materials, track milestones, and collaborate with your team in a shared Bill of Quantities (BOQ).
             </p>
           </div>
         </div>
 
         {/* Form Card */}
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8 space-y-6">
-          {/* Section 1: Name & Type */}
+          {/* Section 1: Workspace Ownership & Identity */}
           <div>
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-1.5">
               <Building className="w-3.5 h-3.5 text-accent" />
-              <span>1. Project Identity</span>
+              <span>1. Workspace & Ownership</span>
             </h2>
 
             <div className="space-y-4">
+              {/* Organization Selector */}
+              {organizations.length > 0 && (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Workspace Scope
+                  </label>
+                  <select
+                    value={selectedOrgId}
+                    onChange={(e) => setSelectedOrgId(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent font-medium text-slate-800"
+                  >
+                    <option value="">👤 Personal Project (Private to you)</option>
+                    {organizations.map((org) => (
+                      <option key={org.id} value={org.id}>
+                        🏢 {org.name} ({org.business_type})
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-[11px] text-slate-500 mt-1">
+                    {selectedOrgId
+                      ? 'Team members in this organization can be assigned as project collaborators.'
+                      : 'Personal projects are visible only to your account.'}
+                  </p>
+                </div>
+              )}
+
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
                   Project / Site Name *
@@ -148,12 +183,14 @@ const CreateProjectPage: React.FC = () => {
                         className={`p-3 rounded-xl border text-left transition-all ${
                           isSelected
                             ? 'border-accent bg-orange-50/60 ring-2 ring-accent/30 shadow-sm'
-                            : 'border-slate-200 hover:border-slate-300 bg-white'
+                            : 'border-slate-200 bg-slate-50/50 hover:bg-slate-100/80 hover:border-slate-300'
                         }`}
                       >
-                        <div className="text-lg mb-1">{pt.icon}</div>
-                        <div className="text-xs font-bold text-slate-900">{pt.type}</div>
-                        <div className="text-[10px] text-slate-500 line-clamp-1">{pt.description}</div>
+                        <div className="text-xl mb-1.5">{pt.icon}</div>
+                        <div className="font-bold text-xs text-slate-900">{pt.type}</div>
+                        <div className="text-[10px] text-slate-500 line-clamp-1 mt-0.5">
+                          {pt.description}
+                        </div>
                       </button>
                     );
                   })}
@@ -162,40 +199,41 @@ const CreateProjectPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Section 2: Area & Floor Specifications */}
-          <div className="pt-4 border-t border-slate-100">
+          <hr className="border-slate-100" />
+
+          {/* Section 2: Building Specs */}
+          <div>
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-1.5">
               <Ruler className="w-3.5 h-3.5 text-accent" />
-              <span>2. Dimensions & Scope</span>
+              <span>2. Dimensions & Structure</span>
             </h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Built-up Area *
+                  Built-Up Area *
                 </label>
                 <div className="flex gap-2">
                   <input
                     type="number"
-                    min="1"
-                    step="1"
                     value={builtUpArea}
                     onChange={(e) => {
                       setBuiltUpArea(e.target.value);
                       if (errors.builtUpArea) setErrors((prev) => ({ ...prev, builtUpArea: '' }));
                     }}
-                    className={`flex-1 px-3.5 py-2.5 bg-slate-50 border rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-accent/40 ${
+                    className={`flex-1 px-3.5 py-2.5 bg-slate-50 border rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-accent/40 transition-all ${
                       errors.builtUpArea ? 'border-red-400' : 'border-slate-200 focus:border-accent'
                     }`}
                     placeholder="1500"
+                    min="50"
                   />
                   <select
                     value={areaUnit}
-                    onChange={(e) => setAreaUnit(e.target.value as 'sq.ft' | 'sq.m')}
-                    className="px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-accent/40"
+                    onChange={(e) => setAreaUnit(e.target.value as any)}
+                    className="px-3 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none"
                   >
-                    <option value="sq.ft">sq.ft</option>
-                    <option value="sq.m">sq.m</option>
+                    <option value="sq.ft">Sq. Ft.</option>
+                    <option value="sq.m">Sq. Mtr.</option>
                   </select>
                 </div>
                 {errors.builtUpArea && (
@@ -207,58 +245,39 @@ const CreateProjectPage: React.FC = () => {
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
                   Number of Floors (G + N)
                 </label>
-                <input
-                  type="number"
-                  min="1"
-                  max="50"
-                  value={floors}
-                  onChange={(e) => setFloors(Math.max(1, parseInt(e.target.value) || 1))}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent"
-                  placeholder="2"
-                />
+                <div className="flex items-center gap-2">
+                  {[1, 2, 3, 4, 5].map((fl) => (
+                    <button
+                      key={fl}
+                      type="button"
+                      onClick={() => setFloors(fl)}
+                      className={`flex-1 py-2.5 rounded-xl border text-xs font-bold transition-all ${
+                        floors === fl
+                          ? 'bg-[#071A2B] text-white border-[#071A2B] shadow-sm'
+                          : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                      }`}
+                    >
+                      {fl} {fl === 1 ? 'Floor' : 'Floors'}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Section 3: Current Stage */}
-          <div className="pt-4 border-t border-slate-100">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-1.5">
-              <Layers className="w-3.5 h-3.5 text-accent" />
-              <span>3. Current Project Stage</span>
-            </h2>
+          <hr className="border-slate-100" />
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {PROJECT_STAGES.map((st) => {
-                const isSelected = stage === st;
-                return (
-                  <button
-                    key={st}
-                    type="button"
-                    onClick={() => setStage(st)}
-                    className={`py-2 px-3 rounded-xl border text-xs font-semibold text-center transition-all ${
-                      isSelected
-                        ? 'border-accent bg-accent text-white shadow-sm'
-                        : 'border-slate-200 hover:border-slate-300 bg-white text-slate-700'
-                    }`}
-                  >
-                    {st}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Section 4: Location */}
-          <div className="pt-4 border-t border-slate-100">
+          {/* Section 3: Location & Milestone Stage */}
+          <div>
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-1.5">
               <MapPin className="w-3.5 h-3.5 text-accent" />
-              <span>4. Site Location</span>
+              <span>3. Location & Milestone Stage</span>
             </h2>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  City / District *
+                  Site City / District *
                 </label>
                 <input
                   type="text"
@@ -267,10 +286,10 @@ const CreateProjectPage: React.FC = () => {
                     setCity(e.target.value);
                     if (errors.city) setErrors((prev) => ({ ...prev, city: '' }));
                   }}
-                  className={`w-full px-3.5 py-2.5 bg-slate-50 border rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-accent/40 ${
+                  className={`w-full px-3.5 py-2.5 bg-slate-50 border rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-accent/40 transition-all ${
                     errors.city ? 'border-red-400' : 'border-slate-200 focus:border-accent'
                   }`}
-                  placeholder="e.g. Pune / Mumbai"
+                  placeholder="Pune, Maharashtra"
                 />
                 {errors.city && <p className="text-xs text-red-500 mt-1">{errors.city}</p>}
               </div>
@@ -281,35 +300,50 @@ const CreateProjectPage: React.FC = () => {
                 </label>
                 <input
                   type="text"
-                  maxLength={6}
                   value={pincode}
                   onChange={(e) => {
                     setPincode(e.target.value);
                     if (errors.pincode) setErrors((prev) => ({ ...prev, pincode: '' }));
                   }}
-                  className={`w-full px-3.5 py-2.5 bg-slate-50 border rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-accent/40 ${
+                  className={`w-full px-3.5 py-2.5 bg-slate-50 border rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-accent/40 transition-all ${
                     errors.pincode ? 'border-red-400' : 'border-slate-200 focus:border-accent'
                   }`}
                   placeholder="411045"
+                  maxLength={6}
                 />
                 {errors.pincode && <p className="text-xs text-red-500 mt-1">{errors.pincode}</p>}
               </div>
             </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Current Construction Stage
+              </label>
+              <select
+                value={stage}
+                onChange={(e) => setStage(e.target.value as ProjectStage)}
+                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent font-medium text-slate-800"
+              >
+                {PROJECT_STAGES.map((st) => (
+                  <option key={st} value={st}>
+                    {st}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
-          {/* Submission Notice */}
-          <div className="p-3.5 bg-blue-50/60 rounded-xl border border-blue-100 flex items-start gap-2 text-xs text-blue-900">
-            <Info className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
-            <span>
-              Your project will be saved locally on this device. You can customize materials, stages, and export a digital BOQ quotation at any time.
-            </span>
-          </div>
+          {/* Form Actions */}
+          <div className="pt-4 flex items-center justify-end gap-3 border-t border-slate-100">
+            <Link to="/projects">
+              <Button variant="outline" size="md">
+                Cancel
+              </Button>
+            </Link>
 
-          {/* Submit Action */}
-          <div className="pt-2 flex justify-end">
-            <Button type="submit" variant="primary" size="lg" className="w-full sm:w-auto px-10 shadow-lg shadow-accent/20 font-bold">
-              <span>Create Project & Setup BOQ</span>
-              <ArrowRight className="w-4 h-4 ml-1" />
+            <Button variant="primary" size="md" className="shadow-md shadow-accent/20 flex items-center gap-1.5 font-bold">
+              <span>Save & Launch Project BOQ</span>
+              <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
         </form>

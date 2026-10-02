@@ -14,7 +14,9 @@ import {
   ShieldCheck,
   Truck,
   Boxes,
+  CreditCard,
 } from 'lucide-react';
+import { Order } from '@/types';
 import { useOrderStore } from '@/store/orderStore';
 import { formatPrice } from '@/utils/formatPrice';
 import OrderStatusTimeline, { getStatusBadgeInfo } from '@/components/order/OrderStatusTimeline';
