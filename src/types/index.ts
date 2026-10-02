@@ -172,6 +172,42 @@ export interface ProjectActivityEvent {
   created_at: string;
 }
 
+
+// --- Project Collaboration & Comment Types (Phase 2L.6) ---
+
+export interface CommentAuthorSummary {
+  id: string;
+  name?: string | null;
+  email: string;
+  role?: string | null;
+}
+
+export interface ProjectComment {
+  id: string;
+  projectId: string;
+  userId: string;
+  content: string;
+  isEdited: boolean;
+  createdAt: string;
+  updatedAt: string;
+  author?: CommentAuthorSummary | null;
+}
+
+export interface ProjectCommentCreatePayload {
+  content: string;
+}
+
+export interface ProjectCommentUpdatePayload {
+  content: string;
+}
+
+export interface ProjectCommentListResponse {
+  comments: ProjectComment[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 export interface ProjectActivityListResponse {
   activities: ProjectActivityEvent[];
   total: number;

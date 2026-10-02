@@ -28,3 +28,5 @@ __all__ = [
     "OrganizationService",
 ]
 from app.services.notification_service import ProjectNotificationService
+
+from app.services.comment_service import ProjectCommentService

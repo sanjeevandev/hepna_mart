@@ -6,6 +6,12 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.api.dependencies import require_authenticated_user
 from app.models.user import User
+from app.schemas.comment import (
+    ProjectCommentCreate,
+    ProjectCommentUpdate,
+    ProjectCommentResponse,
+    ProjectCommentListResponse,
+)
 from app.schemas.project import (
     ProjectCreate,
     ProjectUpdate,
@@ -21,6 +27,7 @@ from app.schemas.project import (
 from app.schemas.activity import ProjectActivityListResponse
 from app.services.project_service import ProjectService
 from app.services.activity_service import ProjectActivityService
+from app.services.comment_service import ProjectCommentService
 
 logger = logging.getLogger("hepna.api.projects")
 router = APIRouter(prefix="/projects", tags=["Customer Projects & BOQ Workspace"])
@@ -254,3 +261,84 @@ def toggle_project_stage(
     Toggles completion status for a construction milestone stage.
     """
     return ProjectService.toggle_stage_complete(db, current_user.id, project_id, stage)
+
+
+# =============================================================================
+# PROJECT COLLABORATION & COMMENTS (Phase 2L.6)
+# =============================================================================
+
+@router.get("/{project_id}/comments", response_model=ProjectCommentListResponse)
+def list_project_comments(
+    project_id: str,
+    page: int = Query(1, ge=1),
+    limit: int = Query(50, ge=1, le=100),
+    current_user: User = Depends(require_authenticated_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Retrieves chronological discussion comments for an authorized project workspace.
+    """
+    return ProjectCommentService.list_comments(
+        db=db,
+        user_id=current_user.id,
+        project_id=project_id,
+        page=page,
+        limit=limit,
+    )
+
+
+@router.post("/{project_id}/comments", response_model=ProjectCommentResponse, status_code=status.HTTP_201_CREATED)
+def create_project_comment(
+    project_id: str,
+    payload: ProjectCommentCreate,
+    current_user: User = Depends(require_authenticated_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Posts a new discussion comment on a project workspace and triggers collaborator alerts.
+    """
+    return ProjectCommentService.create_comment(
+        db=db,
+        user_id=current_user.id,
+        project_id=project_id,
+        payload=payload,
+    )
+
+
+@router.patch("/{project_id}/comments/{comment_id}", response_model=ProjectCommentResponse)
+def update_project_comment(
+    project_id: str,
+    comment_id: str,
+    payload: ProjectCommentUpdate,
+    current_user: User = Depends(require_authenticated_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Updates an existing project comment (author-only).
+    """
+    return ProjectCommentService.update_comment(
+        db=db,
+        user_id=current_user.id,
+        project_id=project_id,
+        comment_id=comment_id,
+        payload=payload,
+    )
+
+
+@router.delete("/{project_id}/comments/{comment_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_project_comment(
+    project_id: str,
+    comment_id: str,
+    current_user: User = Depends(require_authenticated_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Deletes a project comment (author or project manager / admin).
+    """
+    ProjectCommentService.delete_comment(
+        db=db,
+        user_id=current_user.id,
+        project_id=project_id,
+        comment_id=comment_id,
+    )
+    return None

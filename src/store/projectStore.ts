@@ -1,9 +1,30 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Project, ProjectMaterialItem, ProjectType, ProjectStage, ProjectMember, OrgRole, ProjectActivityEvent } from '@/types';
+import { Project, ProjectMaterialItem, ProjectType, ProjectStage, ProjectMember, OrgRole, ProjectActivityEvent, ProjectComment } from '@/types';
 import { products } from '@/data/products';
-import { apiClient, getAuthToken, BackendProject } from '@/lib/api';
+import { apiClient, getAuthToken, BackendProject, BackendProjectComment } from '@/lib/api';
 import toast from 'react-hot-toast';
+
+
+function transformBackendComment(bc: BackendProjectComment): ProjectComment {
+  return {
+    id: bc.id,
+    projectId: bc.project_id,
+    userId: bc.user_id,
+    content: bc.content,
+    isEdited: bc.is_edited,
+    createdAt: typeof bc.created_at === 'string' ? bc.created_at : new Date(bc.created_at).toISOString(),
+    updatedAt: typeof bc.updated_at === 'string' ? bc.updated_at : new Date(bc.updated_at).toISOString(),
+    author: bc.author
+      ? {
+          id: bc.author.id,
+          name: bc.author.name || null,
+          email: bc.author.email,
+          role: bc.author.role || null,
+        }
+      : null,
+  };
+}
 
 function transformBackendProject(bp: BackendProject): Project {
   return {
@@ -109,6 +130,11 @@ interface ProjectState {
   updateProjectMemberRole: (projectId: string, userId: string, role: OrgRole) => Promise<boolean>;
   removeProjectMember: (projectId: string, userId: string) => Promise<boolean>;
   transferProjectOrganization: (projectId: string, targetOrgId: string | null) => Promise<boolean>;
+  comments: Record<string, ProjectComment[]>;
+  fetchProjectComments: (projectId: string, params?: { page?: number; limit?: number }) => Promise<ProjectComment[]>;
+  addProjectComment: (projectId: string, content: string) => Promise<ProjectComment | null>;
+  updateProjectComment: (projectId: string, commentId: string, content: string) => Promise<boolean>;
+  deleteProjectComment: (projectId: string, commentId: string) => Promise<boolean>;
   activities: Record<string, ProjectActivityEvent[]>;
   fetchProjectActivity: (projectId: string, params?: { page?: number; limit?: number; action?: string }) => Promise<ProjectActivityEvent[]>;
 }
@@ -158,6 +184,7 @@ export const useProjectStore = create<ProjectState>()(
         },
       ],
       activeProjectId: 'proj-sample-1',
+      comments: {},
       isLoading: false,
 
       fetchProjects: async () => {

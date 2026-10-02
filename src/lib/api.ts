@@ -1043,6 +1043,48 @@ class ApiClient {
       return this.post<BackendProject>(`projects/${encodeURIComponent(projectId)}/transfer-organization`, payload);
     },
 
+
+    listComments: async (
+      projectId: string,
+      params?: { page?: number; limit?: number }
+    ): Promise<ApiResponse<BackendProjectCommentListResponse>> => {
+      const queryParams = new URLSearchParams();
+      if (params?.page) queryParams.set('page', params.page.toString());
+      if (params?.limit) queryParams.set('limit', params.limit.toString());
+      const qs = queryParams.toString();
+      const endpoint = qs
+        ? `projects/${encodeURIComponent(projectId)}/comments?${qs}`
+        : `projects/${encodeURIComponent(projectId)}/comments`;
+      return this.get<BackendProjectCommentListResponse>(endpoint);
+    },
+
+    createComment: async (
+      projectId: string,
+      payload: { content: string }
+    ): Promise<ApiResponse<BackendProjectComment>> => {
+      return this.post<BackendProjectComment>(`projects/${encodeURIComponent(projectId)}/comments`, payload);
+    },
+
+    updateComment: async (
+      projectId: string,
+      commentId: string,
+      payload: { content: string }
+    ): Promise<ApiResponse<BackendProjectComment>> => {
+      return this.patch<BackendProjectComment>(
+        `projects/${encodeURIComponent(projectId)}/comments/${encodeURIComponent(commentId)}`,
+        payload
+      );
+    },
+
+    deleteComment: async (
+      projectId: string,
+      commentId: string
+    ): Promise<ApiResponse<void>> => {
+      return this.delete<void>(
+        `projects/${encodeURIComponent(projectId)}/comments/${encodeURIComponent(commentId)}`
+      );
+    },
+
     getActivity: async (
       projectId: string,
       params?: { page?: number; limit?: number; action?: string }
@@ -1494,6 +1536,32 @@ export interface BackendProjectActivity {
   resource_id?: string | null;
   metadata: Record<string, any>;
   created_at: string;
+}
+
+
+export interface BackendCommentAuthorSummary {
+  id: string;
+  name?: string | null;
+  email: string;
+  role?: string | null;
+}
+
+export interface BackendProjectComment {
+  id: string;
+  project_id: string;
+  user_id: string;
+  content: string;
+  is_edited: boolean;
+  created_at: string;
+  updated_at: string;
+  author?: BackendCommentAuthorSummary | null;
+}
+
+export interface BackendProjectCommentListResponse {
+  comments: BackendProjectComment[];
+  total: number;
+  page: number;
+  limit: number;
 }
 
 export interface BackendProjectActivityListResponse {

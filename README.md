@@ -225,18 +225,38 @@ server {
   ```
   Performs pre-restore confirmation and post-restore baseline count validation.
 
+
 ---
 
-## 10. Verification & Quality Assurance
+## 10. Phase 2L Architecture & Collaboration Features
+
+HEPNA MART provides an end-to-end B2B construction project workspace:
+1. **Business & Contractor Profiles (Phase 2L.1)**: Company registration, GSTIN/PAN verification, and tier verification.
+2. **Customer Organizations & RBAC (Phase 2L.2)**: Multi-user organizations, team roles (`OWNER`, `ADMIN`, `PROJECT_MANAGER`, `PROCUREMENT_MANAGER`, `SITE_SUPERVISOR`, `VIEWER`), and email invitation flows.
+3. **Shared Projects & Project Members (Phase 2L.3)**: Shared workspace delegation, project-level role assignments, effective role capping, and transfer of ownership.
+4. **Project Activity & Audit Logs (Phase 2L.4)**: Server-authoritative append-only audit trail logging every project mutation and stage transition.
+5. **Project Notifications & Activity Alerts (Phase 2L.5)**: Transactional in-app notification center alerting project collaborators and organization admins with unread count tracking.
+6. **Project Collaboration & Discussions (Phase 2L.6)**: Real-time project discussions, rich comment feed, @mention resolution, inline comment editing, role badges, and full authorization-enforced discussion moderation.
+
+### Project Collaboration API Reference
+- `GET /api/v1/projects/{project_id}/comments` — List project comments with author metadata (supports pagination).
+- `POST /api/v1/projects/{project_id}/comments` — Create discussion comment and notify collaborators.
+- `PATCH /api/v1/projects/{project_id}/comments/{comment_id}` — Edit comment (author only).
+- `DELETE /api/v1/projects/{project_id}/comments/{comment_id}` — Delete comment (author or project manager / admin).
+
+---
+
+## 11. Verification & Quality Assurance
 
 Run the automated test suite and deployment verification:
 ```bash
 # 1. Frontend TypeScript Validation
-npx tsc --noEmit -p tsconfig.app.json
+npx tsc --noEmit
 
 # 2. Frontend Production Build
 npm run build
 
-# 3. Backend Pytest Suite (145 tests)
-PYTHONPATH=backend backend/.venv/bin/pytest backend/tests -v
+# 3. Backend Pytest Suite (214 tests)
+PYTHONPATH=backend pytest backend/tests -v
 ```
+

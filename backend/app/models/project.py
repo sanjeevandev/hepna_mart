@@ -21,6 +21,7 @@ from app.models.organization import OrgRole
 
 if TYPE_CHECKING:
     from app.models.user import User
+    from app.models.comment import ProjectComment
     from app.models.product import Product
     from app.models.estimate import Estimate
     from app.models.organization import Organization
@@ -80,6 +81,7 @@ class Project(Base, TimestampMixin):
         back_populates="project",
         cascade="all, delete-orphan",
     )
+    comments: Mapped[List["ProjectComment"]] = relationship("ProjectComment", back_populates="project", cascade="all, delete-orphan", order_by="ProjectComment.created_at.asc()")
     members: Mapped[List["ProjectMember"]] = relationship(
         "ProjectMember",
         back_populates="project",

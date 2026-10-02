@@ -224,3 +224,11 @@ __all__ = [
     "InvitationResponse",
     "InvitationAcceptRequest",
 ]
+
+from app.schemas.comment import (
+    CommentAuthorSummary,
+    ProjectCommentCreate,
+    ProjectCommentUpdate,
+    ProjectCommentResponse,
+    ProjectCommentListResponse,
+)

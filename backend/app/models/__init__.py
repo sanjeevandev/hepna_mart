@@ -61,3 +61,5 @@ __all__ = [
     "OrganizationInvitation",
     "OrgRole",
 ]
+
+from app.models.comment import ProjectComment

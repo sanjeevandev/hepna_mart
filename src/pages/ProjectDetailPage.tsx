@@ -30,12 +30,14 @@ import {
   Layers,
   Clock,
   Filter,
+  MessageSquare,
 } from 'lucide-react';
 import { useProjectStore } from '@/store/projectStore';
 import { useBusinessStore } from '@/store/businessStore';
 import { products } from '@/data/products';
 import { categories } from '@/data/categories';
 import { OrgRole, ProjectMember, ProjectActivityEvent } from '@/types';
+import { ProjectCommentsTab } from '@/components/project/ProjectCommentsTab';
 import { formatPrice } from '@/utils/formatPrice';
 import Button from '@/components/ui/Button';
 import toast from 'react-hot-toast';
@@ -130,6 +132,8 @@ const ProjectDetailPage: React.FC = () => {
     transferProjectOrganization,
     activities,
     fetchProjectActivity,
+    comments,
+    fetchProjectComments,
   } = useProjectStore();
 
   const {
@@ -139,8 +143,9 @@ const ProjectDetailPage: React.FC = () => {
     fetchMembers,
   } = useBusinessStore();
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'activity'>('overview');
-  const [activityFilter, setActivityFilter] = useState<string>('all');
+  const [activeTab, setActiveTab] = useState<'overview' | 'activity' | 'collaboration'>('overview');
+  const [activityFilter,
+  MessageSquare, setActivityFilter] = useState<string>('all');
   const [isRefreshingActivity, setIsRefreshingActivity] = useState(false);
 
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false);
@@ -153,12 +158,14 @@ const ProjectDetailPage: React.FC = () => {
     if (projectId) {
       fetchProjectById(projectId);
       fetchProjectActivity(projectId);
+      fetchProjectComments(projectId);
     }
     fetchOrganizations();
   }, [projectId, fetchProjectById, fetchProjectActivity, fetchOrganizations]);
 
   const project = projectId ? getProject(projectId) : undefined;
   const projectActivities = (projectId && activities[projectId]) ? activities[projectId] : [];
+  const projectComments = (projectId && comments[projectId]) ? comments[projectId] : [];
 
   useEffect(() => {
     if (project?.organizationId || project?.organization_id) {
@@ -208,6 +215,7 @@ const ProjectDetailPage: React.FC = () => {
       setSelectedUserToAdd('');
       setSelectedRoleToAdd('viewer');
       fetchProjectActivity(projectId);
+      fetchProjectComments(projectId);
     }
   };
 
@@ -219,6 +227,7 @@ const ProjectDetailPage: React.FC = () => {
     if (ok) {
       setIsTransferModalOpen(false);
       fetchProjectActivity(projectId);
+      fetchProjectComments(projectId);
     }
   };
 
@@ -364,6 +373,23 @@ const ProjectDetailPage: React.FC = () => {
             {projectActivities.length > 0 && (
               <span className="px-1.5 py-0.2 text-[10px] rounded-full bg-accent/20 text-accent font-extrabold">
                 {projectActivities.length}
+              </span>
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('collaboration')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+              activeTab === 'collaboration'
+                ? 'bg-[#071A2B] text-white shadow-sm'
+                : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+            }`}
+          >
+            <MessageSquare className="w-4 h-4 text-accent" />
+            <span>Discussions & Notes</span>
+            {projectComments.length > 0 && (
+              <span className="px-1.5 py-0.2 text-[10px] rounded-full bg-accent/20 text-accent font-extrabold">
+                {projectComments.length}
               </span>
             )}
           </button>
@@ -698,6 +724,11 @@ const ProjectDetailPage: React.FC = () => {
               </div>
             </div>
           </>
+        )}
+
+        {/* Tab 3: COLLABORATION & DISCUSSIONS (Phase 2L.6) */}
+        {activeTab === 'collaboration' && (
+          <ProjectCommentsTab projectId={project.id} project={project} />
         )}
 
         {/* Tab 2: ACTIVITY & AUDIT HISTORY */}

@@ -158,6 +158,22 @@ class ProjectNotificationService:
                 "Estimate Transferred to BOQ",
                 f"{actor_name} transferred {items} material items from Estimate #{est_id} into project '{project_name}'."
             )
+        elif action == ProjectAction.COMMENT_CREATED:
+            snippet = m.get("preview") or "a discussion comment"
+            return (
+                "New Project Discussion Comment",
+                f"{actor_name} commented on project '{project_name}': \"{snippet}\""
+            )
+        elif action == ProjectAction.COMMENT_UPDATED:
+            return (
+                "Project Comment Edited",
+                f"{actor_name} edited a comment on project '{project_name}'."
+            )
+        elif action == ProjectAction.COMMENT_DELETED:
+            return (
+                "Project Comment Deleted",
+                f"{actor_name} removed a comment from project '{project_name}'."
+            )
         else:
             action_title = action.replace("_", " ").title()
             return (
