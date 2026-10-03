@@ -1,5 +1,5 @@
 import logging
-from typing import Callable, Optional, Union
+from typing import Callable, Optional, Union, List
 from fastapi import Depends, HTTPException, Security, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import select

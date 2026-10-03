@@ -68,3 +68,6 @@ def test_pricing_permission(
         "user_id": current_user.id,
         "role": current_user.role.value,
     }
+
+# Prevent pytest from collecting FastAPI endpoint handlers in this module as tests.
+__test__ = False
